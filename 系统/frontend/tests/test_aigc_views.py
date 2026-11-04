@@ -46,6 +46,7 @@ GENERAL = {
     "band_label": "高风险提示",
     "band_reason": "分数高于上界",
     "branches": {
+        "formula": "0.8 × [0.5 × CLIP 原头 + 0.5 × 重训头] + 0.2 × CommunityForensics",
         "clip_original_logit": 3.0,
         "clip_refit_logit": 4.0,
         "clip_logit": 3.5,
@@ -163,3 +164,12 @@ def test_task_list_shows_overall_label(tmp_path: Path) -> None:
     summary = summarize_task(tmp_path)
     assert summary is not None
     assert summary["deepfake_label"] == "高风险提示"
+
+
+def test_history_row_pairs_overall_band_with_general_score() -> None:
+    from components.task_history import _deepfake_summary
+
+    label, score = _deepfake_summary(_merged())
+    assert label == "高风险提示"
+    assert score == 2.9
+

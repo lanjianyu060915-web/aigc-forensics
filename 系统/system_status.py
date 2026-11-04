@@ -961,6 +961,11 @@ def inspect_system_status(
     }
 
 
+def _is_lfs_pointer(path: Path) -> bool:
+    with path.open("rb") as stream:
+        return stream.read(24).startswith(b"version https://git-lfs")
+
+
 def _inspect_general_aigc(section: Any, config_path: Path) -> dict[str, Any]:
     """只查文件是否齐全，不加载模型、不算权重哈希（哈希在模型加载时校验）。"""
 
@@ -975,19 +980,21 @@ def _inspect_general_aigc(section: Any, config_path: Path) -> dict[str, Any]:
     if package is None or not (package / "manifest.json").is_file():
         missing.append(f"模型包：{package}")
     else:
-        manifest = json.loads((package / "manifest.json").read_text(encoding="utf-8"))
-        checkpoint = package / str(manifest.get("checkpoint"))
-        details["model_name"] = manifest.get("model_id")
-        if not checkpoint.is_file():
-            missing.append(f"权重文件：{checkpoint}")
-        calibration = package / "calibration.json"
-        if calibration.is_file():
-            payload = json.loads(calibration.read_text(encoding="utf-8"))
+        try:
+            manifest = json.loads((package / "manifest.json").read_text(encoding="utf-8"))
+            checkpoint = package / str(manifest.get("checkpoint"))
+            details["model_name"] = manifest.get("model_id")
+            if not checkpoint.is_file():
+                missing.append(f"权重文件：{checkpoint}")
+            elif _is_lfs_pointer(checkpoint):
+                missing.append("权重文件还是 Git LFS 占位文件，请安装 Git LFS 后运行 git lfs pull")
+            calibration = package / "calibration.json"
+            payload = json.loads(calibration.read_text(encoding="utf-8")) if calibration.is_file() else {}
             details["calibrated_kinds"] = [
                 kind for kind in ("image", "video") if isinstance(payload.get(kind), dict)
             ]
-        else:
-            details["calibrated_kinds"] = []
+        except (OSError, ValueError, AttributeError) as exc:
+            missing.append(f"模型包记录无法读取：{exc}")
     available = not missing
     return {
         "status": "available" if available else "unavailable",

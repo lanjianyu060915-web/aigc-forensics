@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from orchestrator import _run_general_aigc, run_task
+from orchestrator import _identity_not_applicable, _run_general_aigc, run_task
 
 
 class _Progress:
@@ -101,6 +101,34 @@ def test_service_failure_falls_back_and_records_reason(tmp_path: Path) -> None:
     assert payload["status"] == "success"
     assert "服务挂了" in payload["runtime"]["fallback_reason"]
     assert "general_aigc_service_fallback" in progress.events
+
+
+def test_late_worker_write_cannot_replace_the_recorded_result(tmp_path: Path) -> None:
+    seen = {}
+
+    def service(*, input_path, output_path, timeout, face_crops=None):
+        seen["output"] = Path(output_path)
+        return {"status": "success", "logit": 2.0, "band": "high", "band_label": "高风险提示"}
+
+    _call(tmp_path, _section(tmp_path / "x.py"), services={"run_general_aigc": service})
+    assert seen["output"] != tmp_path / "general_aigc_result.json"
+    assert (tmp_path / "general_aigc_result.json").is_file()
+
+
+@pytest.mark.parametrize(
+    ("reasons", "applicable"),
+    [
+        (["图片中未检测到人脸: a", "图片中未检测到人脸: b"], False),
+        (["图片中未检测到人脸: a", "模型崩溃"], True),
+    ],
+)
+def test_video_identity_is_not_applicable_only_when_every_frame_has_no_face(reasons, applicable) -> None:
+    payload = {
+        "status": "error",
+        "error_message": "全部关键帧的身份检索均未成功，视频级候选不可用。",
+        "details": {"frame_failures": [{"error_message": reason} for reason in reasons]},
+    }
+    assert (_identity_not_applicable(payload) is None) is applicable
 
 
 def test_missing_python_is_a_result_not_an_exception(tmp_path: Path) -> None:

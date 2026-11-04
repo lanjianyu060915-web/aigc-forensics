@@ -1206,7 +1206,16 @@ NO_FACE_REASON = "未检测到人脸，人脸身份比对不适用"
 def _identity_not_applicable(payload: Mapping[str, Any]) -> dict[str, Any] | None:
     """通用内容没有人脸是常态：身份比对记为不适用，不算模块失败。"""
 
-    if payload.get("status") != "error" or "未检测到人脸" not in str(payload.get("error_message") or ""):
+    if payload.get("status") != "error":
+        return None
+    # 视频看每一帧的失败原因：只要有一帧是别的错误，就不能算作不适用。
+    frame_failures = _mapping_get(payload.get("details"), "frame_failures")
+    reasons = (
+        [str(_mapping_get(item, "error_message") or "") for item in frame_failures]
+        if isinstance(frame_failures, list) and frame_failures
+        else [str(payload.get("error_message") or "")]
+    )
+    if not all("未检测到人脸" in reason for reason in reasons):
         return None
     return {
         **payload,
@@ -1356,7 +1365,8 @@ def _run_general_aigc(
                 method,
                 kwargs={
                     "input_path": input_path,
-                    "output_path": output_path,
+                    # 超时后 worker 还可能写文件，不能让它覆盖已进证据清单的结果。
+                    "output_path": output_path.with_name(f".{output_path.name}.worker"),
                     "timeout": remaining,
                     "face_crops": None if face_crops is None else list(face_crops),
                 },
@@ -2669,6 +2679,7 @@ def run_task(
             and isinstance(general_aigc_section, Mapping)
             and general_aigc_section.get("enabled") is not False
         ):
+            crop_started = time.perf_counter()
             face_crop_paths, face_crop_records = _extract_face_crops(
                 section=general_aigc_section.get("face_crops"),
                 config_path=resolved_config,
@@ -2677,6 +2688,7 @@ def run_task(
                 is_video=video_path is not None,
                 logs_dir=logs_dir,
             )
+            crop_seconds = time.perf_counter() - crop_started
             general_payload = _run_general_aigc(
                 section=general_aigc_section,
                 config_path=resolved_config,
@@ -2689,7 +2701,9 @@ def run_task(
             )
             if isinstance(general_payload.get("face_branch"), dict):
                 general_payload["face_branch"]["records"] = face_crop_records
-                _write_json(general_aigc_output, general_payload)
+            if isinstance(general_payload.get("runtime_seconds"), (int, float)):
+                general_payload["runtime_seconds"] += crop_seconds
+            _write_json(general_aigc_output, general_payload)
             results[name] = attach_general_aigc(results[name], general_payload)
             _write_json(output_paths[name], results[name])
             metadata[name]["status"] = results[name]["status"]

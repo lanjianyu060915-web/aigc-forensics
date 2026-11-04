@@ -1392,7 +1392,7 @@ def _render_batch_job() -> None:
     st.progress(finished / total if total else 1.0, text=f"已完成 {finished} / {total}")
     columns = (
         ("deepfake_label", "鉴伪结论"),
-        ("deepfake_score", "鉴伪风险分"),
+        ("deepfake_score", "鉴伪分数"),
         ("identity_label", "身份结论"),
         ("identity_top", "身份第一候选"),
         ("source_label", "素材结论"),

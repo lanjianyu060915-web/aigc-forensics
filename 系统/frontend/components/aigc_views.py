@@ -196,14 +196,13 @@ def _render_frame_chart(general: Mapping[str, Any]) -> None:
 
 def _formula_text(general: Mapping[str, Any]) -> str:
     branches = _mapping(general.get("branches"))
-    community = _logit_text(branches.get("community_logit"))
-    refit = _logit_text(branches.get("clip_refit_logit"))
-    if general.get("input_kind") == "image":
-        return f"融合公式：0.5 × 重训头 {refit} + 0.5 × CommunityForensics {community}。图片上原头基本失效，不参与。"
-    return (
-        f"融合公式：0.8 × [0.5 × CLIP 原头 {_logit_text(branches.get('clip_original_logit'))} + "
-        f"0.5 × 重训头 {refit}] + 0.2 × CommunityForensics {community}"
+    values = (
+        f"重训头 {_logit_text(branches.get('clip_refit_logit'))}，"
+        f"CommunityForensics {_logit_text(branches.get('community_logit'))}"
     )
+    if general.get("input_kind") != "image":
+        values = f"CLIP 原头 {_logit_text(branches.get('clip_original_logit'))}，{values}"
+    return f"融合公式：{_text(branches.get('formula'))}。本次分数：{values}。"
 
 
 def render_overall_section(deepfake: Mapping[str, Any]) -> None:

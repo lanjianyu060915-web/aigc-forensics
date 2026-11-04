@@ -72,7 +72,7 @@ def face_branch_payload(
                 "medium_max": thresholds["medium_max"],
                 "calibration_set": thresholds.get("calibration_set", {}),
             }
-            if thresholds is not None
+            if band is not None and thresholds is not None
             else None
         ),
         "crops": [
@@ -145,6 +145,7 @@ def success_payload(
             "clip_refit_logit": result.clip_refit_logit,
             "clip_logit": result.clip_logit,
             "community_logit": result.community_logit,
+            "formula": result.formula,
         },
         "frames": [
             {

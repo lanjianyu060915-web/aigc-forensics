@@ -63,6 +63,7 @@ class ScoreResult:
     inference_seconds: float
     frame_batch_size: int
     warnings: tuple[str, ...] = ()
+    formula: str = ""
 
 
 def resolve_device(requested: str) -> torch.device:
@@ -351,12 +352,18 @@ class GeneralAigcScorer:
         community_logit = float(np.mean(community_logits))
         if kind == "image":
             logit = IMAGE_REFIT_WEIGHT * refit + (1 - IMAGE_REFIT_WEIGHT) * community_logit
+            formula = f"{IMAGE_REFIT_WEIGHT:g} × 重训头 + {1 - IMAGE_REFIT_WEIGHT:g} × CommunityForensics"
         else:
             logit = config.clip_weight * clip_logit + (1 - config.clip_weight) * community_logit
+            formula = (
+                f"{config.clip_weight:g} × [0.5 × CLIP 原头 + 0.5 × 重训头] "
+                f"+ {1 - config.clip_weight:g} × CommunityForensics"
+            )
         frame_logits = per_crop.reshape(-1, crops)
         return ScoreResult(
             kind=kind,
             logit=float(logit),
+            formula=formula,
             clip_logit=clip_logit,
             clip_original_logit=original,
             clip_refit_logit=refit,

@@ -113,6 +113,7 @@ class GeneralAigcRuntime:
         face_branch = self._face_branch(face_crops)
         if face_branch is not None:
             payload["face_branch"] = face_branch
+            payload["runtime_seconds"] = time.perf_counter() - started
         self.request_count += 1
         write_json(output, payload)
         return payload

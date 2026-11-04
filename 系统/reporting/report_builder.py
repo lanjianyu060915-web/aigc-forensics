@@ -458,7 +458,15 @@ def _overall_lines(technical: Mapping[str, Any]) -> list[str]:
             lines.append(f"- {label}：不适用，没有检出可用的人脸")
         else:
             lines.append(f"- {label}：未完成，{_text(branch.get('error_message'))}")
-    lines.append("以下是整图分支的明细，只作提示，不影响总体档位。")
+    whole_image = next(
+        (_mapping(item) for item in overall.get("branches") or [] if _mapping(item).get("key") == "full_image"),
+        {},
+    )
+    lines.append(
+        "以下是整图分支的明细，只作提示，不影响总体档位。"
+        if whole_image.get("status") == "success"
+        else "整图分支没有完成，下面的字段没有数值。"
+    )
     return lines
 
 

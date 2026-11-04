@@ -58,9 +58,16 @@ def _serve(runtime: Any) -> int:
         if action != "run":
             _emit("response", request_id=request_id, ready=True, health="ok", ok=False, error=f"不支持的 action：{action!r}")
             continue
-        payload = runtime.run(
-            message.get("input_path"), message.get("output_path"), message.get("face_crops")
-        )
+        try:
+            payload = runtime.run(
+                message.get("input_path"), message.get("output_path"), message.get("face_crops")
+            )
+        except Exception as exc:  # noqa: BLE001 - 单次请求出错不能带走常驻进程，由编排层回退
+            _emit(
+                "response", request_id=request_id, ready=True, health="ok", ok=False,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+            continue
         # 单个文件解码失败是这次结果的一部分，不算服务故障，编排层按 payload 的 status 处理。
         _emit("response", request_id=request_id, ready=True, health="ok", ok=True, payload=payload)
     return 0

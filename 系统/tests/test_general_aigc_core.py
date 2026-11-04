@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "modules" / "genera
 from general_aigc_core import (  # noqa: E402
     band_of,
     error_payload,
+    face_branch_payload,
     input_kind,
     load_calibration,
     success_payload,
@@ -20,6 +21,7 @@ from general_aigc_core import (  # noqa: E402
 
 @dataclass
 class _Result:
+    formula = "公式"
     kind: str = "video"
     logit: float = 2.0
     clip_logit: float = 2.5
@@ -112,3 +114,36 @@ def test_error_payload_shape() -> None:
     assert payload["score"] is None
     assert payload["error_message"] == "坏文件"
     assert payload["details"]["error_type"] == "decode_error"
+
+
+def test_incomplete_face_thresholds_do_not_raise() -> None:
+    payload = face_branch_payload([-1.0], ["a.jpg"], {"face_crop": {"low_max": -5.0}})
+    assert payload["status"] == "success"
+    assert payload["band"] is None
+    assert payload["band_thresholds"] is None
+
+
+def test_worker_survives_a_request_that_raises(monkeypatch) -> None:
+    import io
+    import json
+
+    import persistent_worker
+
+    class _Runtime:
+        def health_details(self):
+            return {}
+
+        def run(self, *_args):
+            raise KeyError("坏配置")
+
+    request = {"protocol": persistent_worker.PROTOCOL_NAME, "type": "request", "request_id": "r1", "action": "run"}
+    shutdown = {**request, "request_id": "r2", "action": "shutdown"}
+    output = io.StringIO()
+    monkeypatch.setattr(persistent_worker, "PROTOCOL_OUTPUT", output)
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(request) + "\n" + json.dumps(shutdown) + "\n"))
+    assert persistent_worker._serve(_Runtime()) == 0
+    messages = [json.loads(line) for line in output.getvalue().splitlines() if line.strip()]
+    failed = next(item for item in messages if item["request_id"] == "r1")
+    assert failed["ok"] is False
+    assert "坏配置" in failed["error"]
+    assert any(item["request_id"] == "r2" for item in messages)

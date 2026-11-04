@@ -1033,7 +1033,7 @@ class RuntimeServiceManager:
                 "output_path": str(Path(output_path).expanduser().resolve(strict=False)),
                 "face_crops": None if face_crops is None else [str(item) for item in face_crops],
             },
-            timeout,
+            max(deadline - time.monotonic(), 0.001),
         )
         return self._payload_from_response("general_aigc", response)
 

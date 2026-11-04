@@ -41,7 +41,7 @@ SUMMARY_COLUMNS = (
     ("input_type", "类型"),
     ("status_label", "状态"),
     ("deepfake_label", "鉴伪结论"),
-    ("deepfake_score", "鉴伪风险分"),
+    ("deepfake_score", "鉴伪分数"),
     ("identity_label", "身份结论"),
     ("identity_top", "身份第一候选"),
     ("identity_score", "身份相似度"),
@@ -104,7 +104,9 @@ def _deepfake_summary(result: Mapping[str, Any]) -> tuple[str, float | None]:
     if not label:
         verdict = result.get("is_deepfake")
         label = "疑似AI换脸" if verdict is True else "未见明显换脸特征" if verdict is False else "证据不足"
-    return label, _number(result.get("score"))
+    # 有总体结论时配通用分支的分数；整图分支只作提示，它的分数不能代表这一行。
+    general = result.get("general_aigc") if isinstance(result.get("general_aigc"), Mapping) else {}
+    return label, _number(general.get("logit") if overall else result.get("score"))
 
 
 def _open_set_label(result: Mapping[str, Any], decide) -> str:
