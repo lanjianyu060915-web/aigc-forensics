@@ -17,7 +17,6 @@ VERDICT_TONES = {
     "generator_hint": "warn",
     "no_label": "muted",
 }
-CROP_LABELS = ("中心", "左上", "右上", "左下", "右下")
 BRANCH_COLORS = {"CLIP 分支": "#1F4E79", "CommunityForensics 分支": "#C55A3D"}
 
 
@@ -195,19 +194,16 @@ def _render_frame_chart(general: Mapping[str, Any]) -> None:
     st.caption("逐帧分数只说明模型在这些时刻的反应，不是伪造时段定位。")
 
 
-def _render_crop_table(general: Mapping[str, Any]) -> None:
-    frames = _list(general.get("frames"))
-    crops = _list(_mapping(frames[0]).get("crop_logits")) if frames else []
-    if not crops:
-        return
-    st.table(
-        [
-            {"裁剪位置": CROP_LABELS[index] if index < len(CROP_LABELS) else str(index), "分数": f"{value:.3f}"}
-            for index, value in enumerate(crops)
-            if isinstance(value, (int, float))
-        ]
+def _formula_text(general: Mapping[str, Any]) -> str:
+    branches = _mapping(general.get("branches"))
+    community = _logit_text(branches.get("community_logit"))
+    refit = _logit_text(branches.get("clip_refit_logit"))
+    if general.get("input_kind") == "image":
+        return f"融合公式：0.5 × 重训头 {refit} + 0.5 × CommunityForensics {community}。图片上原头基本失效，不参与。"
+    return (
+        f"融合公式：0.8 × [0.5 × CLIP 原头 {_logit_text(branches.get('clip_original_logit'))} + "
+        f"0.5 × 重训头 {refit}] + 0.2 × CommunityForensics {community}"
     )
-    st.caption("图片按原尺寸取 5 个 224 像素裁剪，分数取均值。")
 
 
 def render_overall_section(deepfake: Mapping[str, Any]) -> None:
@@ -268,21 +264,18 @@ def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
     columns = st.columns(4)
     columns[0].metric("档位", _text(general.get("band_label"), "未标定"))
     columns[1].metric("融合分数", _logit_text(logit))
-    columns[2].metric("CLIP 分支", _logit_text(branches.get("clip_logit")))
+    if general.get("input_kind") == "image":
+        columns[2].metric("重训头", _logit_text(branches.get("clip_refit_logit")))
+    else:
+        columns[2].metric("CLIP 分支", _logit_text(branches.get("clip_logit")))
     columns[3].metric("CommunityForensics", _logit_text(branches.get("community_logit")))
     if logit is not None and thresholds:
         _render_logit_scale(logit, thresholds)
     if general.get("band_reason"):
         st.caption(f"分档依据：{general['band_reason']}")
-    st.caption(
-        f"融合公式：0.8 × [0.5 × CLIP 原头 {_logit_text(branches.get('clip_original_logit'))} + "
-        f"0.5 × 重训头 {_logit_text(branches.get('clip_refit_logit'))}] + "
-        f"0.2 × CommunityForensics {_logit_text(branches.get('community_logit'))}"
-    )
+    st.caption(_formula_text(general))
     if general.get("input_kind") == "video":
         _render_frame_chart(general)
-    else:
-        _render_crop_table(general)
     calibration = _mapping(thresholds.get("calibration_set"))
     with st.expander("运行详情和局限"):
         key_values(

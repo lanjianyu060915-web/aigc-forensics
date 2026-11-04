@@ -39,6 +39,8 @@ VIDEO_TIMEOUT_SECONDS = 180.0
 SEEK_AFTER_SECONDS = 90.0
 SEEK_MAX_DURATION_SECONDS = 4 * 3600.0
 DEFAULT_FRAME_BATCH_SIZE = 16
+# 图片上 C38 原头基本失效（图片校准集 AUC 0.59，真实图中位分 5.1），只用重训头和 CF384，等权。
+IMAGE_REFIT_WEIGHT = 0.5
 
 
 @dataclass(frozen=True)
@@ -347,7 +349,10 @@ class GeneralAigcScorer:
         config = self.model.config
         clip_logit = float(np.mean(per_crop))
         community_logit = float(np.mean(community_logits))
-        logit = config.clip_weight * clip_logit + (1 - config.clip_weight) * community_logit
+        if kind == "image":
+            logit = IMAGE_REFIT_WEIGHT * refit + (1 - IMAGE_REFIT_WEIGHT) * community_logit
+        else:
+            logit = config.clip_weight * clip_logit + (1 - config.clip_weight) * community_logit
         frame_logits = per_crop.reshape(-1, crops)
         return ScoreResult(
             kind=kind,

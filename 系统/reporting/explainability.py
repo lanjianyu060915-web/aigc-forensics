@@ -601,12 +601,16 @@ def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, An
     basis = [f"总体档位只由各路档位推导，分数不相加（{_text(overall.get('rule'))}）。"]
     if general.get("status") == "success":
         branches = _mapping(general.get("branches"))
-        basis.append(
-            "通用 AIGC 分支融合公式：0.8 × [0.5 × CLIP 原头 "
-            f"{_fmt(_number(branches.get('clip_original_logit')), 3)} + 0.5 × 重训头 "
-            f"{_fmt(_number(branches.get('clip_refit_logit')), 3)}] + 0.2 × CommunityForensics "
-            f"{_fmt(_number(branches.get('community_logit')), 3)}。"
-        )
+        refit = _fmt(_number(branches.get("clip_refit_logit")), 3)
+        community = _fmt(_number(branches.get("community_logit")), 3)
+        if general.get("input_kind") == "image":
+            basis.append(f"通用 AIGC 分支融合公式：0.5 × 重训头 {refit} + 0.5 × CommunityForensics {community}。")
+        else:
+            basis.append(
+                "通用 AIGC 分支融合公式：0.8 × [0.5 × CLIP 原头 "
+                f"{_fmt(_number(branches.get('clip_original_logit')), 3)} + 0.5 × 重训头 {refit}] "
+                f"+ 0.2 × CommunityForensics {community}。"
+            )
         if _text(general.get("band_reason")):
             basis.append(f"通用 AIGC 分支分档依据：{general['band_reason']}")
     if _text(face.get("band_reason")):

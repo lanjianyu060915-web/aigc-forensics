@@ -127,7 +127,7 @@ def test_image_scores_one_frame_five_crops(scorer: GeneralAigcScorer, tmp_path: 
     assert (result.width, result.height) == (96, 64)
     assert result.decode_mode == "image"
     assert result.duration_seconds is None
-    expected = 0.8 * result.clip_logit + 0.2 * result.community_logit
+    expected = 0.5 * result.clip_refit_logit + 0.5 * result.community_logit
     assert result.logit == pytest.approx(expected)
 
 

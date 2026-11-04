@@ -49,5 +49,28 @@
         "SWAN-DF": -11.4723
       }
     }
+  },
+  "image": {
+    "low_max": -2.36652,
+    "medium_max": -1.367796,
+    "calibration_set": {
+      "description": "公开图片评测集校准划分的真实图 401 张（ImageNet、DOCCI、Pexels 按来源等权）",
+      "n_real": 401,
+      "sources": {
+        "OpenFake_DOCCI": 133,
+        "OpenFake_IMAGENET": 134,
+        "OpenFake_PEXELS": 134
+      },
+      "per_source_p95": {
+        "OpenFake_DOCCI": -2.303,
+        "OpenFake_IMAGENET": -4.1174,
+        "OpenFake_PEXELS": -2.0116
+      },
+      "per_source_median": {
+        "OpenFake_DOCCI": -5.4246,
+        "OpenFake_IMAGENET": -6.9002,
+        "OpenFake_PEXELS": -4.7544
+      }
+    }
   }
 }
