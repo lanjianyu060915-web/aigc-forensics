@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
+import subprocess
 
 import pytest
 
@@ -32,3 +34,24 @@ def test_batch_files_use_crlf(path: Path) -> None:
 def test_powershell_launcher_has_bom(name: str) -> None:
     # Windows PowerShell 5.1 把无 BOM 的脚本按系统代码页读，中文会乱码甚至语法错误。
     assert (ROOT / name).read_bytes().startswith(b"\xef\xbb\xbf")
+
+
+@pytest.mark.parametrize("name", ["start.ps1", "tools/setup_runtime.ps1"])
+def test_powershell_scripts_parse(name: str) -> None:
+    # PowerShell 把中文引号当字符串定界符，写在双引号字符串里会直接解析失败。
+    powershell = shutil.which("powershell.exe")
+    if powershell is None:
+        pytest.skip("没有 PowerShell")
+    script = (
+        "$errors = $null; [void][System.Management.Automation.Language.Parser]::ParseFile("
+        f"'{ROOT / name}', [ref]$null, [ref]$errors); $errors | ForEach-Object {{ $_.Message }}; exit $errors.Count"
+    )
+    completed = subprocess.run(
+        [powershell, "-NoProfile", "-NonInteractive", "-Command", script],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+
