@@ -1,6 +1,6 @@
-# 原始底图搜索模块（队友 B）
+# 原始素材搜索模块（队友 B）
 
-输入一张疑似换脸图和候选底图库，返回最可能的原始底图 Top-K、规范 JSON、运行日志与匹配可视化。本包可在 CPU 环境中独立运行。
+输入一张疑似换脸图和候选素材库，返回最可能的原始素材 Top-K、规范 JSON、运行日志与匹配可视化。本包可在 CPU 环境中独立运行。
 
 ## 目录
 
@@ -42,7 +42,7 @@ python run_source_search.py --query sample_data/query/query_01_6514545be6d97386_
 ```
 
 - `--query`：待检索的疑似换脸图。
-- `--library`：候选原始底图库目录。
+- `--library`：候选原始素材库目录。
 - `--top-k`：返回候选数量。
 - `--output`：结果 JSON 路径。
 
@@ -86,14 +86,14 @@ Lowe 匹配、RANSAC 内外点以及可用时的单应投影证据。
 
 完整字段契约和真实案例回归结果见：
 
-- `../../docs/upgrade_v0.4.0/底图溯源后端中间证据接口说明.md`
-- `../../docs/upgrade_v0.4.0/底图溯源真实回归测试报告.md`
+- `../../docs/upgrade_v0.4.0/素材溯源后端中间证据接口说明.md`
+- `../../docs/upgrade_v0.4.0/素材溯源真实回归测试报告.md`
 
 ## 示例数据与来源
 
-- `sample_data/source_library/`：50 张候选原始底图。
+- `sample_data/source_library/`：50 张候选原始素材。
 - `sample_data/query/`：10 张用于检索验证的换脸式合成查询图。
-- `sample_data/ground_truth.csv`：查询图与真实底图映射。
+- `sample_data/ground_truth.csv`：查询图与真实素材映射。
 - `sample_data/dataset_sources.csv`：每张原图的 Open Images ID、原始网址、落地页、许可证、作者、尺寸与 SHA-256。
 - `sample_data/ATTRIBUTION.md`：数据来源和许可说明。
 

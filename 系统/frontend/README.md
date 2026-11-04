@@ -1,25 +1,25 @@
 # 三模块 Streamlit 前端
 
-前端以双搜索 official Streamlit UI 为基线，正式接入 AI 换脸鉴伪，产品标题为“AI换脸涉案图像智能鉴伪与原始素材溯源系统”。
+前端以双搜索 official Streamlit UI 为基线，正式接入 AIGC 鉴伪，产品标题为“AIGC 图像视频鉴伪与溯源系统”。
 
 ## 交互与真实运行
 
 `Live Analysis` 只有一个涉案图片上传入口，对应四个操作：
 
-- `AI换脸鉴伪`：仅选择 `deepfake`；
+- `AIGC 鉴伪`：仅选择 `deepfake`；
 - `人脸身份搜索`：仅选择 `identity`；
-- `原始底图搜索`：仅选择 `source`；
+- `原始素材搜索`：仅选择 `source`；
 - `一键综合分析`：选择三个模块。
 
 前端调用 `orchestrator.run_task(..., selected_modules=..., services=...)`，未选模块由后端以 `status=skipped` 记录。一个模块失败不会抹去其他模块结果。
 
-顶部和侧栏使用 `system_status.inspect_system_status()` 的真实检查结果，显示 AIGC 模型、身份数据库、底图数据库和运算设备。显式空库、未初始化或不可用会立即禁用相应按钮，不进入无期限 loading。
+顶部和侧栏使用 `system_status.inspect_system_status()` 的真实检查结果，显示 AIGC 模型、身份数据库、素材数据库和运算设备。显式空库、未初始化或不可用会立即禁用相应按钮，不进入无期限 loading。
 
 `RuntimeServiceManager` 通过 `@st.cache_resource` 在 UI 进程生命周期内启动一次，供 AIGC/身份模型复用。任一服务未就绪时，页面显示降级原因，调度器自动改用隔离子进程，UI 不因服务启动失败而崩溃。
 
 ## 结果语义
 
-结果区固定保留三个页签：AI 换脸鉴伪、人脸身份搜索、原始底图搜索。上方的“证据汇总”只并列展示三类证据，绝不计算跨任务融合概率。
+结果区固定保留三个页签：AIGC 鉴伪、人脸身份搜索、原始素材搜索。上方的“证据汇总”只并列展示三类证据，绝不计算跨任务融合概率。
 
 AIGC 原生 `LOW_CONFIDENCE` 和 `INSUFFICIENT_EVIDENCE` 保持“不确定”；`is_deepfake=null` 绝不会被映射成 REAL。`score` 只按原模块的 FAKE 风险分数语义显示，不宣称是系统准确率或司法结论。
 

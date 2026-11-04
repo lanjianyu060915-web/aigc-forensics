@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any, Iterable
 
@@ -144,6 +145,8 @@ def video_panels() -> None:
         rows = _jsonl(path)
         for row in rows:
             row["face"] = rows_c21.get(row["sample_id"])
+            # 没有逐关键帧跑整图分支，用同一份 CF 的视频分数按它的边界换算，只用来估计误报量级。
+            row["whole_band"] = whole_image_band(row.get("community_logit"))
         panels[name] = summarize_group(rows, "logit", CALIBRATION["video"])
     write(
         "视频集合-20261104/summary.json",
@@ -196,29 +199,29 @@ def face_swap_sets() -> None:
     )
 
 
-def image_splits() -> None:
-    folder = DATA / "image"
-    manifest_rows = _jsonl(folder / "calibration.jsonl") if (folder / "calibration.jsonl").is_file() else []
-    if not manifest_rows or "image" not in CALIBRATION:
+def parent_id(sample_id: str) -> str:
+    """退化样本的 ID 是母本 ID 加后缀（图片 __jpeg_q75，视频 _d28）。"""
+    return re.sub(r"(__.+|_d\d+)$", "", sample_id)
+
+
+def blind_splits(folder: Path, kind: str, output: str, notes: dict[str, str], use_whole_image: bool) -> None:
+    if kind not in CALIBRATION or not (folder / "calibration.scores.jsonl").is_file():
         return
-    report: dict[str, Any] = {
-        "thresholds": {k: CALIBRATION["image"][k] for k in ("low_max", "medium_max")},
-    }
+    report: dict[str, Any] = {"thresholds": {k: CALIBRATION[kind][k] for k in ("low_max", "medium_max")}}
     slim: list[dict[str, Any]] = []
-    for split, note in (
-        ("calibration", "定公式和边界用的划分"),
-        ("test", "公式和边界冻结后只跑一次"),
-        ("test_degraded", "test 母图的传播退化版，同样只跑一次"),
-    ):
+    tested: dict[str, list[dict[str, Any]]] = {}
+    for split, note in notes.items():
         scores_path = folder / f"{split}.scores.jsonl"
         if not scores_path.is_file():
             continue
         rows = _jsonl(scores_path)
-        features_path = folder / f"features{'_cal' if split == 'calibration' else '_' + split}.npz"
-        faces = face_scores(features_path) if features_path.is_file() else {}
+        tested[split] = rows
+        candidates = [folder / f"features_{split}.npz", folder / "features_cal.npz"] if split == "calibration" else [folder / f"features_{split}.npz"]
+        features_path = next((item for item in candidates if item.is_file()), None)
+        faces = face_scores(features_path) if features_path is not None else {}
         for row in rows:
             row["face"] = faces.get(row["sample_id"])
-            row["whole_band"] = whole_image_band(row.get("community_logit"))
+            row["whole_band"] = whole_image_band(row.get("community_logit")) if use_whole_image else None
             slim.append(
                 {
                     key: row.get(key)
@@ -228,37 +231,43 @@ def image_splits() -> None:
                     )
                 }
             )
-        section: dict[str, Any] = {"note": note, "all": summarize_group(rows, "logit", CALIBRATION["image"])}
+        section: dict[str, Any] = {"note": note, "all": summarize_group(rows, "logit", CALIBRATION[kind])}
         real_rows = [row for row in rows if int(row["label"]) == 0]
         by_generator = {}
         for generator in sorted({row["generator"] for row in rows if int(row["label"]) == 1}):
             subset = [row for row in rows if row["generator"] == generator]
-            bands = [band(row["logit"], CALIBRATION["image"]) for row in subset]
             by_generator[generator] = {
                 "n": len(subset),
                 "auc_against_all_real": auc(
                     [0] * len(real_rows) + [1] * len(subset),
                     [row["logit"] for row in real_rows] + [row["logit"] for row in subset],
                 ),
-                "general": rates(bands),
+                "general": rates([band(row["logit"], CALIBRATION[kind]) for row in subset]),
             }
         section["by_generator"] = by_generator
-        by_real = {}
-        for source in sorted({row["source"] for row in real_rows}):
-            subset = [row for row in real_rows if row["source"] == source]
-            by_real[source] = {"n": len(subset), "general": rates([band(row["logit"], CALIBRATION["image"]) for row in subset])}
-        section["by_real_source"] = by_real
-        transforms = sorted({row.get("transform") for row in rows})
+        section["by_real_source"] = {
+            source: {
+                "n": sum(row["source"] == source for row in real_rows),
+                "general": rates([band(row["logit"], CALIBRATION[kind]) for row in real_rows if row["source"] == source]),
+            }
+            for source in sorted({row["source"] for row in real_rows})
+        }
+        transforms = sorted({str(row.get("transform")) for row in rows})
         if len(transforms) > 1:
             section["by_transform"] = {
-                str(transform): summarize_group(
-                    [row for row in rows if row.get("transform") == transform], "logit", CALIBRATION["image"]
+                transform: summarize_group(
+                    [row for row in rows if str(row.get("transform")) == transform], "logit", CALIBRATION[kind]
                 )
                 for transform in transforms
             }
         report[split] = section
-    write("图片评测-20261104/summary.json", report)
-    target = OUT / "图片评测-20261104" / "scores.jsonl"
+    if "test" in tested and "test_degraded" in tested:
+        # 退化子集只取了部分母本，和母本本身对比才公平。
+        parents = {parent_id(row["sample_id"]) for row in tested["test_degraded"]}
+        subset = [row for row in tested["test"] if row["sample_id"] in parents]
+        report["test_degraded"]["same_parents_original"] = summarize_group(subset, "logit", CALIBRATION[kind])
+    write(f"{output}/summary.json", report)
+    target = OUT / output / "scores.jsonl"
     target.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in slim), encoding="utf-8", newline="\n")
 
 
@@ -290,11 +299,132 @@ def source_search() -> None:
     write("素材检索-20261104/summary.json", output)
 
 
+def figure_specs() -> None:
+    """给 make_report_figures.py 的输入：只用上面写好的汇总，不另算数字。"""
+    panels = json.loads((OUT / "视频集合-20261104/summary.json").read_text(encoding="utf-8"))["panels"]
+    image = json.loads((OUT / "图片评测-20261104/summary.json").read_text(encoding="utf-8"))
+    video = json.loads((OUT / "视频盲测-20261104/summary.json").read_text(encoding="utf-8"))
+    swaps = json.loads((OUT / "人脸分支-20261104/summary.json").read_text(encoding="utf-8"))["sets"]
+    rows = []
+    for name, section in (
+        ("图片盲测 1200", image["test"]["all"]),
+        ("图片退化 800", image["test_degraded"]["all"]),
+        ("视频盲测 146", video["test"]["all"]),
+        ("视频转码 120", video["test_degraded"]["all"]),
+        ("GenVidBench 400（非盲测）", panels["genvid400"]),
+        ("平台留出 148（非盲测）", panels["platform148"]),
+        ("平台混合 199（非盲测）", panels["first199"]),
+        ("ViF 310（非盲测）", panels["vif310"]),
+        ("早期新采 46（非盲测）", panels["fresh"]),
+    ):
+        rows.append(
+            {
+                "name": name,
+                "auc": section["general_auc"],
+                "false_alarm": section["real"]["general"]["review_or_above"],
+                "hit": section["fake"]["general"]["review_or_above"],
+            }
+        )
+    by_generator = sorted(
+        ({"name": key, "auc": value["auc_against_all_real"]} for key, value in image["test"]["by_generator"].items()),
+        key=lambda item: -item["auc"],
+    )
+    specs = [
+        {
+            "kind": "bars",
+            "file": "通用分支AUC",
+            "rows": rows,
+            "title": "通用 AIGC 分支的 AUC",
+            "subtitle": "前 4 行是模型冻结后只跑一次的盲测。横轴从随机水平 0.5 开始",
+            "key": "auc",
+            "axis_min": 0.5,
+            "axis_max": 1.0,
+            "ticks": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+            "axis_title": "AUC",
+        },
+        {
+            "kind": "dumbbell",
+            "file": "通用分支检出与误报",
+            "rows": rows,
+            "title": "固定边界下的误报和检出",
+            "subtitle": "通用 AIGC 分支进入“需人工复核”及以上的比例",
+            "low_key": "false_alarm",
+            "high_key": "hit",
+            "low_label": "真实样本（误报）",
+            "high_label": "生成样本（检出）",
+            "axis_min": 0,
+            "axis_max": 100,
+            "ticks": [0, 20, 40, 60, 80, 100],
+            "percent": True,
+            "axis_title": "比例",
+        },
+        {
+            "kind": "dumbbell",
+            "file": "人脸裁剪与整图",
+            "rows": [
+                {"name": name, "whole": swaps[key]["community_whole_auc"], "face": swaps[key]["face_auc"]}
+                for name, key in (
+                    ("案例 3（40 张）", "case3_pairs"),
+                    ("SWAN-DF 图片（100 张）", "swan_df_images"),
+                    ("DFDC 视频（240 条）", "dfdc_240"),
+                )
+            ],
+            "title": "同一份 CF384 权重：打整图和打人脸裁剪图",
+            "subtitle": "换脸数据上的 AUC。这些数据选模时看过，不是盲测",
+            "low_key": "whole",
+            "high_key": "face",
+            "low_label": "打整图",
+            "high_label": "打人脸裁剪图",
+            "axis_min": 0.4,
+            "axis_max": 1.0,
+            "ticks": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+            "percent": False,
+            "axis_title": "AUC",
+        },
+        {
+            "kind": "bars",
+            "file": "图片盲测各生成器",
+            "rows": by_generator,
+            "title": "图片盲测：各生成器的 AUC",
+            "subtitle": "每个生成器对全部真实图。样本少的生成器波动大，见测试报告的数量",
+            "key": "auc",
+            "axis_min": 0.5,
+            "axis_max": 1.0,
+            "ticks": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+            "axis_title": "AUC",
+        },
+    ]
+    write("figures.json", specs)
+
+
 def main() -> int:
     video_panels()
     face_swap_sets()
-    image_splits()
+    blind_splits(
+        DATA / "image",
+        "image",
+        "图片评测-20261104",
+        {
+            "calibration": "定图片公式和边界用的划分",
+            "test": "公式和边界冻结后只跑一次",
+            "test_degraded": "test 母图的传播退化版，同样只跑一次",
+        },
+        use_whole_image=True,
+    )
+    blind_splits(
+        DATA / "video_blind",
+        "video",
+        "视频盲测-20261104",
+        {
+            "calibration": "真实样本并入视频边界的划分",
+            "test": "边界冻结后只跑一次",
+            "test_degraded": "test 原片统一转码成 H.264 CRF28、720p 的版本，同样只跑一次",
+        },
+        use_whole_image=False,
+    )
     source_search()
+    if (OUT / "视频盲测-20261104/summary.json").is_file():
+        figure_specs()
     return 0
 
 

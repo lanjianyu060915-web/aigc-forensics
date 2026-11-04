@@ -54,10 +54,10 @@
 
   <rect x="390" y="280" width="164" height="212" class="box"/>
   <text x="472" y="308" text-anchor="middle" class="h2">通用 AIGC 分支</text>
-  <text x="404" y="336" class="t">CLIP 视觉特征</text>
-  <text x="404" y="358" class="t">原检测头 + 3 个</text>
-  <text x="404" y="380" class="t">重训头（占 0.8）</text>
-  <text x="404" y="402" class="t">CF384 整帧（0.2）</text>
+  <text x="404" y="336" class="t">CLIP 检测头 + CF384</text>
+  <text x="404" y="358" class="t">视频权重 0.8 : 0.2</text>
+  <text x="404" y="380" class="t">图片权重 0.5 : 0.5</text>
+  <text x="404" y="402" class="t">图片只用重训头</text>
   <text x="404" y="430" class="s">视频 10 帧 × 5 裁剪</text>
   <text x="404" y="452" class="s">图片 1 帧 × 5 裁剪</text>
   <text x="472" y="480" text-anchor="middle" class="tag" fill="#1f4e79">定主结论</text>

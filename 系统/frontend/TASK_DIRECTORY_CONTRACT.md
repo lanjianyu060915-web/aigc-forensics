@@ -16,7 +16,7 @@ case_xxx/
 
 三份结果 JSON 是 task 根的直接子文件、UTF-8 编码，单文件不超过 5 MiB。状态允许 `success`、`error` 和 `skipped`；`skipped` 明确表示本次未选择模块，不是成功或失败结论。
 
-## AI 换脸鉴伪结果
+## AIGC 鉴伪结果
 
 必需字段：
 
@@ -32,7 +32,7 @@ runtime_seconds, details, error_message
 - `status=error` 必须有非空 `error_message`。
 - `status=skipped` 必须使 `is_deepfake=null`、`score=null`，`label` 只能为 null 或 `skipped`。
 
-## 人脸身份与原始底图结果
+## 人脸身份与原始素材结果
 
 两份搜索结果的顶层字段：
 
@@ -46,7 +46,7 @@ status, query_image, candidates, runtime_seconds, error_message
 rank, identity_id, identity_name, score, reference_image
 ```
 
-底图候选字段：
+素材候选字段：
 
 ```text
 rank, file_path, global_score, local_score, final_score, visualization_path
@@ -64,6 +64,6 @@ rank, file_path, global_score, local_score, final_score, visualization_path
 ## 路径安全
 
 - `query_image` 和匹配可视化应位于 task 根。
-- 身份参考图、底图可位于操作者明确批准的对应库根。
+- 身份参考图、素材可位于操作者明确批准的对应库根。
 - 拒绝 `..`、驱动器相对路径、相对路径冒号、越界绝对路径和越界符号链接。
 - 路径通过边界校验后若文件被删除，页面显示受控警告而不崩溃。
