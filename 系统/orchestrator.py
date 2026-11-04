@@ -2091,6 +2091,17 @@ def _video_band_thresholds(frame_results: Sequence[Mapping[str, Any]]) -> dict[s
     return None
 
 
+def _video_has_no_faces(video_selection: Mapping[str, Any]) -> bool:
+    """抽帧时所有候选帧都没检出人脸。检测器不可用时不能下这个结论。"""
+
+    detection = _mapping_or_empty(video_selection.get("face_detection"))
+    return (
+        bool(detection.get("available"))
+        and detection.get("frames_with_single_face") == 0
+        and detection.get("frames_with_multiple_faces") == 0
+    )
+
+
 def _run_video_module(
     *,
     name: str,
@@ -2117,6 +2128,8 @@ def _run_video_module(
     frame_root.mkdir(parents=True, exist_ok=True)
     total = len(frames)
     frame_results: list[dict[str, Any]] = []
+    # 没有人脸的视频每帧都要把所有检测尺度试一遍才报失败，要空跑一两分钟，这里直接跳过。
+    skip_identity = name == "identity" and _video_has_no_faces(video_selection)
     for order, frame in enumerate(frames, start=1):
         frame_path = key_dir / str(frame.get("path") or "")
         frame_output = frame_root / f"frame_{order:03d}.json"
@@ -2141,7 +2154,15 @@ def _run_video_module(
         payload: dict[str, Any] | None = None
         error = ""
         try:
-            if name == "deepfake":
+            if skip_identity:
+                payload = {
+                    "status": "error",
+                    "query_image": str(frame_path),
+                    "candidates": [],
+                    "runtime_seconds": 0.0,
+                    "error_message": "图片中未检测到人脸：抽帧时这段视频的候选帧都没有检出人脸",
+                }
+            elif name == "deepfake":
                 payload, _frame_metadata = _run_deepfake_module(
                     section=section,
                     config_path=config_path,

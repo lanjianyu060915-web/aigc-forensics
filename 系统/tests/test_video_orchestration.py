@@ -17,6 +17,7 @@ from typing import Any, Iterator
 
 import pytest
 
+import orchestrator
 from orchestrator import OrchestrationError, run_task
 
 
@@ -288,3 +289,36 @@ def test_image_query_still_uses_single_image_path(workspace_tmp_path: Path) -> N
     assert not (task_dir / "video_summary.json").exists()
     assert not (task_dir / "key_frames").exists()
     assert (task_dir / "query.jpg").is_file()
+
+
+@pytest.mark.parametrize(
+    ("detection", "expected"),
+    [
+        ({"available": True, "frames_with_single_face": 0, "frames_with_multiple_faces": 0}, True),
+        ({"available": True, "frames_with_single_face": 1, "frames_with_multiple_faces": 0}, False),
+        ({"available": True, "frames_with_single_face": 0, "frames_with_multiple_faces": 2}, False),
+        ({"available": False, "frames_with_single_face": 0, "frames_with_multiple_faces": 0}, False),
+        ({}, False),
+    ],
+)
+def test_video_counts_as_faceless_only_when_detection_really_ran(detection, expected) -> None:
+    assert orchestrator._video_has_no_faces({"face_detection": detection}) is expected
+
+
+def test_faceless_video_skips_identity_and_task_still_succeeds(
+    workspace_tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(orchestrator, "_video_has_no_faces", lambda selection: True)
+    config_path = _write_config(workspace_tmp_path)
+    video = workspace_tmp_path / "query.mp4"
+    video.write_bytes(b"fixture-video-bytes")
+    services = VideoServices()
+
+    status = run_task(video, config_path=config_path, services=services, selected_modules=["identity"])
+    identity = json.loads((Path(status["task_dir"]) / "identity_result.json").read_text(encoding="utf-8"))
+
+    assert services.identity_frames == []
+    assert identity["status"] == "skipped"
+    assert identity["not_applicable"] is True
+    assert status["status"] == "success"
+
