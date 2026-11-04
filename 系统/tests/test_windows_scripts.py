@@ -14,6 +14,7 @@ BATCH_FILES = [
     ROOT / "run_case.bat",
     ROOT.parent / "启动系统.bat",
     ROOT.parent / "运行自检.bat",
+    ROOT.parent / "搭建环境.bat",
 ]
 
 
@@ -27,6 +28,7 @@ def test_batch_files_use_crlf(path: Path) -> None:
     assert not data.startswith(b"\xef\xbb\xbf"), f"{path.name} 不能带 BOM，否则第一行命令失效"
 
 
-def test_powershell_launcher_has_bom() -> None:
+@pytest.mark.parametrize("name", ["start.ps1", "tools/setup_runtime.ps1"])
+def test_powershell_launcher_has_bom(name: str) -> None:
     # Windows PowerShell 5.1 把无 BOM 的脚本按系统代码页读，中文会乱码甚至语法错误。
-    assert (ROOT / "start.ps1").read_bytes().startswith(b"\xef\xbb\xbf")
+    assert (ROOT / name).read_bytes().startswith(b"\xef\xbb\xbf")
