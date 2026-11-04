@@ -1,0 +1,33 @@
+{
+  "model": "DecisionTreeClassifier",
+  "hyperparameters": {
+    "max_depth": 3,
+    "min_samples_leaf": 5,
+    "random_state": 20261104
+  },
+  "allowed_features": [
+    "width",
+    "height",
+    "duration_seconds",
+    "codec",
+    "container",
+    "file_size"
+  ],
+  "train_split": "calibration",
+  "evaluation_split": "test",
+  "train_count": 63,
+  "test_count": 146,
+  "test_auc": 0.9600037643515905,
+  "test_accuracy": 0.9452054794520548,
+  "feature_importance": {
+    "width": 0.0,
+    "height": 0.0,
+    "duration_seconds": 0.9563859328758261,
+    "file_size": 0.043614067124173914,
+    "codec_h264": 0.0,
+    "container_mov,mp4,m4a,3gp,3g2,mj2": 0.0
+  },
+  "sklearn_version": "1.7.2",
+  "policy": "One fit, one test evaluation; no hyperparameter search and no sample changes after AUC; no pixels/audio/features from detection models.",
+  "tree_rules": "|--- duration_seconds <= 6.00\n|   |--- duration_seconds <= 4.50\n|   |   |--- class: 0\n|   |--- duration_seconds >  4.50\n|   |   |--- file_size <= 6978857.00\n|   |   |   |--- class: 1\n|   |   |--- file_size >  6978857.00\n|   |   |   |--- class: 1\n|--- duration_seconds >  6.00\n|   |--- class: 0\n"
+}

@@ -1,0 +1,54 @@
+{
+  "positive": {
+    "n": 100,
+    "states": {
+      "high_confidence": 100
+    },
+    "global_score_quantiles": {
+      "0.01": 0.9492,
+      "0.05": 0.9682,
+      "0.5": 0.9907,
+      "0.95": 0.9956,
+      "0.99": 0.9968
+    },
+    "by_kind": {
+      "jpeg_q75_generated": {
+        "high_confidence": 25
+      },
+      "jpeg_q75_real": {
+        "high_confidence": 25
+      },
+      "resize50_jpeg_q85_generated": {
+        "high_confidence": 25
+      },
+      "resize50_jpeg_q85_real": {
+        "high_confidence": 25
+      }
+    },
+    "top1_hit": 100
+  },
+  "negative": {
+    "n": 100,
+    "states": {
+      "no_reliable_candidate": 93,
+      "insufficient_evidence": 7
+    },
+    "global_score_quantiles": {
+      "0.01": 0.5041,
+      "0.05": 0.5177,
+      "0.5": 0.5848,
+      "0.95": 0.6516,
+      "0.99": 0.6767
+    },
+    "by_kind": {
+      "generated": {
+        "no_reliable_candidate": 50
+      },
+      "real": {
+        "no_reliable_candidate": 43,
+        "insufficient_evidence": 7
+      }
+    }
+  },
+  "seconds_median": 25.705
+}

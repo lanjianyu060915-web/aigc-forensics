@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 522" width="960" height="522" font-family="'Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+<rect width="960" height="522" fill="#ffffff"/>
+<text x="32.0" y="42.0" font-size="22" fill="#0b0b0b" text-anchor="start" font-weight="700">通用 AIGC 分支的 AUC</text>
+<text x="32.0" y="70.0" font-size="15" fill="#52514e" text-anchor="start" font-weight="400">前 4 行是模型冻结后只跑一次的盲测。横轴从随机水平 0.5 开始</text>
+<line x1="250.0" y1="96" x2="250.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="250.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.5</text>
+<line x1="374.0" y1="96" x2="374.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="374.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.6</text>
+<line x1="498.0" y1="96" x2="498.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="498.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.7</text>
+<line x1="622.0" y1="96" x2="622.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="622.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.8</text>
+<line x1="746.0" y1="96" x2="746.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="746.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.9</text>
+<line x1="870.0" y1="96" x2="870.0" y2="456" stroke="#e7e6e2" stroke-width="1"/>
+<text x="870.0" y="478.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">1</text>
+<text x="560.0" y="504.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">AUC</text>
+<text x="234.0" y="121.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">图片盲测 1200</text>
+<path d="M 250 105.0 H 725.1 Q 729.1 105.0 729.1 109.0 V 123.0 Q 729.1 127.0 725.1 127.0 H 250 Z" fill="#2a78d6"/>
+<text x="737.1" y="121.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.886</text>
+<text x="234.0" y="161.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">图片退化 800</text>
+<path d="M 250 145.0 H 632.5 Q 636.5 145.0 636.5 149.0 V 163.0 Q 636.5 167.0 632.5 167.0 H 250 Z" fill="#2a78d6"/>
+<text x="644.5" y="161.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.812</text>
+<text x="234.0" y="201.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">视频盲测 146</text>
+<path d="M 250 185.0 H 769.4 Q 773.4 185.0 773.4 189.0 V 203.0 Q 773.4 207.0 769.4 207.0 H 250 Z" fill="#2a78d6"/>
+<text x="781.4" y="201.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.922</text>
+<text x="234.0" y="241.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">视频转码 120</text>
+<path d="M 250 225.0 H 763.0 Q 767.0 225.0 767.0 229.0 V 243.0 Q 767.0 247.0 763.0 247.0 H 250 Z" fill="#2a78d6"/>
+<text x="775.0" y="241.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.917</text>
+<text x="234.0" y="281.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">GenVidBench 400（非盲测）</text>
+<path d="M 250 265.0 H 833.0 Q 837.0 265.0 837.0 269.0 V 283.0 Q 837.0 287.0 833.0 287.0 H 250 Z" fill="#2a78d6"/>
+<text x="845.0" y="281.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.973</text>
+<text x="234.0" y="321.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">平台留出 148（非盲测）</text>
+<path d="M 250 305.0 H 798.0 Q 802.0 305.0 802.0 309.0 V 323.0 Q 802.0 327.0 798.0 327.0 H 250 Z" fill="#2a78d6"/>
+<text x="810.0" y="321.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.945</text>
+<text x="234.0" y="361.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">平台混合 199（非盲测）</text>
+<path d="M 250 345.0 H 785.4 Q 789.4 345.0 789.4 349.0 V 363.0 Q 789.4 367.0 785.4 367.0 H 250 Z" fill="#2a78d6"/>
+<text x="797.4" y="361.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.935</text>
+<text x="234.0" y="401.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">ViF 310（非盲测）</text>
+<path d="M 250 385.0 H 679.0 Q 683.0 385.0 683.0 389.0 V 403.0 Q 683.0 407.0 679.0 407.0 H 250 Z" fill="#2a78d6"/>
+<text x="691.0" y="401.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.849</text>
+<text x="234.0" y="441.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">早期新采 46（非盲测）</text>
+<path d="M 250 425.0 H 796.8 Q 800.8 425.0 800.8 429.0 V 443.0 Q 800.8 447.0 796.8 447.0 H 250 Z" fill="#2a78d6"/>
+<text x="808.8" y="441.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.944</text>
+</svg>

@@ -1,0 +1,286 @@
+[
+  {
+    "kind": "bars",
+    "file": "通用分支AUC",
+    "rows": [
+      {
+        "name": "图片盲测 1200",
+        "auc": 0.8864,
+        "false_alarm": 7.0,
+        "hit": 63.1
+      },
+      {
+        "name": "图片退化 800",
+        "auc": 0.8117,
+        "false_alarm": 9.0,
+        "hit": 55.5
+      },
+      {
+        "name": "视频盲测 146",
+        "auc": 0.9221,
+        "false_alarm": 15.9,
+        "hit": 75.3
+      },
+      {
+        "name": "视频转码 120",
+        "auc": 0.9169,
+        "false_alarm": 10.0,
+        "hit": 71.7
+      },
+      {
+        "name": "GenVidBench 400（非盲测）",
+        "auc": 0.9734,
+        "false_alarm": 8.0,
+        "hit": 88.5
+      },
+      {
+        "name": "平台留出 148（非盲测）",
+        "auc": 0.9452,
+        "false_alarm": 4.1,
+        "hit": 68.0
+      },
+      {
+        "name": "平台混合 199（非盲测）",
+        "auc": 0.935,
+        "false_alarm": 5.1,
+        "hit": 59.3
+      },
+      {
+        "name": "ViF 310（非盲测）",
+        "auc": 0.8492,
+        "false_alarm": 1.1,
+        "hit": 30.8
+      },
+      {
+        "name": "早期新采 46（非盲测）",
+        "auc": 0.9442,
+        "false_alarm": 0.0,
+        "hit": 60.0
+      }
+    ],
+    "title": "通用 AIGC 分支的 AUC",
+    "subtitle": "前 4 行是模型冻结后只跑一次的盲测。横轴从随机水平 0.5 开始",
+    "key": "auc",
+    "axis_min": 0.5,
+    "axis_max": 1.0,
+    "ticks": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "axis_title": "AUC"
+  },
+  {
+    "kind": "dumbbell",
+    "file": "通用分支检出与误报",
+    "rows": [
+      {
+        "name": "图片盲测 1200",
+        "auc": 0.8864,
+        "false_alarm": 7.0,
+        "hit": 63.1
+      },
+      {
+        "name": "图片退化 800",
+        "auc": 0.8117,
+        "false_alarm": 9.0,
+        "hit": 55.5
+      },
+      {
+        "name": "视频盲测 146",
+        "auc": 0.9221,
+        "false_alarm": 15.9,
+        "hit": 75.3
+      },
+      {
+        "name": "视频转码 120",
+        "auc": 0.9169,
+        "false_alarm": 10.0,
+        "hit": 71.7
+      },
+      {
+        "name": "GenVidBench 400（非盲测）",
+        "auc": 0.9734,
+        "false_alarm": 8.0,
+        "hit": 88.5
+      },
+      {
+        "name": "平台留出 148（非盲测）",
+        "auc": 0.9452,
+        "false_alarm": 4.1,
+        "hit": 68.0
+      },
+      {
+        "name": "平台混合 199（非盲测）",
+        "auc": 0.935,
+        "false_alarm": 5.1,
+        "hit": 59.3
+      },
+      {
+        "name": "ViF 310（非盲测）",
+        "auc": 0.8492,
+        "false_alarm": 1.1,
+        "hit": 30.8
+      },
+      {
+        "name": "早期新采 46（非盲测）",
+        "auc": 0.9442,
+        "false_alarm": 0.0,
+        "hit": 60.0
+      }
+    ],
+    "title": "固定边界下的误报和检出",
+    "subtitle": "通用 AIGC 分支进入“需人工复核”及以上的比例",
+    "low_key": "false_alarm",
+    "high_key": "hit",
+    "low_label": "真实样本（误报）",
+    "high_label": "生成样本（检出）",
+    "axis_min": 0,
+    "axis_max": 100,
+    "ticks": [
+      0,
+      20,
+      40,
+      60,
+      80,
+      100
+    ],
+    "percent": true,
+    "axis_title": "比例"
+  },
+  {
+    "kind": "dumbbell",
+    "file": "人脸裁剪与整图",
+    "rows": [
+      {
+        "name": "案例 3（40 张）",
+        "whole": 0.6625,
+        "face": 0.8947
+      },
+      {
+        "name": "SWAN-DF 图片（100 张）",
+        "whole": 0.9506,
+        "face": 0.9269
+      },
+      {
+        "name": "DFDC 视频（240 条）",
+        "whole": 0.4827,
+        "face": 0.5865
+      }
+    ],
+    "title": "同一份 CF384 权重：打整图和打人脸裁剪图",
+    "subtitle": "换脸数据上的 AUC。这些数据选模时看过，不是盲测",
+    "low_key": "whole",
+    "high_key": "face",
+    "low_label": "打整图",
+    "high_label": "打人脸裁剪图",
+    "axis_min": 0.4,
+    "axis_max": 1.0,
+    "ticks": [
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "percent": false,
+    "axis_title": "AUC"
+  },
+  {
+    "kind": "bars",
+    "file": "图片盲测各生成器",
+    "rows": [
+      {
+        "name": "sdxl",
+        "auc": 1.0
+      },
+      {
+        "name": "sdxl-1.0",
+        "auc": 0.9992
+      },
+      {
+        "name": "sd-2.1",
+        "auc": 0.9863
+      },
+      {
+        "name": "seedream-v4.0",
+        "auc": 0.9808
+      },
+      {
+        "name": "dalle-3",
+        "auc": 0.9784
+      },
+      {
+        "name": "imagen-4.0",
+        "auc": 0.9772
+      },
+      {
+        "name": "seedream-v5.0",
+        "auc": 0.9762
+      },
+      {
+        "name": "ernie-image",
+        "auc": 0.9601
+      },
+      {
+        "name": "gpt-image-1.5",
+        "auc": 0.9531
+      },
+      {
+        "name": "recraft-v2",
+        "auc": 0.948
+      },
+      {
+        "name": "ernie-image-turbo",
+        "auc": 0.9216
+      },
+      {
+        "name": "sd-3.5",
+        "auc": 0.9206
+      },
+      {
+        "name": "z-image-turbo",
+        "auc": 0.9205
+      },
+      {
+        "name": "seedream-v4.5",
+        "auc": 0.915
+      },
+      {
+        "name": "recraft-v3",
+        "auc": 0.9035
+      },
+      {
+        "name": "midjourney-7",
+        "auc": 0.8723
+      },
+      {
+        "name": "imagen-3.0-002",
+        "auc": 0.8536
+      },
+      {
+        "name": "flux.2-klein-9b",
+        "auc": 0.7148
+      }
+    ],
+    "title": "图片盲测：各生成器的 AUC",
+    "subtitle": "每个生成器对全部真实图。样本少的生成器波动大，见测试报告的数量",
+    "key": "auc",
+    "axis_min": 0.5,
+    "axis_max": 1.0,
+    "ticks": [
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "axis_title": "AUC"
+  }
+]

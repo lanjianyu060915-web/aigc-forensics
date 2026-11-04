@@ -1,0 +1,1250 @@
+{
+  "thresholds": {
+    "low_max": -2.36652,
+    "medium_max": -1.367796
+  },
+  "calibration": {
+    "note": "定图片公式和边界用的划分",
+    "all": {
+      "n": 800,
+      "real": {
+        "general": {
+          "n": 401,
+          "low": 94.8,
+          "medium": 4.0,
+          "high": 1.2,
+          "none": 0.0,
+          "review_or_above": 5.2
+        },
+        "face": {
+          "n": 401,
+          "low": 8.0,
+          "medium": 0.2,
+          "high": 0.0,
+          "none": 91.8,
+          "review_or_above": 0.2
+        },
+        "overall": {
+          "n": 401,
+          "low": 94.5,
+          "medium": 4.2,
+          "high": 1.2,
+          "none": 0.0,
+          "review_or_above": 5.5
+        },
+        "whole_image": {
+          "n": 401,
+          "low": 50.9,
+          "medium": 5.2,
+          "high": 43.9,
+          "none": 0.0,
+          "review_or_above": 49.1
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 399,
+          "low": 34.3,
+          "medium": 9.3,
+          "high": 56.4,
+          "none": 0.0,
+          "review_or_above": 65.7
+        },
+        "face": {
+          "n": 399,
+          "low": 33.6,
+          "medium": 2.3,
+          "high": 13.8,
+          "none": 50.4,
+          "review_or_above": 16.0
+        },
+        "overall": {
+          "n": 399,
+          "low": 32.1,
+          "medium": 10.8,
+          "high": 57.1,
+          "none": 0.0,
+          "review_or_above": 67.9
+        },
+        "whole_image": {
+          "n": 399,
+          "low": 11.3,
+          "medium": 2.5,
+          "high": 86.2,
+          "none": 0.0,
+          "review_or_above": 88.7
+        }
+      },
+      "general_auc": 0.9086,
+      "general_eer": 17.96,
+      "community_whole_auc": 0.8388,
+      "faces": {
+        "real": 33,
+        "fake": 198
+      },
+      "face_auc": 0.7052,
+      "general_auc_on_face_samples": 0.828,
+      "general_auc_without_face": 0.9087
+    },
+    "by_generator": {
+      "dalle-3": {
+        "n": 10,
+        "auc_against_all_real": 0.989,
+        "general": {
+          "n": 10,
+          "low": 10.0,
+          "medium": 10.0,
+          "high": 80.0,
+          "none": 0.0,
+          "review_or_above": 90.0
+        }
+      },
+      "ernie-image": {
+        "n": 8,
+        "auc_against_all_real": 0.9782,
+        "general": {
+          "n": 8,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "ernie-image-turbo": {
+        "n": 16,
+        "auc_against_all_real": 0.8957,
+        "general": {
+          "n": 16,
+          "low": 37.5,
+          "medium": 0.0,
+          "high": 62.5,
+          "none": 0.0,
+          "review_or_above": 62.5
+        }
+      },
+      "flux.2-klein-9b": {
+        "n": 80,
+        "auc_against_all_real": 0.7703,
+        "general": {
+          "n": 80,
+          "low": 75.0,
+          "medium": 10.0,
+          "high": 15.0,
+          "none": 0.0,
+          "review_or_above": 25.0
+        }
+      },
+      "gpt-image-1.5": {
+        "n": 64,
+        "auc_against_all_real": 0.9642,
+        "general": {
+          "n": 64,
+          "low": 15.6,
+          "medium": 4.7,
+          "high": 79.7,
+          "none": 0.0,
+          "review_or_above": 84.4
+        }
+      },
+      "imagen-3.0-002": {
+        "n": 10,
+        "auc_against_all_real": 0.9337,
+        "general": {
+          "n": 10,
+          "low": 40.0,
+          "medium": 10.0,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 60.0
+        }
+      },
+      "imagen-4.0": {
+        "n": 5,
+        "auc_against_all_real": 0.9152,
+        "general": {
+          "n": 5,
+          "low": 20.0,
+          "medium": 0.0,
+          "high": 80.0,
+          "none": 0.0,
+          "review_or_above": 80.0
+        }
+      },
+      "midjourney-7": {
+        "n": 48,
+        "auc_against_all_real": 0.8962,
+        "general": {
+          "n": 48,
+          "low": 31.2,
+          "medium": 16.7,
+          "high": 52.1,
+          "none": 0.0,
+          "review_or_above": 68.8
+        }
+      },
+      "recraft-v2": {
+        "n": 4,
+        "auc_against_all_real": 1.0,
+        "general": {
+          "n": 4,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "recraft-v3": {
+        "n": 23,
+        "auc_against_all_real": 0.8606,
+        "general": {
+          "n": 23,
+          "low": 52.2,
+          "medium": 4.3,
+          "high": 43.5,
+          "none": 0.0,
+          "review_or_above": 47.8
+        }
+      },
+      "sd-2.1": {
+        "n": 9,
+        "auc_against_all_real": 0.9989,
+        "general": {
+          "n": 9,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "sd-3.5": {
+        "n": 12,
+        "auc_against_all_real": 0.9541,
+        "general": {
+          "n": 12,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "sdxl": {
+        "n": 12,
+        "auc_against_all_real": 0.9996,
+        "general": {
+          "n": 12,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "sdxl-1.0": {
+        "n": 6,
+        "auc_against_all_real": 1.0,
+        "general": {
+          "n": 6,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "seedream-v4.0": {
+        "n": 6,
+        "auc_against_all_real": 0.9422,
+        "general": {
+          "n": 6,
+          "low": 16.7,
+          "medium": 0.0,
+          "high": 83.3,
+          "none": 0.0,
+          "review_or_above": 83.3
+        }
+      },
+      "seedream-v4.5": {
+        "n": 9,
+        "auc_against_all_real": 0.9936,
+        "general": {
+          "n": 9,
+          "low": 0.0,
+          "medium": 11.1,
+          "high": 88.9,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "seedream-v5.0": {
+        "n": 5,
+        "auc_against_all_real": 0.988,
+        "general": {
+          "n": 5,
+          "low": 0.0,
+          "medium": 20.0,
+          "high": 80.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "z-image-turbo": {
+        "n": 72,
+        "auc_against_all_real": 0.951,
+        "general": {
+          "n": 72,
+          "low": 30.6,
+          "medium": 18.1,
+          "high": 51.4,
+          "none": 0.0,
+          "review_or_above": 69.4
+        }
+      }
+    },
+    "by_real_source": {
+      "OpenFake_DOCCI": {
+        "n": 133,
+        "general": {
+          "n": 133,
+          "low": 93.2,
+          "medium": 6.0,
+          "high": 0.8,
+          "none": 0.0,
+          "review_or_above": 6.8
+        }
+      },
+      "OpenFake_IMAGENET": {
+        "n": 134,
+        "general": {
+          "n": 134,
+          "low": 99.3,
+          "medium": 0.7,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.7
+        }
+      },
+      "OpenFake_PEXELS": {
+        "n": 134,
+        "general": {
+          "n": 134,
+          "low": 91.8,
+          "medium": 5.2,
+          "high": 3.0,
+          "none": 0.0,
+          "review_or_above": 8.2
+        }
+      }
+    }
+  },
+  "test": {
+    "note": "公式和边界冻结后只跑一次",
+    "all": {
+      "n": 1200,
+      "real": {
+        "general": {
+          "n": 599,
+          "low": 93.0,
+          "medium": 4.5,
+          "high": 2.5,
+          "none": 0.0,
+          "review_or_above": 7.0
+        },
+        "face": {
+          "n": 599,
+          "low": 12.0,
+          "medium": 0.0,
+          "high": 0.8,
+          "none": 87.1,
+          "review_or_above": 0.8
+        },
+        "overall": {
+          "n": 599,
+          "low": 92.2,
+          "medium": 5.3,
+          "high": 2.5,
+          "none": 0.0,
+          "review_or_above": 7.8
+        },
+        "whole_image": {
+          "n": 599,
+          "low": 49.4,
+          "medium": 5.2,
+          "high": 45.4,
+          "none": 0.0,
+          "review_or_above": 50.6
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 601,
+          "low": 36.9,
+          "medium": 10.1,
+          "high": 52.9,
+          "none": 0.0,
+          "review_or_above": 63.1
+        },
+        "face": {
+          "n": 601,
+          "low": 38.6,
+          "medium": 1.7,
+          "high": 11.0,
+          "none": 48.8,
+          "review_or_above": 12.6
+        },
+        "overall": {
+          "n": 601,
+          "low": 34.3,
+          "medium": 12.5,
+          "high": 53.2,
+          "none": 0.0,
+          "review_or_above": 65.7
+        },
+        "whole_image": {
+          "n": 601,
+          "low": 13.6,
+          "medium": 3.3,
+          "high": 83.0,
+          "none": 0.0,
+          "review_or_above": 86.4
+        }
+      },
+      "general_auc": 0.8864,
+      "general_eer": 21.8,
+      "community_whole_auc": 0.8032,
+      "faces": {
+        "real": 77,
+        "fake": 308
+      },
+      "face_auc": 0.6179,
+      "general_auc_on_face_samples": 0.7806,
+      "general_auc_without_face": 0.9035
+    },
+    "by_generator": {
+      "dalle-3": {
+        "n": 15,
+        "auc_against_all_real": 0.9784,
+        "general": {
+          "n": 15,
+          "low": 13.3,
+          "medium": 13.3,
+          "high": 73.3,
+          "none": 0.0,
+          "review_or_above": 86.7
+        }
+      },
+      "ernie-image": {
+        "n": 12,
+        "auc_against_all_real": 0.9601,
+        "general": {
+          "n": 12,
+          "low": 16.7,
+          "medium": 0.0,
+          "high": 83.3,
+          "none": 0.0,
+          "review_or_above": 83.3
+        }
+      },
+      "ernie-image-turbo": {
+        "n": 24,
+        "auc_against_all_real": 0.9216,
+        "general": {
+          "n": 24,
+          "low": 33.3,
+          "medium": 0.0,
+          "high": 66.7,
+          "none": 0.0,
+          "review_or_above": 66.7
+        }
+      },
+      "flux.2-klein-9b": {
+        "n": 120,
+        "auc_against_all_real": 0.7148,
+        "general": {
+          "n": 120,
+          "low": 82.5,
+          "medium": 8.3,
+          "high": 9.2,
+          "none": 0.0,
+          "review_or_above": 17.5
+        }
+      },
+      "gpt-image-1.5": {
+        "n": 96,
+        "auc_against_all_real": 0.9531,
+        "general": {
+          "n": 96,
+          "low": 15.6,
+          "medium": 11.5,
+          "high": 72.9,
+          "none": 0.0,
+          "review_or_above": 84.4
+        }
+      },
+      "imagen-3.0-002": {
+        "n": 14,
+        "auc_against_all_real": 0.8536,
+        "general": {
+          "n": 14,
+          "low": 57.1,
+          "medium": 14.3,
+          "high": 28.6,
+          "none": 0.0,
+          "review_or_above": 42.9
+        }
+      },
+      "imagen-4.0": {
+        "n": 6,
+        "auc_against_all_real": 0.9772,
+        "general": {
+          "n": 6,
+          "low": 0.0,
+          "medium": 33.3,
+          "high": 66.7,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "midjourney-7": {
+        "n": 72,
+        "auc_against_all_real": 0.8723,
+        "general": {
+          "n": 72,
+          "low": 44.4,
+          "medium": 11.1,
+          "high": 44.4,
+          "none": 0.0,
+          "review_or_above": 55.6
+        }
+      },
+      "recraft-v2": {
+        "n": 8,
+        "auc_against_all_real": 0.948,
+        "general": {
+          "n": 8,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "recraft-v3": {
+        "n": 35,
+        "auc_against_all_real": 0.9035,
+        "general": {
+          "n": 35,
+          "low": 31.4,
+          "medium": 22.9,
+          "high": 45.7,
+          "none": 0.0,
+          "review_or_above": 68.6
+        }
+      },
+      "sd-2.1": {
+        "n": 13,
+        "auc_against_all_real": 0.9863,
+        "general": {
+          "n": 13,
+          "low": 15.4,
+          "medium": 0.0,
+          "high": 84.6,
+          "none": 0.0,
+          "review_or_above": 84.6
+        }
+      },
+      "sd-3.5": {
+        "n": 18,
+        "auc_against_all_real": 0.9206,
+        "general": {
+          "n": 18,
+          "low": 33.3,
+          "medium": 5.6,
+          "high": 61.1,
+          "none": 0.0,
+          "review_or_above": 66.7
+        }
+      },
+      "sdxl": {
+        "n": 20,
+        "auc_against_all_real": 1.0,
+        "general": {
+          "n": 20,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "sdxl-1.0": {
+        "n": 10,
+        "auc_against_all_real": 0.9992,
+        "general": {
+          "n": 10,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "seedream-v4.0": {
+        "n": 10,
+        "auc_against_all_real": 0.9808,
+        "general": {
+          "n": 10,
+          "low": 10.0,
+          "medium": 0.0,
+          "high": 90.0,
+          "none": 0.0,
+          "review_or_above": 90.0
+        }
+      },
+      "seedream-v4.5": {
+        "n": 13,
+        "auc_against_all_real": 0.915,
+        "general": {
+          "n": 13,
+          "low": 23.1,
+          "medium": 7.7,
+          "high": 69.2,
+          "none": 0.0,
+          "review_or_above": 76.9
+        }
+      },
+      "seedream-v5.0": {
+        "n": 7,
+        "auc_against_all_real": 0.9762,
+        "general": {
+          "n": 7,
+          "low": 0.0,
+          "medium": 42.9,
+          "high": 57.1,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "z-image-turbo": {
+        "n": 108,
+        "auc_against_all_real": 0.9205,
+        "general": {
+          "n": 108,
+          "low": 28.7,
+          "medium": 12.0,
+          "high": 59.3,
+          "none": 0.0,
+          "review_or_above": 71.3
+        }
+      }
+    },
+    "by_real_source": {
+      "OpenFake_DOCCI": {
+        "n": 200,
+        "general": {
+          "n": 200,
+          "low": 91.0,
+          "medium": 5.5,
+          "high": 3.5,
+          "none": 0.0,
+          "review_or_above": 9.0
+        }
+      },
+      "OpenFake_IMAGENET": {
+        "n": 200,
+        "general": {
+          "n": 200,
+          "low": 98.0,
+          "medium": 2.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 2.0
+        }
+      },
+      "OpenFake_PEXELS": {
+        "n": 199,
+        "general": {
+          "n": 199,
+          "low": 89.9,
+          "medium": 6.0,
+          "high": 4.0,
+          "none": 0.0,
+          "review_or_above": 10.1
+        }
+      }
+    }
+  },
+  "test_degraded": {
+    "note": "test 母图的传播退化版，同样只跑一次",
+    "all": {
+      "n": 800,
+      "real": {
+        "general": {
+          "n": 400,
+          "low": 91.0,
+          "medium": 6.8,
+          "high": 2.2,
+          "none": 0.0,
+          "review_or_above": 9.0
+        },
+        "face": {
+          "n": 400,
+          "low": 8.8,
+          "medium": 0.0,
+          "high": 0.8,
+          "none": 90.5,
+          "review_or_above": 0.8
+        },
+        "overall": {
+          "n": 400,
+          "low": 90.8,
+          "medium": 6.8,
+          "high": 2.5,
+          "none": 0.0,
+          "review_or_above": 9.2
+        },
+        "whole_image": {
+          "n": 400,
+          "low": 26.8,
+          "medium": 5.5,
+          "high": 67.8,
+          "none": 0.0,
+          "review_or_above": 73.2
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 400,
+          "low": 44.5,
+          "medium": 12.8,
+          "high": 42.8,
+          "none": 0.0,
+          "review_or_above": 55.5
+        },
+        "face": {
+          "n": 400,
+          "low": 34.2,
+          "medium": 1.2,
+          "high": 2.0,
+          "none": 62.5,
+          "review_or_above": 3.2
+        },
+        "overall": {
+          "n": 400,
+          "low": 44.2,
+          "medium": 13.0,
+          "high": 42.8,
+          "none": 0.0,
+          "review_or_above": 55.8
+        },
+        "whole_image": {
+          "n": 400,
+          "low": 19.8,
+          "medium": 4.2,
+          "high": 76.0,
+          "none": 0.0,
+          "review_or_above": 80.2
+        }
+      },
+      "general_auc": 0.8117,
+      "general_eer": 28.0,
+      "community_whole_auc": 0.6334,
+      "faces": {
+        "real": 38,
+        "fake": 150
+      },
+      "face_auc": 0.5142,
+      "general_auc_on_face_samples": 0.6602,
+      "general_auc_without_face": 0.8331
+    },
+    "by_generator": {
+      "dalle-3": {
+        "n": 12,
+        "auc_against_all_real": 0.9273,
+        "general": {
+          "n": 12,
+          "low": 25.0,
+          "medium": 25.0,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "ernie-image": {
+        "n": 8,
+        "auc_against_all_real": 0.8728,
+        "general": {
+          "n": 8,
+          "low": 37.5,
+          "medium": 12.5,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 62.5
+        }
+      },
+      "ernie-image-turbo": {
+        "n": 18,
+        "auc_against_all_real": 0.7865,
+        "general": {
+          "n": 18,
+          "low": 44.4,
+          "medium": 16.7,
+          "high": 38.9,
+          "none": 0.0,
+          "review_or_above": 55.6
+        }
+      },
+      "flux.2-klein-9b": {
+        "n": 80,
+        "auc_against_all_real": 0.5392,
+        "general": {
+          "n": 80,
+          "low": 88.8,
+          "medium": 5.0,
+          "high": 6.2,
+          "none": 0.0,
+          "review_or_above": 11.2
+        }
+      },
+      "gpt-image-1.5": {
+        "n": 62,
+        "auc_against_all_real": 0.9217,
+        "general": {
+          "n": 62,
+          "low": 22.6,
+          "medium": 9.7,
+          "high": 67.7,
+          "none": 0.0,
+          "review_or_above": 77.4
+        }
+      },
+      "imagen-3.0-002": {
+        "n": 12,
+        "auc_against_all_real": 0.7577,
+        "general": {
+          "n": 12,
+          "low": 66.7,
+          "medium": 25.0,
+          "high": 8.3,
+          "none": 0.0,
+          "review_or_above": 33.3
+        }
+      },
+      "imagen-4.0": {
+        "n": 4,
+        "auc_against_all_real": 0.8644,
+        "general": {
+          "n": 4,
+          "low": 25.0,
+          "medium": 50.0,
+          "high": 25.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "midjourney-7": {
+        "n": 48,
+        "auc_against_all_real": 0.8652,
+        "general": {
+          "n": 48,
+          "low": 41.7,
+          "medium": 14.6,
+          "high": 43.8,
+          "none": 0.0,
+          "review_or_above": 58.3
+        }
+      },
+      "recraft-v2": {
+        "n": 8,
+        "auc_against_all_real": 0.8875,
+        "general": {
+          "n": 8,
+          "low": 37.5,
+          "medium": 12.5,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 62.5
+        }
+      },
+      "recraft-v3": {
+        "n": 16,
+        "auc_against_all_real": 0.7883,
+        "general": {
+          "n": 16,
+          "low": 56.2,
+          "medium": 18.8,
+          "high": 25.0,
+          "none": 0.0,
+          "review_or_above": 43.8
+        }
+      },
+      "sd-2.1": {
+        "n": 12,
+        "auc_against_all_real": 0.9204,
+        "general": {
+          "n": 12,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "sd-3.5": {
+        "n": 14,
+        "auc_against_all_real": 0.8911,
+        "general": {
+          "n": 14,
+          "low": 42.9,
+          "medium": 14.3,
+          "high": 42.9,
+          "none": 0.0,
+          "review_or_above": 57.1
+        }
+      },
+      "sdxl": {
+        "n": 14,
+        "auc_against_all_real": 0.9575,
+        "general": {
+          "n": 14,
+          "low": 14.3,
+          "medium": 14.3,
+          "high": 71.4,
+          "none": 0.0,
+          "review_or_above": 85.7
+        }
+      },
+      "sdxl-1.0": {
+        "n": 8,
+        "auc_against_all_real": 0.9966,
+        "general": {
+          "n": 8,
+          "low": 0.0,
+          "medium": 12.5,
+          "high": 87.5,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "seedream-v4.0": {
+        "n": 8,
+        "auc_against_all_real": 0.9856,
+        "general": {
+          "n": 8,
+          "low": 0.0,
+          "medium": 37.5,
+          "high": 62.5,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "seedream-v4.5": {
+        "n": 8,
+        "auc_against_all_real": 0.7797,
+        "general": {
+          "n": 8,
+          "low": 50.0,
+          "medium": 12.5,
+          "high": 37.5,
+          "none": 0.0,
+          "review_or_above": 50.0
+        }
+      },
+      "z-image-turbo": {
+        "n": 68,
+        "auc_against_all_real": 0.8724,
+        "general": {
+          "n": 68,
+          "low": 33.8,
+          "medium": 13.2,
+          "high": 52.9,
+          "none": 0.0,
+          "review_or_above": 66.2
+        }
+      }
+    },
+    "by_real_source": {
+      "OpenFake_DOCCI": {
+        "n": 124,
+        "general": {
+          "n": 124,
+          "low": 91.9,
+          "medium": 4.8,
+          "high": 3.2,
+          "none": 0.0,
+          "review_or_above": 8.1
+        }
+      },
+      "OpenFake_IMAGENET": {
+        "n": 142,
+        "general": {
+          "n": 142,
+          "low": 94.4,
+          "medium": 4.9,
+          "high": 0.7,
+          "none": 0.0,
+          "review_or_above": 5.6
+        }
+      },
+      "OpenFake_PEXELS": {
+        "n": 134,
+        "general": {
+          "n": 134,
+          "low": 86.6,
+          "medium": 10.4,
+          "high": 3.0,
+          "none": 0.0,
+          "review_or_above": 13.4
+        }
+      }
+    },
+    "by_transform": {
+      "jpeg_q75": {
+        "n": 400,
+        "real": {
+          "general": {
+            "n": 200,
+            "low": 92.0,
+            "medium": 6.0,
+            "high": 2.0,
+            "none": 0.0,
+            "review_or_above": 8.0
+          },
+          "face": {
+            "n": 200,
+            "low": 11.5,
+            "medium": 0.0,
+            "high": 0.5,
+            "none": 88.0,
+            "review_or_above": 0.5
+          },
+          "overall": {
+            "n": 200,
+            "low": 92.0,
+            "medium": 6.0,
+            "high": 2.0,
+            "none": 0.0,
+            "review_or_above": 8.0
+          },
+          "whole_image": {
+            "n": 200,
+            "low": 30.0,
+            "medium": 5.0,
+            "high": 65.0,
+            "none": 0.0,
+            "review_or_above": 70.0
+          }
+        },
+        "fake": {
+          "general": {
+            "n": 200,
+            "low": 35.0,
+            "medium": 14.0,
+            "high": 51.0,
+            "none": 0.0,
+            "review_or_above": 65.0
+          },
+          "face": {
+            "n": 200,
+            "low": 44.0,
+            "medium": 1.5,
+            "high": 4.0,
+            "none": 50.5,
+            "review_or_above": 5.5
+          },
+          "overall": {
+            "n": 200,
+            "low": 34.5,
+            "medium": 14.5,
+            "high": 51.0,
+            "none": 0.0,
+            "review_or_above": 65.5
+          },
+          "whole_image": {
+            "n": 200,
+            "low": 12.0,
+            "medium": 2.5,
+            "high": 85.5,
+            "none": 0.0,
+            "review_or_above": 88.0
+          }
+        },
+        "general_auc": 0.8657,
+        "general_eer": 23.5,
+        "community_whole_auc": 0.753,
+        "faces": {
+          "real": 24,
+          "fake": 99
+        },
+        "face_auc": 0.5774,
+        "general_auc_on_face_samples": 0.6877,
+        "general_auc_without_face": 0.895
+      },
+      "resize50_jpeg_q85": {
+        "n": 400,
+        "real": {
+          "general": {
+            "n": 200,
+            "low": 90.0,
+            "medium": 7.5,
+            "high": 2.5,
+            "none": 0.0,
+            "review_or_above": 10.0
+          },
+          "face": {
+            "n": 200,
+            "low": 6.0,
+            "medium": 0.0,
+            "high": 1.0,
+            "none": 93.0,
+            "review_or_above": 1.0
+          },
+          "overall": {
+            "n": 200,
+            "low": 89.5,
+            "medium": 7.5,
+            "high": 3.0,
+            "none": 0.0,
+            "review_or_above": 10.5
+          },
+          "whole_image": {
+            "n": 200,
+            "low": 23.5,
+            "medium": 6.0,
+            "high": 70.5,
+            "none": 0.0,
+            "review_or_above": 76.5
+          }
+        },
+        "fake": {
+          "general": {
+            "n": 200,
+            "low": 54.0,
+            "medium": 11.5,
+            "high": 34.5,
+            "none": 0.0,
+            "review_or_above": 46.0
+          },
+          "face": {
+            "n": 200,
+            "low": 24.5,
+            "medium": 1.0,
+            "high": 0.0,
+            "none": 74.5,
+            "review_or_above": 1.0
+          },
+          "overall": {
+            "n": 200,
+            "low": 54.0,
+            "medium": 11.5,
+            "high": 34.5,
+            "none": 0.0,
+            "review_or_above": 46.0
+          },
+          "whole_image": {
+            "n": 200,
+            "low": 27.5,
+            "medium": 6.0,
+            "high": 66.5,
+            "none": 0.0,
+            "review_or_above": 72.5
+          }
+        },
+        "general_auc": 0.7522,
+        "general_eer": 33.0,
+        "community_whole_auc": 0.5062,
+        "faces": {
+          "real": 14,
+          "fake": 51
+        },
+        "face_auc": 0.3964,
+        "general_auc_on_face_samples": 0.605,
+        "general_auc_without_face": 0.7746
+      }
+    },
+    "same_parents_original": {
+      "n": 400,
+      "real": {
+        "general": {
+          "n": 200,
+          "low": 93.5,
+          "medium": 5.5,
+          "high": 1.0,
+          "none": 0.0,
+          "review_or_above": 6.5
+        },
+        "face": {
+          "n": 200,
+          "low": 12.0,
+          "medium": 0.0,
+          "high": 1.0,
+          "none": 87.0,
+          "review_or_above": 1.0
+        },
+        "overall": {
+          "n": 200,
+          "low": 92.5,
+          "medium": 6.5,
+          "high": 1.0,
+          "none": 0.0,
+          "review_or_above": 7.5
+        },
+        "whole_image": {
+          "n": 200,
+          "low": 47.5,
+          "medium": 6.0,
+          "high": 46.5,
+          "none": 0.0,
+          "review_or_above": 52.5
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 200,
+          "low": 38.0,
+          "medium": 6.5,
+          "high": 55.5,
+          "none": 0.0,
+          "review_or_above": 62.0
+        },
+        "face": {
+          "n": 200,
+          "low": 38.0,
+          "medium": 1.0,
+          "high": 10.5,
+          "none": 50.5,
+          "review_or_above": 11.5
+        },
+        "overall": {
+          "n": 200,
+          "low": 35.5,
+          "medium": 9.0,
+          "high": 55.5,
+          "none": 0.0,
+          "review_or_above": 64.5
+        },
+        "whole_image": {
+          "n": 200,
+          "low": 15.0,
+          "medium": 3.0,
+          "high": 82.0,
+          "none": 0.0,
+          "review_or_above": 85.0
+        }
+      },
+      "general_auc": 0.8858,
+      "general_eer": 22.5,
+      "community_whole_auc": 0.8119,
+      "faces": {
+        "real": 26,
+        "fake": 99
+      },
+      "face_auc": 0.6026,
+      "general_auc_on_face_samples": 0.7514,
+      "general_auc_without_face": 0.909
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 882" width="960" height="882" font-family="'Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+<rect width="960" height="882" fill="#ffffff"/>
+<text x="32.0" y="42.0" font-size="22" fill="#0b0b0b" text-anchor="start" font-weight="700">图片盲测：各生成器的 AUC</text>
+<text x="32.0" y="70.0" font-size="15" fill="#52514e" text-anchor="start" font-weight="400">每个生成器对全部真实图。样本少的生成器波动大，见测试报告的数量</text>
+<line x1="250.0" y1="96" x2="250.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="250.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.5</text>
+<line x1="374.0" y1="96" x2="374.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="374.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.6</text>
+<line x1="498.0" y1="96" x2="498.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="498.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.7</text>
+<line x1="622.0" y1="96" x2="622.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="622.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.8</text>
+<line x1="746.0" y1="96" x2="746.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="746.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">0.9</text>
+<line x1="870.0" y1="96" x2="870.0" y2="816" stroke="#e7e6e2" stroke-width="1"/>
+<text x="870.0" y="838.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">1</text>
+<text x="560.0" y="864.0" font-size="14" fill="#52514e" text-anchor="middle" font-weight="400">AUC</text>
+<text x="234.0" y="121.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">sdxl</text>
+<path d="M 250 105.0 H 866.0 Q 870.0 105.0 870.0 109.0 V 123.0 Q 870.0 127.0 866.0 127.0 H 250 Z" fill="#2a78d6"/>
+<text x="878.0" y="121.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">1.000</text>
+<text x="234.0" y="161.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">sdxl-1.0</text>
+<path d="M 250 145.0 H 865.0 Q 869.0 145.0 869.0 149.0 V 163.0 Q 869.0 167.0 865.0 167.0 H 250 Z" fill="#2a78d6"/>
+<text x="877.0" y="161.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.999</text>
+<text x="234.0" y="201.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">sd-2.1</text>
+<path d="M 250 185.0 H 849.0 Q 853.0 185.0 853.0 189.0 V 203.0 Q 853.0 207.0 849.0 207.0 H 250 Z" fill="#2a78d6"/>
+<text x="861.0" y="201.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.986</text>
+<text x="234.0" y="241.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">seedream-v4.0</text>
+<path d="M 250 225.0 H 842.2 Q 846.2 225.0 846.2 229.0 V 243.0 Q 846.2 247.0 842.2 247.0 H 250 Z" fill="#2a78d6"/>
+<text x="854.2" y="241.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.981</text>
+<text x="234.0" y="281.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">dalle-3</text>
+<path d="M 250 265.0 H 839.2 Q 843.2 265.0 843.2 269.0 V 283.0 Q 843.2 287.0 839.2 287.0 H 250 Z" fill="#2a78d6"/>
+<text x="851.2" y="281.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.978</text>
+<text x="234.0" y="321.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">imagen-4.0</text>
+<path d="M 250 305.0 H 837.7 Q 841.7 305.0 841.7 309.0 V 323.0 Q 841.7 327.0 837.7 327.0 H 250 Z" fill="#2a78d6"/>
+<text x="849.7" y="321.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.977</text>
+<text x="234.0" y="361.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">seedream-v5.0</text>
+<path d="M 250 345.0 H 836.5 Q 840.5 345.0 840.5 349.0 V 363.0 Q 840.5 367.0 836.5 367.0 H 250 Z" fill="#2a78d6"/>
+<text x="848.5" y="361.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.976</text>
+<text x="234.0" y="401.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">ernie-image</text>
+<path d="M 250 385.0 H 816.5 Q 820.5 385.0 820.5 389.0 V 403.0 Q 820.5 407.0 816.5 407.0 H 250 Z" fill="#2a78d6"/>
+<text x="828.5" y="401.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.960</text>
+<text x="234.0" y="441.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">gpt-image-1.5</text>
+<path d="M 250 425.0 H 807.8 Q 811.8 425.0 811.8 429.0 V 443.0 Q 811.8 447.0 807.8 447.0 H 250 Z" fill="#2a78d6"/>
+<text x="819.8" y="441.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.953</text>
+<text x="234.0" y="481.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">recraft-v2</text>
+<path d="M 250 465.0 H 801.5 Q 805.5 465.0 805.5 469.0 V 483.0 Q 805.5 487.0 801.5 487.0 H 250 Z" fill="#2a78d6"/>
+<text x="813.5" y="481.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.948</text>
+<text x="234.0" y="521.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">ernie-image-turbo</text>
+<path d="M 250 505.0 H 768.8 Q 772.8 505.0 772.8 509.0 V 523.0 Q 772.8 527.0 768.8 527.0 H 250 Z" fill="#2a78d6"/>
+<text x="780.8" y="521.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.922</text>
+<text x="234.0" y="561.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">sd-3.5</text>
+<path d="M 250 545.0 H 767.5 Q 771.5 545.0 771.5 549.0 V 563.0 Q 771.5 567.0 767.5 567.0 H 250 Z" fill="#2a78d6"/>
+<text x="779.5" y="561.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.921</text>
+<text x="234.0" y="601.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">z-image-turbo</text>
+<path d="M 250 585.0 H 767.4 Q 771.4 585.0 771.4 589.0 V 603.0 Q 771.4 607.0 767.4 607.0 H 250 Z" fill="#2a78d6"/>
+<text x="779.4" y="601.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.920</text>
+<text x="234.0" y="641.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">seedream-v4.5</text>
+<path d="M 250 625.0 H 760.6 Q 764.6 625.0 764.6 629.0 V 643.0 Q 764.6 647.0 760.6 647.0 H 250 Z" fill="#2a78d6"/>
+<text x="772.6" y="641.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.915</text>
+<text x="234.0" y="681.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">recraft-v3</text>
+<path d="M 250 665.0 H 746.3 Q 750.3 665.0 750.3 669.0 V 683.0 Q 750.3 687.0 746.3 687.0 H 250 Z" fill="#2a78d6"/>
+<text x="758.3" y="681.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.903</text>
+<text x="234.0" y="721.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">midjourney-7</text>
+<path d="M 250 705.0 H 707.7 Q 711.7 705.0 711.7 709.0 V 723.0 Q 711.7 727.0 707.7 727.0 H 250 Z" fill="#2a78d6"/>
+<text x="719.7" y="721.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.872</text>
+<text x="234.0" y="761.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">imagen-3.0-002</text>
+<path d="M 250 745.0 H 684.5 Q 688.5 745.0 688.5 749.0 V 763.0 Q 688.5 767.0 684.5 767.0 H 250 Z" fill="#2a78d6"/>
+<text x="696.5" y="761.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.854</text>
+<text x="234.0" y="801.0" font-size="15" fill="#0b0b0b" text-anchor="end" font-weight="400">flux.2-klein-9b</text>
+<path d="M 250 785.0 H 512.4 Q 516.4 785.0 516.4 789.0 V 803.0 Q 516.4 807.0 512.4 807.0 H 250 Z" fill="#2a78d6"/>
+<text x="524.4" y="801.0" font-size="14" fill="#0b0b0b" text-anchor="start" font-weight="400">0.715</text>
+</svg>

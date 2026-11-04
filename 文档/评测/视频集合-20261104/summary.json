@@ -1,0 +1,386 @@
+{
+  "note": "这些集合选模时看过，不是盲测。边界也来自这些集合的真实样本。人脸分支只在 first199 上有裁剪。",
+  "thresholds": {
+    "low_max": 0.689943,
+    "medium_max": 1.616911
+  },
+  "panels": {
+    "platform148": {
+      "n": 148,
+      "real": {
+        "general": {
+          "n": 73,
+          "low": 95.9,
+          "medium": 1.4,
+          "high": 2.7,
+          "none": 0.0,
+          "review_or_above": 4.1
+        },
+        "face": {
+          "n": 73,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 73,
+          "low": 95.9,
+          "medium": 1.4,
+          "high": 2.7,
+          "none": 0.0,
+          "review_or_above": 4.1
+        },
+        "whole_image": {
+          "n": 73,
+          "low": 20.5,
+          "medium": 0.0,
+          "high": 79.5,
+          "none": 0.0,
+          "review_or_above": 79.5
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 75,
+          "low": 32.0,
+          "medium": 13.3,
+          "high": 54.7,
+          "none": 0.0,
+          "review_or_above": 68.0
+        },
+        "face": {
+          "n": 75,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 75,
+          "low": 32.0,
+          "medium": 13.3,
+          "high": 54.7,
+          "none": 0.0,
+          "review_or_above": 68.0
+        },
+        "whole_image": {
+          "n": 75,
+          "low": 8.0,
+          "medium": 1.3,
+          "high": 90.7,
+          "none": 0.0,
+          "review_or_above": 92.0
+        }
+      },
+      "general_auc": 0.9452,
+      "general_eer": 10.96,
+      "community_whole_auc": 0.6875
+    },
+    "first199": {
+      "n": 199,
+      "real": {
+        "general": {
+          "n": 118,
+          "low": 94.9,
+          "medium": 3.4,
+          "high": 1.7,
+          "none": 0.0,
+          "review_or_above": 5.1
+        },
+        "face": {
+          "n": 118,
+          "low": 14.4,
+          "medium": 1.7,
+          "high": 2.5,
+          "none": 81.4,
+          "review_or_above": 4.2
+        },
+        "overall": {
+          "n": 118,
+          "low": 90.7,
+          "medium": 7.6,
+          "high": 1.7,
+          "none": 0.0,
+          "review_or_above": 9.3
+        },
+        "whole_image": {
+          "n": 118,
+          "low": 22.9,
+          "medium": 6.8,
+          "high": 70.3,
+          "none": 0.0,
+          "review_or_above": 77.1
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 81,
+          "low": 40.7,
+          "medium": 27.2,
+          "high": 32.1,
+          "none": 0.0,
+          "review_or_above": 59.3
+        },
+        "face": {
+          "n": 81,
+          "low": 34.6,
+          "medium": 6.2,
+          "high": 12.3,
+          "none": 46.9,
+          "review_or_above": 18.5
+        },
+        "overall": {
+          "n": 81,
+          "low": 34.6,
+          "medium": 30.9,
+          "high": 34.6,
+          "none": 0.0,
+          "review_or_above": 65.4
+        },
+        "whole_image": {
+          "n": 81,
+          "low": 8.6,
+          "medium": 1.2,
+          "high": 90.1,
+          "none": 0.0,
+          "review_or_above": 91.4
+        }
+      },
+      "general_auc": 0.935,
+      "general_eer": 14.41,
+      "community_whole_auc": 0.6627,
+      "faces": {
+        "real": 22,
+        "fake": 43
+      },
+      "face_auc": 0.6342,
+      "general_auc_on_face_samples": 0.9524,
+      "general_auc_without_face": 0.9153
+    },
+    "genvid400": {
+      "n": 400,
+      "real": {
+        "general": {
+          "n": 200,
+          "low": 92.0,
+          "medium": 6.5,
+          "high": 1.5,
+          "none": 0.0,
+          "review_or_above": 8.0
+        },
+        "face": {
+          "n": 200,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 200,
+          "low": 92.0,
+          "medium": 6.5,
+          "high": 1.5,
+          "none": 0.0,
+          "review_or_above": 8.0
+        },
+        "whole_image": {
+          "n": 200,
+          "low": 13.0,
+          "medium": 6.0,
+          "high": 81.0,
+          "none": 0.0,
+          "review_or_above": 87.0
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 200,
+          "low": 11.5,
+          "medium": 12.0,
+          "high": 76.5,
+          "none": 0.0,
+          "review_or_above": 88.5
+        },
+        "face": {
+          "n": 200,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 200,
+          "low": 11.5,
+          "medium": 12.0,
+          "high": 76.5,
+          "none": 0.0,
+          "review_or_above": 88.5
+        },
+        "whole_image": {
+          "n": 200,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "general_auc": 0.9734,
+      "general_eer": 11.0,
+      "community_whole_auc": 0.9817
+    },
+    "vif310": {
+      "n": 310,
+      "real": {
+        "general": {
+          "n": 89,
+          "low": 98.9,
+          "medium": 0.0,
+          "high": 1.1,
+          "none": 0.0,
+          "review_or_above": 1.1
+        },
+        "face": {
+          "n": 89,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 89,
+          "low": 98.9,
+          "medium": 0.0,
+          "high": 1.1,
+          "none": 0.0,
+          "review_or_above": 1.1
+        },
+        "whole_image": {
+          "n": 89,
+          "low": 33.7,
+          "medium": 3.4,
+          "high": 62.9,
+          "none": 0.0,
+          "review_or_above": 66.3
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 221,
+          "low": 69.2,
+          "medium": 9.5,
+          "high": 21.3,
+          "none": 0.0,
+          "review_or_above": 30.8
+        },
+        "face": {
+          "n": 221,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 221,
+          "low": 69.2,
+          "medium": 9.5,
+          "high": 21.3,
+          "none": 0.0,
+          "review_or_above": 30.8
+        },
+        "whole_image": {
+          "n": 221,
+          "low": 13.1,
+          "medium": 5.0,
+          "high": 81.9,
+          "none": 0.0,
+          "review_or_above": 86.9
+        }
+      },
+      "general_auc": 0.8492,
+      "general_eer": 23.08,
+      "community_whole_auc": 0.7132
+    },
+    "fresh": {
+      "n": 46,
+      "real": {
+        "general": {
+          "n": 26,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        },
+        "face": {
+          "n": 26,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 26,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        },
+        "whole_image": {
+          "n": 26,
+          "low": 23.1,
+          "medium": 3.8,
+          "high": 73.1,
+          "none": 0.0,
+          "review_or_above": 76.9
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 20,
+          "low": 40.0,
+          "medium": 25.0,
+          "high": 35.0,
+          "none": 0.0,
+          "review_or_above": 60.0
+        },
+        "face": {
+          "n": 20,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 100.0,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 20,
+          "low": 40.0,
+          "medium": 25.0,
+          "high": 35.0,
+          "none": 0.0,
+          "review_or_above": 60.0
+        },
+        "whole_image": {
+          "n": 20,
+          "low": 5.0,
+          "medium": 0.0,
+          "high": 95.0,
+          "none": 0.0,
+          "review_or_above": 95.0
+        }
+      },
+      "general_auc": 0.9442,
+      "general_eer": 10.0,
+      "community_whole_auc": 0.9135
+    }
+  }
+}

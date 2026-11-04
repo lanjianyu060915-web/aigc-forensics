@@ -1,0 +1,310 @@
+{
+  "seed": 20261104,
+  "time_utc": "2026-11-04T10:23:54.324558+00:00",
+  "all_count": 329,
+  "original_count": 209,
+  "derived_count": 120,
+  "sources": {
+    "Rapidata_Hunyuan": 15,
+    "Rapidata_Luma": 15,
+    "Rapidata_Pika": 15,
+    "Rapidata_Runway": 15,
+    "Rapidata_Seedance": 6,
+    "Rapidata_Sora": 15,
+    "Rapidata_Veo": 15,
+    "Rapidata_Wan": 15,
+    "4DCodeBench_ABC-130K": 5,
+    "4DCodeBench_AgiBotWorld": 2,
+    "4DCodeBench_Phys-AD": 3,
+    "4DCodeBench_Phys101": 3,
+    "4DCodeBench_Robo360": 1,
+    "4DCodeBench_T-REX": 4,
+    "4DCodeBench_WISA-80K": 28,
+    "4DCodeBench_physics-IQ-benchmark": 12,
+    "ComGenVid_MSVD": 20,
+    "YoCausal_AnimalKingdom": 10,
+    "YoCausal_MomentsInTime": 10
+  },
+  "generators": {
+    "Hunyuan": 15,
+    "Luma": 15,
+    "Pika": 15,
+    "Runway": 15,
+    "Seedance": 6,
+    "Sora": 15,
+    "Veo": 15,
+    "Wan": 15,
+    "real": 98
+  },
+  "splits": {
+    "calibration": 63,
+    "test": 146,
+    "test_degraded": 120
+  },
+  "split_labels": {
+    "calibration": {
+      "1": 34,
+      "0": 29
+    },
+    "test": {
+      "1": 77,
+      "0": 69
+    },
+    "test_degraded": {
+      "0": 60,
+      "1": 60
+    }
+  },
+  "by_label_original": {
+    "0": {
+      "count": 98,
+      "codec": {
+        "h264": 98
+      },
+      "container": {
+        "mov,mp4,m4a,3gp,3g2,mj2": 98
+      },
+      "resolution": {
+        "640x480": 18,
+        "1280x720": 51,
+        "1280x960": 1,
+        "640x360": 19,
+        "1280x734": 1,
+        "1280x630": 1,
+        "960x720": 1,
+        "600x480": 2,
+        "720x480": 2,
+        "480x642": 1,
+        "720x720": 1
+      },
+      "fps": {
+        "24.0": 14,
+        "30.0": 59,
+        "25.0": 14,
+        "23.976": 2,
+        "29.97": 7,
+        "29.917": 2
+      },
+      "duration_seconds": {
+        "min": 1.266667,
+        "p25": 3.31000025,
+        "median": 6.2125,
+        "p75": 8.03,
+        "max": 13.04,
+        "mean": 6.14550456122449
+      },
+      "bit_rate": {
+        "min": 231968.0,
+        "p25": 919958.75,
+        "median": 1605253.0,
+        "p75": 3499125.5,
+        "max": 34277832.0,
+        "mean": 3826369.4081632653
+      },
+      "file_size": {
+        "min": 86988.0,
+        "p25": 686188.25,
+        "median": 1132115.0,
+        "p75": 3768903.0,
+        "max": 36442973.0,
+        "mean": 3118882.948979592
+      },
+      "preferred_5_to_30_seconds": 62
+    },
+    "1": {
+      "count": 111,
+      "codec": {
+        "h264": 111
+      },
+      "container": {
+        "mov,mp4,m4a,3gp,3g2,mj2": 111
+      },
+      "resolution": {
+        "864x480": 15,
+        "960x544": 15,
+        "1280x720": 30,
+        "1280x768": 15,
+        "1920x1088": 6,
+        "854x480": 15,
+        "832x480": 15
+      },
+      "fps": {
+        "24.0": 81,
+        "30.0": 15,
+        "16.0": 15
+      },
+      "duration_seconds": {
+        "min": 5.0,
+        "p25": 5.041667,
+        "median": 5.166667,
+        "p75": 5.375,
+        "max": 6.0,
+        "mean": 5.2697072702702705
+      },
+      "bit_rate": {
+        "min": 188561.0,
+        "p25": 2148338.5,
+        "median": 3752078.0,
+        "p75": 6836718.5,
+        "max": 17028118.0,
+        "mean": 4762272.774774775
+      },
+      "file_size": {
+        "min": 126690.0,
+        "p25": 1392088.0,
+        "median": 2501153.0,
+        "p75": 4415218.0,
+        "max": 10731263.0,
+        "mean": 3146147.3333333335
+      },
+      "preferred_5_to_30_seconds": 111
+    }
+  },
+  "source_splits": {
+    "4DCodeBench_ABC-130K": {
+      "test": 4,
+      "calibration": 1
+    },
+    "4DCodeBench_AgiBotWorld": {
+      "test": 2
+    },
+    "4DCodeBench_Phys-AD": {
+      "test": 2,
+      "calibration": 1
+    },
+    "4DCodeBench_Phys101": {
+      "test": 2,
+      "calibration": 1
+    },
+    "4DCodeBench_Robo360": {
+      "test": 1
+    },
+    "4DCodeBench_T-REX": {
+      "test": 3,
+      "calibration": 1
+    },
+    "4DCodeBench_WISA-80K": {
+      "calibration": 10,
+      "test": 18
+    },
+    "4DCodeBench_physics-IQ-benchmark": {
+      "calibration": 3,
+      "test": 9
+    },
+    "ComGenVid_MSVD": {
+      "test": 15,
+      "calibration": 5
+    },
+    "Rapidata_Hunyuan": {
+      "calibration": 5,
+      "test": 10
+    },
+    "Rapidata_Luma": {
+      "test": 11,
+      "calibration": 4
+    },
+    "Rapidata_Pika": {
+      "test": 10,
+      "calibration": 5
+    },
+    "Rapidata_Runway": {
+      "test": 10,
+      "calibration": 5
+    },
+    "Rapidata_Seedance": {
+      "test": 5,
+      "calibration": 1
+    },
+    "Rapidata_Sora": {
+      "test": 9,
+      "calibration": 6
+    },
+    "Rapidata_Veo": {
+      "calibration": 4,
+      "test": 11
+    },
+    "Rapidata_Wan": {
+      "test": 11,
+      "calibration": 4
+    },
+    "YoCausal_AnimalKingdom": {
+      "calibration": 4,
+      "test": 6
+    },
+    "YoCausal_MomentsInTime": {
+      "test": 7,
+      "calibration": 3
+    }
+  },
+  "generator_splits": {
+    "Hunyuan": {
+      "calibration": 5,
+      "test": 10
+    },
+    "Luma": {
+      "test": 11,
+      "calibration": 4
+    },
+    "Pika": {
+      "test": 10,
+      "calibration": 5
+    },
+    "Runway": {
+      "test": 10,
+      "calibration": 5
+    },
+    "Seedance": {
+      "test": 5,
+      "calibration": 1
+    },
+    "Sora": {
+      "test": 9,
+      "calibration": 6
+    },
+    "Veo": {
+      "calibration": 4,
+      "test": 11
+    },
+    "Wan": {
+      "test": 11,
+      "calibration": 4
+    },
+    "real": {
+      "test": 69,
+      "calibration": 29
+    }
+  },
+  "metadata_shortcut": {
+    "model": "DecisionTreeClassifier",
+    "hyperparameters": {
+      "max_depth": 3,
+      "min_samples_leaf": 5,
+      "random_state": 20261104
+    },
+    "allowed_features": [
+      "width",
+      "height",
+      "duration_seconds",
+      "codec",
+      "container",
+      "file_size"
+    ],
+    "train_split": "calibration",
+    "evaluation_split": "test",
+    "train_count": 63,
+    "test_count": 146,
+    "test_auc": 0.9600037643515905,
+    "test_accuracy": 0.9452054794520548,
+    "feature_importance": {
+      "width": 0.0,
+      "height": 0.0,
+      "duration_seconds": 0.9563859328758261,
+      "file_size": 0.043614067124173914,
+      "codec_h264": 0.0,
+      "container_mov,mp4,m4a,3gp,3g2,mj2": 0.0
+    },
+    "sklearn_version": "1.7.2",
+    "policy": "One fit, one test evaluation; no hyperparameter search and no sample changes after AUC; no pixels/audio/features from detection models.",
+    "tree_rules": "|--- duration_seconds <= 6.00\n|   |--- duration_seconds <= 4.50\n|   |   |--- class: 0\n|   |--- duration_seconds >  4.50\n|   |   |--- file_size <= 6978857.00\n|   |   |   |--- class: 1\n|   |   |--- file_size >  6978857.00\n|   |   |   |--- class: 1\n|--- duration_seconds >  6.00\n|   |--- class: 0\n"
+  }
+}

@@ -1,0 +1,916 @@
+{
+  "thresholds": {
+    "low_max": 0.689943,
+    "medium_max": 1.616911
+  },
+  "calibration": {
+    "note": "真实样本并入视频边界的划分",
+    "all": {
+      "n": 63,
+      "real": {
+        "general": {
+          "n": 29,
+          "low": 86.2,
+          "medium": 13.8,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 13.8
+        },
+        "face": {
+          "n": 29,
+          "low": 13.8,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 86.2,
+          "review_or_above": 0.0
+        },
+        "overall": {
+          "n": 29,
+          "low": 86.2,
+          "medium": 13.8,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 13.8
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 34,
+          "low": 14.7,
+          "medium": 17.6,
+          "high": 67.6,
+          "none": 0.0,
+          "review_or_above": 85.3
+        },
+        "face": {
+          "n": 34,
+          "low": 2.9,
+          "medium": 0.0,
+          "high": 17.6,
+          "none": 79.4,
+          "review_or_above": 17.6
+        },
+        "overall": {
+          "n": 34,
+          "low": 14.7,
+          "medium": 14.7,
+          "high": 70.6,
+          "none": 0.0,
+          "review_or_above": 85.3
+        }
+      },
+      "general_auc": 0.9249,
+      "general_eer": 14.71,
+      "community_whole_auc": 0.9675,
+      "faces": {
+        "real": 4,
+        "fake": 7
+      },
+      "face_auc": 1.0,
+      "general_auc_on_face_samples": 1.0,
+      "general_auc_without_face": 0.9126
+    },
+    "by_generator": {
+      "Hunyuan": {
+        "n": 5,
+        "auc_against_all_real": 1.0,
+        "general": {
+          "n": 5,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Luma": {
+        "n": 4,
+        "auc_against_all_real": 0.8966,
+        "general": {
+          "n": 4,
+          "low": 25.0,
+          "medium": 50.0,
+          "high": 25.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "Pika": {
+        "n": 5,
+        "auc_against_all_real": 1.0,
+        "general": {
+          "n": 5,
+          "low": 0.0,
+          "medium": 0.0,
+          "high": 100.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Runway": {
+        "n": 5,
+        "auc_against_all_real": 0.9586,
+        "general": {
+          "n": 5,
+          "low": 0.0,
+          "medium": 40.0,
+          "high": 60.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Seedance": {
+        "n": 1,
+        "auc_against_all_real": 0.8966,
+        "general": {
+          "n": 1,
+          "low": 0.0,
+          "medium": 100.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Sora": {
+        "n": 6,
+        "auc_against_all_real": 0.8908,
+        "general": {
+          "n": 6,
+          "low": 33.3,
+          "medium": 16.7,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 66.7
+        }
+      },
+      "Veo": {
+        "n": 4,
+        "auc_against_all_real": 0.7759,
+        "general": {
+          "n": 4,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      },
+      "Wan": {
+        "n": 4,
+        "auc_against_all_real": 0.931,
+        "general": {
+          "n": 4,
+          "low": 25.0,
+          "medium": 0.0,
+          "high": 75.0,
+          "none": 0.0,
+          "review_or_above": 75.0
+        }
+      }
+    },
+    "by_real_source": {
+      "4DCodeBench_ABC-130K": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys-AD": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys101": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_T-REX": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_WISA-80K": {
+        "n": 10,
+        "general": {
+          "n": 10,
+          "low": 80.0,
+          "medium": 20.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 20.0
+        }
+      },
+      "4DCodeBench_physics-IQ-benchmark": {
+        "n": 3,
+        "general": {
+          "n": 3,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "ComGenVid_MSVD": {
+        "n": 5,
+        "general": {
+          "n": 5,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "YoCausal_AnimalKingdom": {
+        "n": 4,
+        "general": {
+          "n": 4,
+          "low": 75.0,
+          "medium": 25.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 25.0
+        }
+      },
+      "YoCausal_MomentsInTime": {
+        "n": 3,
+        "general": {
+          "n": 3,
+          "low": 66.7,
+          "medium": 33.3,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 33.3
+        }
+      }
+    }
+  },
+  "test": {
+    "note": "边界冻结后只跑一次",
+    "all": {
+      "n": 146,
+      "real": {
+        "general": {
+          "n": 69,
+          "low": 84.1,
+          "medium": 11.6,
+          "high": 4.3,
+          "none": 0.0,
+          "review_or_above": 15.9
+        },
+        "face": {
+          "n": 69,
+          "low": 14.5,
+          "medium": 0.0,
+          "high": 1.4,
+          "none": 84.1,
+          "review_or_above": 1.4
+        },
+        "overall": {
+          "n": 69,
+          "low": 84.1,
+          "medium": 10.1,
+          "high": 5.8,
+          "none": 0.0,
+          "review_or_above": 15.9
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 77,
+          "low": 24.7,
+          "medium": 13.0,
+          "high": 62.3,
+          "none": 0.0,
+          "review_or_above": 75.3
+        },
+        "face": {
+          "n": 77,
+          "low": 7.8,
+          "medium": 5.2,
+          "high": 18.2,
+          "none": 68.8,
+          "review_or_above": 23.4
+        },
+        "overall": {
+          "n": 77,
+          "low": 23.4,
+          "medium": 13.0,
+          "high": 63.6,
+          "none": 0.0,
+          "review_or_above": 76.6
+        }
+      },
+      "general_auc": 0.9221,
+      "general_eer": 19.48,
+      "community_whole_auc": 0.9211,
+      "faces": {
+        "real": 11,
+        "fake": 24
+      },
+      "face_auc": 0.9015,
+      "general_auc_on_face_samples": 0.9735,
+      "general_auc_without_face": 0.9008
+    },
+    "by_generator": {
+      "Hunyuan": {
+        "n": 10,
+        "auc_against_all_real": 0.9478,
+        "general": {
+          "n": 10,
+          "low": 10.0,
+          "medium": 20.0,
+          "high": 70.0,
+          "none": 0.0,
+          "review_or_above": 90.0
+        }
+      },
+      "Luma": {
+        "n": 11,
+        "auc_against_all_real": 0.9157,
+        "general": {
+          "n": 11,
+          "low": 27.3,
+          "medium": 9.1,
+          "high": 63.6,
+          "none": 0.0,
+          "review_or_above": 72.7
+        }
+      },
+      "Pika": {
+        "n": 10,
+        "auc_against_all_real": 0.9826,
+        "general": {
+          "n": 10,
+          "low": 0.0,
+          "medium": 20.0,
+          "high": 80.0,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Runway": {
+        "n": 10,
+        "auc_against_all_real": 0.9565,
+        "general": {
+          "n": 10,
+          "low": 20.0,
+          "medium": 0.0,
+          "high": 80.0,
+          "none": 0.0,
+          "review_or_above": 80.0
+        }
+      },
+      "Seedance": {
+        "n": 5,
+        "auc_against_all_real": 0.7797,
+        "general": {
+          "n": 5,
+          "low": 80.0,
+          "medium": 0.0,
+          "high": 20.0,
+          "none": 0.0,
+          "review_or_above": 20.0
+        }
+      },
+      "Sora": {
+        "n": 9,
+        "auc_against_all_real": 0.905,
+        "general": {
+          "n": 9,
+          "low": 33.3,
+          "medium": 11.1,
+          "high": 55.6,
+          "none": 0.0,
+          "review_or_above": 66.7
+        }
+      },
+      "Veo": {
+        "n": 11,
+        "auc_against_all_real": 0.8893,
+        "general": {
+          "n": 11,
+          "low": 36.4,
+          "medium": 18.2,
+          "high": 45.5,
+          "none": 0.0,
+          "review_or_above": 63.6
+        }
+      },
+      "Wan": {
+        "n": 11,
+        "auc_against_all_real": 0.9302,
+        "general": {
+          "n": 11,
+          "low": 18.2,
+          "medium": 18.2,
+          "high": 63.6,
+          "none": 0.0,
+          "review_or_above": 81.8
+        }
+      }
+    },
+    "by_real_source": {
+      "4DCodeBench_ABC-130K": {
+        "n": 4,
+        "general": {
+          "n": 4,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_AgiBotWorld": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys-AD": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys101": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Robo360": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_T-REX": {
+        "n": 3,
+        "general": {
+          "n": 3,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_WISA-80K": {
+        "n": 18,
+        "general": {
+          "n": 18,
+          "low": 61.1,
+          "medium": 27.8,
+          "high": 11.1,
+          "none": 0.0,
+          "review_or_above": 38.9
+        }
+      },
+      "4DCodeBench_physics-IQ-benchmark": {
+        "n": 9,
+        "general": {
+          "n": 9,
+          "low": 88.9,
+          "medium": 11.1,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 11.1
+        }
+      },
+      "ComGenVid_MSVD": {
+        "n": 15,
+        "general": {
+          "n": 15,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "YoCausal_AnimalKingdom": {
+        "n": 6,
+        "general": {
+          "n": 6,
+          "low": 66.7,
+          "medium": 33.3,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 33.3
+        }
+      },
+      "YoCausal_MomentsInTime": {
+        "n": 7,
+        "general": {
+          "n": 7,
+          "low": 85.7,
+          "medium": 0.0,
+          "high": 14.3,
+          "none": 0.0,
+          "review_or_above": 14.3
+        }
+      }
+    }
+  },
+  "test_degraded": {
+    "note": "test 原片统一转码成 H.264 CRF28、720p 的版本，同样只跑一次",
+    "all": {
+      "n": 120,
+      "real": {
+        "general": {
+          "n": 60,
+          "low": 90.0,
+          "medium": 6.7,
+          "high": 3.3,
+          "none": 0.0,
+          "review_or_above": 10.0
+        },
+        "face": {
+          "n": 60,
+          "low": 16.7,
+          "medium": 0.0,
+          "high": 1.7,
+          "none": 81.7,
+          "review_or_above": 1.7
+        },
+        "overall": {
+          "n": 60,
+          "low": 90.0,
+          "medium": 5.0,
+          "high": 5.0,
+          "none": 0.0,
+          "review_or_above": 10.0
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 60,
+          "low": 28.3,
+          "medium": 18.3,
+          "high": 53.3,
+          "none": 0.0,
+          "review_or_above": 71.7
+        },
+        "face": {
+          "n": 60,
+          "low": 21.7,
+          "medium": 3.3,
+          "high": 10.0,
+          "none": 65.0,
+          "review_or_above": 13.3
+        },
+        "overall": {
+          "n": 60,
+          "low": 28.3,
+          "medium": 16.7,
+          "high": 55.0,
+          "none": 0.0,
+          "review_or_above": 71.7
+        }
+      },
+      "general_auc": 0.9169,
+      "general_eer": 18.33,
+      "community_whole_auc": 0.8933,
+      "faces": {
+        "real": 11,
+        "fake": 21
+      },
+      "face_auc": 0.8009,
+      "general_auc_on_face_samples": 0.961,
+      "general_auc_without_face": 0.8995
+    },
+    "by_generator": {
+      "Hunyuan": {
+        "n": 8,
+        "auc_against_all_real": 0.9479,
+        "general": {
+          "n": 8,
+          "low": 12.5,
+          "medium": 37.5,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 87.5
+        }
+      },
+      "Luma": {
+        "n": 7,
+        "auc_against_all_real": 0.9548,
+        "general": {
+          "n": 7,
+          "low": 28.6,
+          "medium": 0.0,
+          "high": 71.4,
+          "none": 0.0,
+          "review_or_above": 71.4
+        }
+      },
+      "Pika": {
+        "n": 9,
+        "auc_against_all_real": 0.9759,
+        "general": {
+          "n": 9,
+          "low": 11.1,
+          "medium": 22.2,
+          "high": 66.7,
+          "none": 0.0,
+          "review_or_above": 88.9
+        }
+      },
+      "Runway": {
+        "n": 8,
+        "auc_against_all_real": 0.9771,
+        "general": {
+          "n": 8,
+          "low": 0.0,
+          "medium": 37.5,
+          "high": 62.5,
+          "none": 0.0,
+          "review_or_above": 100.0
+        }
+      },
+      "Seedance": {
+        "n": 4,
+        "auc_against_all_real": 0.7708,
+        "general": {
+          "n": 4,
+          "low": 75.0,
+          "medium": 0.0,
+          "high": 25.0,
+          "none": 0.0,
+          "review_or_above": 25.0
+        }
+      },
+      "Sora": {
+        "n": 6,
+        "auc_against_all_real": 0.8944,
+        "general": {
+          "n": 6,
+          "low": 50.0,
+          "medium": 0.0,
+          "high": 50.0,
+          "none": 0.0,
+          "review_or_above": 50.0
+        }
+      },
+      "Veo": {
+        "n": 9,
+        "auc_against_all_real": 0.8037,
+        "general": {
+          "n": 9,
+          "low": 66.7,
+          "medium": 0.0,
+          "high": 33.3,
+          "none": 0.0,
+          "review_or_above": 33.3
+        }
+      },
+      "Wan": {
+        "n": 9,
+        "auc_against_all_real": 0.9407,
+        "general": {
+          "n": 9,
+          "low": 11.1,
+          "medium": 33.3,
+          "high": 55.6,
+          "none": 0.0,
+          "review_or_above": 88.9
+        }
+      }
+    },
+    "by_real_source": {
+      "4DCodeBench_ABC-130K": {
+        "n": 4,
+        "general": {
+          "n": 4,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_AgiBotWorld": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys-AD": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Phys101": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_Robo360": {
+        "n": 1,
+        "general": {
+          "n": 1,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_T-REX": {
+        "n": 2,
+        "general": {
+          "n": 2,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "4DCodeBench_WISA-80K": {
+        "n": 14,
+        "general": {
+          "n": 14,
+          "low": 64.3,
+          "medium": 21.4,
+          "high": 14.3,
+          "none": 0.0,
+          "review_or_above": 35.7
+        }
+      },
+      "4DCodeBench_physics-IQ-benchmark": {
+        "n": 8,
+        "general": {
+          "n": 8,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "ComGenVid_MSVD": {
+        "n": 15,
+        "general": {
+          "n": 15,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "YoCausal_AnimalKingdom": {
+        "n": 6,
+        "general": {
+          "n": 6,
+          "low": 100.0,
+          "medium": 0.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 0.0
+        }
+      },
+      "YoCausal_MomentsInTime": {
+        "n": 4,
+        "general": {
+          "n": 4,
+          "low": 75.0,
+          "medium": 25.0,
+          "high": 0.0,
+          "none": 0.0,
+          "review_or_above": 25.0
+        }
+      }
+    },
+    "same_parents_original": {
+      "n": 120,
+      "real": {
+        "general": {
+          "n": 60,
+          "low": 85.0,
+          "medium": 10.0,
+          "high": 5.0,
+          "none": 0.0,
+          "review_or_above": 15.0
+        },
+        "face": {
+          "n": 60,
+          "low": 15.0,
+          "medium": 0.0,
+          "high": 1.7,
+          "none": 83.3,
+          "review_or_above": 1.7
+        },
+        "overall": {
+          "n": 60,
+          "low": 85.0,
+          "medium": 8.3,
+          "high": 6.7,
+          "none": 0.0,
+          "review_or_above": 15.0
+        }
+      },
+      "fake": {
+        "general": {
+          "n": 60,
+          "low": 23.3,
+          "medium": 15.0,
+          "high": 61.7,
+          "none": 0.0,
+          "review_or_above": 76.7
+        },
+        "face": {
+          "n": 60,
+          "low": 6.7,
+          "medium": 6.7,
+          "high": 21.7,
+          "none": 65.0,
+          "review_or_above": 28.3
+        },
+        "overall": {
+          "n": 60,
+          "low": 21.7,
+          "medium": 15.0,
+          "high": 63.3,
+          "none": 0.0,
+          "review_or_above": 78.3
+        }
+      },
+      "general_auc": 0.9253,
+      "general_eer": 18.33,
+      "community_whole_auc": 0.9314,
+      "faces": {
+        "real": 10,
+        "fake": 21
+      },
+      "face_auc": 0.9,
+      "general_auc_on_face_samples": 0.9667,
+      "general_auc_without_face": 0.9046
+    }
+  }
+}
