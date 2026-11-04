@@ -2,11 +2,11 @@
   "schema_version": "1.0",
   "module": "deepfake_detection_v2",
   "branch": "vit_full_image",
-  "created_at": "2026-09-20",
+  "created_at": "2026-11-04",
   "decision_semantics": "分数为深伪风险筛查分，不是准确率，也不是司法鉴定结论。",
   "bands": {
-    "low_max": 0.00029244999999999965,
-    "medium_max": 0.00044479999999999997,
+    "low_max": 7.2013129572372e-05,
+    "medium_max": 0.00011085945385478774,
     "labels": {
       "low": "证据不足",
       "medium": "需人工复核",
@@ -15,49 +15,50 @@
     "note": "分带由独立校准集上真人图分数的分位数确定：低于 p95 视为与已知真人图分布无显著差异；p95~p99 之间提示需复核；超过 p99（即校准集真人图上界）提示高风险。"
   },
   "reference_real_percentiles": {
-    "p50": 7.999999999999999e-05,
-    "p90": 0.00022280000000000008,
-    "p95": 0.00029244999999999965,
-    "p99": 0.00044479999999999997,
-    "p100": 0.000476
+    "p50": 2.579098967416306e-05,
+    "p90": 6.541658691167718e-05,
+    "p95": 7.2013129572372e-05,
+    "p99": 0.00011085945385478774,
+    "p100": 0.0001318763882939099
   },
   "calibration_set": {
     "name": "SWAN-DF 案例01-10（案例11-20 保留为验证集，未参与定标）",
     "n_real": 40,
     "n_fake": 10,
-    "auc": 0.8425
+    "auc": 0.8925
   },
   "validation_set": {
     "name": "SWAN-DF 案例11-20",
-    "auc": 0.9925,
+    "auc": 0.9975,
     "auc_ci95": [
-      0.9697,
+      0.986,
       1.0
     ],
     "operating_point_at_target_fpr_5pct": {
-      "threshold": 0.000287,
-      "recall": 0.5,
+      "threshold": 7.2013129572372e-05,
+      "recall": 0.8,
       "fpr": 0.0
     }
   },
   "preprocessing": {
     "resize": {
       "shortest_edge": 440,
-      "resample": "bicubic"
+      "resample": "bilinear"
     },
     "center_crop": 384,
     "rescale": 0.00392156862745098,
     "normalize_mean": [
-      0.48145466,
-      0.4578275,
-      0.40821073
+      0.485,
+      0.456,
+      0.406
     ],
     "normalize_std": [
-      0.26862954,
-      0.26130258,
-      0.27577711
+      0.229,
+      0.224,
+      0.225
     ],
-    "input_layout": "NCHW float32"
+    "input_layout": "NCHW float32",
+    "note": "作者代码的前处理（短边 440 双线性、中心裁剪 384、ImageNet 均值方差）。9 月版本用的是 HuggingFace 转换件配置里的 CLIP 均值和 bicubic，同一份权重在 SWAN-DF 100 张上 AUC 为 0.8969，换成作者前处理后为 0.9506，边界按同样的口径重新标定。"
   },
   "model_provenance": {
     "repo_id": "buildborderless/CommunityForensics-DeepfakeDet-ViT",
@@ -70,11 +71,13 @@
     "onnx_fidelity": {
       "pearson_vs_pytorch": 0.999403,
       "max_abs_diff": 0.00136578
-    }
+    },
+    "note": "和通用 AIGC 引擎里的 CommunityForensics 分支是同一份权重，分数一致。"
   },
   "limitations": [
     "校准集与验证集来自同一外部数据集的不同案例，样本量小（真人 40 张、换脸 10 张）。",
     "本分支在 112px 对齐裁剪类输入上接近随机（data_formal 上 AUC≈0.45~0.51），必须与 v0.4.0 人脸裁剪分支按输入分辨率路由使用。",
     "跨域直接套用其它数据集的阈值会失效，更换数据来源后必须重新标定。"
-  ]
+  ],
+  "all_100_auc": 0.9506
 }

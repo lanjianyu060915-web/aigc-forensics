@@ -67,6 +67,7 @@ class CommunityForensicsDetector:
         self.output_name = self.session.get_outputs()[0].name
         preprocess = self.calibration["preprocessing"]
         self.shortest_edge = int(preprocess["resize"]["shortest_edge"])
+        self.resample = str(preprocess["resize"].get("resample", "bicubic"))
         self.crop_size = int(preprocess["center_crop"])
         self.rescale = float(preprocess["rescale"])
         self.mean = np.asarray(preprocess["normalize_mean"], dtype=np.float32)
@@ -102,9 +103,11 @@ class CommunityForensicsDetector:
         else:
             new_height = self.shortest_edge
             new_width = int(self.shortest_edge * width / height)
-        resized = image.resize((new_width, new_height), Image.BICUBIC)
-        top = (new_height - self.crop_size) // 2
-        left = (new_width - self.crop_size) // 2
+        resample = {"bicubic": Image.Resampling.BICUBIC, "bilinear": Image.Resampling.BILINEAR}[self.resample]
+        resized = image.resize((new_width, new_height), resample=resample)
+        # 裁剪偏移和通用 AIGC 引擎一致，同一张图两边的 CommunityForensics 分数才相同。
+        top = round((new_height - self.crop_size) / 2)
+        left = round((new_width - self.crop_size) / 2)
         cropped = resized.crop((left, top, left + self.crop_size, top + self.crop_size))
         array = np.asarray(cropped, dtype=np.float32) * self.rescale
         array = (array - self.mean) / self.std

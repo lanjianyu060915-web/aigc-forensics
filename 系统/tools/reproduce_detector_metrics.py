@@ -27,11 +27,11 @@ from vit_detector import CommunityForensicsDetector  # noqa: E402
 
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
-# 线上用 ONNX 模型。9 月的 PyTorch 参考值是 0.8978，ONNX 验收值是 0.8969（Pearson 0.9994）。
+# 2026-11-04 改用作者前处理后的值。9 月前处理（CLIP 均值、bicubic）下依次是 0.8969、0.8425、0.9925、0.6625。
 RECORDED = {
-    "swan_all_100": 0.8969,
-    "swan_case01_10": 0.8425,
-    "swan_case11_20": 0.9925,
+    "swan_all_100": 0.9506,
+    "swan_case01_10": 0.8925,
+    "swan_case11_20": 0.9975,
     "case3_pair": 0.6625,
 }
 

@@ -89,15 +89,16 @@
         "high": "高风险提示"
       },
       "evidence": {
-        "swan_df_cases_11_20": {"auc": 0.9925, "auc_ci95": [0.9697, 1.0], "n_fake": 10},
-        "swan_df_all_100_reference": {"auc": 0.8978, "auc_ci95": [0.8006, 0.9709]},
+        "swan_df_cases_11_20": {"auc": 0.9975, "auc_ci95": [0.986, 1.0], "n_fake": 10},
+        "swan_df_all_100": {"auc": 0.9506},
+        "front_end_note": "2026-11-04 改用作者前处理后重新标定；9 月前处理（CLIP 均值、bicubic）下全部 100 张 AUC 为 0.8969，留出集 0.9925。",
         "data_formal_test": {"auc": 0.4309, "note": "该分支在小尺寸对齐裁剪输入上无效，必须路由"},
         "v040_on_swan_df": {"auc": 0.4594},
         "v040_on_data_formal_test": {"auc": 0.8436},
         "global_fusion_swan_df": {"auc": 0.4394, "note": "跨域套用他域校准权重会把成绩拉低"},
-        "routed": {"data_formal_test": 0.8436, "swan_df_all_100": 0.8978},
+        "routed": {"data_formal_test": 0.8436, "swan_df_all_100": 0.9506},
         "robustness_swan_df_holdout": {
-          "source": "docs/M3_检测器鲁棒性评测.md（11 种退化 × 100 张，主指标为留出集案例11-20）",
+          "source": "文档/升级文档/M3_检测器鲁棒性评测.md（11 种退化 × 100 张，主指标为留出集案例11-20；9 月前处理下的结果，未随前处理更新重测）",
           "original": 0.9925,
           "jpeg_q95": 0.9925,
           "jpeg_q85": 0.9825,

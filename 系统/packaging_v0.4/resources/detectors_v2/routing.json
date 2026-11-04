@@ -8,7 +8,7 @@
       "when": "输入短边 >= 阈值（整图/高分辨率照片）",
       "runtime": "detectors_v2/communityforensics_vit/model.onnx",
       "evidence_auc": {
-        "swan_df_cases_11_20": 0.9925,
+        "swan_df_cases_11_20": 0.9975,
         "data_formal_test": 0.4309
       }
     },
@@ -23,7 +23,7 @@
   },
   "evidence": {
     "routing_auc_data_formal_test": 0.8436,
-    "routing_auc_swan_df": 0.8978,
+    "routing_auc_swan_df": 0.9506,
     "global_fusion_auc_swan_df": 0.4394,
     "note": "在 data_formal/val 上拟合的全局融合权重给 ViT 分支的系数接近 0 甚至为负，跨域使用会把外部集 AUC 从 0.898 拉到 0.439；按输入分辨率路由则在两个域上都达到该域最优单分支水平。"
   },

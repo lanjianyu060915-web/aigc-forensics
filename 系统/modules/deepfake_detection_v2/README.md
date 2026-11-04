@@ -16,7 +16,7 @@ v0.5.0 新增。对 v0.4.0 冻结鉴伪运行时**零改动**，以独立进程 
 
 - `persistent_worker_v2.py` —— 协议服务端，协议名与冻结 worker 一致（`face-source-trace-runtime-v1`），
   是鉴伪模块的唯一入口，并按输入短边分流。
-- `vit_detector.py` —— ONNX 推理与 CLIP 预处理；不写死任何阈值，分带边界全部读 `calibration.json`。
+- `vit_detector.py` —— ONNX 推理与作者前处理（ImageNet 均值方差、双线性缩放）；不写死任何阈值，前处理和分带边界全部读 `calibration.json`。
 - `frozen_branch.py` —— 低于阈值时把请求代理给冻结 worker 的常驻子进程封装。
 
 ## 运行
