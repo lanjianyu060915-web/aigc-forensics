@@ -8,7 +8,7 @@
 在项目根目录运行：
 
 ```powershell
-D:\刑侦查竞赛\first_week\_round1_work\backend\envs\A_env\Scripts\python.exe -B -m pytest tests -q
+python_runtime\python.exe -B -m pytest tests -q
 ```
 
 测试仅使用 `tests/fixtures` 中的轻量 runner/mock worker，不会初始化或运行

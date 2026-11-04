@@ -154,7 +154,6 @@ def test_formal_deepfake_config_has_no_official_weight_or_torch_cache_dependency
         OFFICIAL_WEIGHT_FILENAME.casefold(),
         r".cache\torch".casefold(),
         r"c:\users\example".casefold(),
-        r"d:\刑侦查竞赛".casefold(),
     ):
         assert forbidden not in serialized
 

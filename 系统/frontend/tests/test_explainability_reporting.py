@@ -44,7 +44,7 @@ def deepfake_result(
     return {
         "schema_version": "3.0",
         "status": "success",
-        "query_image": r"D:\刑侦查竞赛\案件甲\query.jpg",
+        "query_image": r"D:\案件库\案件甲\query.jpg",
         "is_deepfake": is_deepfake,
         "score": fusion,
         "label": label,
@@ -84,7 +84,7 @@ def kernel_deepfake_result(*, band: str = "high", score: float = 0.031) -> dict:
     return {
         "schema_version": "3.0",
         "status": "success",
-        "query_image": r"D:\刑侦查竞赛\案件甲\query.jpg",
+        "query_image": r"D:\案件库\案件甲\query.jpg",
         "is_deepfake": band == "high",
         "score": score,
         "label": "fake" if band == "high" else "real",
@@ -148,7 +148,7 @@ def identity_result(*, candidates: bool = True) -> dict:
     return {
         "schema_version": "3.0",
         "status": "success",
-        "query_image": r"D:\刑侦查竞赛\案件甲\query.jpg",
+        "query_image": r"D:\案件库\案件甲\query.jpg",
         "candidates": rows,
         "runtime_seconds": 2.5,
         "error_message": None,
@@ -243,7 +243,7 @@ def source_result(*, candidates: bool = True, insufficient_matches: bool = False
     return {
         "schema_version": "3.0",
         "status": "success",
-        "query_image": r"D:\刑侦查竞赛\案件甲\query.jpg",
+        "query_image": r"D:\案件库\案件甲\query.jpg",
         "candidates": rows,
         "runtime_seconds": 3.75,
         "error_message": None,
@@ -469,7 +469,7 @@ class ReportBuilderTests(unittest.TestCase):
         self.assertIn("频域模型：FrequencyStatDetector 87维统计特征 + LogisticRegression", text)
         self.assertIn("Top1与Top2差值：0.090000", text)
         self.assertIn("RANSAC内点数：20", text)
-        self.assertNotIn(r"D:\刑侦查竞赛", text)
+        self.assertNotIn(r"D:\案件库", text)
         self.assertNotIn(r"C:\Users\example", text)
         self.assertIn(html.escape("<script>系统</script>"), html_report)
         self.assertNotIn("<script>系统</script>", html_report)

@@ -4,7 +4,7 @@
   "product_version": "0.4.0",
   "display_version": "3.0",
   "upgrade": {
-    "track": "刑科技项目升级2.0",
+    "track": "项目升级2.0",
     "base_frozen_version": "0.4.0",
     "base_frozen_archive": "GitHub Release backup-2026-10-05：baseline-v0.4.0-full.zip（22 个分卷）",
     "base_frozen_archive_sha256": "5E8B6D04EB496C425B15FDCA938BFF47A9581F5404E7877D73507F96256675E3",
