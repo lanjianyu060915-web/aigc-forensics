@@ -43,7 +43,7 @@
 
 ## 三、主要软件依赖
 
-版本来自本地元数据，不是查询“最新版”后替换的结果。**应用环境**为 `系统/python_runtime`；**引擎／GPU 环境**为 `系统/engine_runtime` 与训练环境，二者所列核心包版本一致；**冻结环境**为 `系统/packaging_v0.3/resources/deepfake_runtime`。标注“重建清单”的版本仅说明 `系统/requirements-aigc-frozen.txt` 的要求，不冒充全部现存二进制已被验证。
+版本来自本地元数据，不是查询“最新版”后替换的结果。**应用环境**为 `系统/python_runtime`；**引擎／GPU 环境**为 `系统/engine_runtime` 与训练环境，二者所列核心包版本一致；**冻结环境**为 `系统/packaging_v0.3/resources/deepfake_runtime`。标注“重建清单”的版本仅说明 `系统/requirements/` 下锁定清单的要求，不冒充全部现存二进制已被验证。
 
 | 名称 | 版本（按环境） | 许可 | 已核对的上游地址 |
 | --- | --- | --- | --- |
