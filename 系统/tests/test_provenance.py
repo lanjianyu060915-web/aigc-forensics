@@ -668,3 +668,11 @@ def test_zero_length_and_large_bmff_headers(tmp_path):
     result = run_bytes(tmp_path, struct.pack(">I4sQ", 1, b"uuid", 2**63) + implementation.C2PA_UUID, ".mp4")
     assert result["status"] == "error"
     assert result["c2pa"]["present"] is False
+
+
+def test_bundled_demo_video_carries_a_label(tmp_path):
+    source = Path(__file__).resolve().parents[1] / "examples" / "labelled_demo_video.mp4"
+    result = implementation.analyze_file(source)
+    assert result["verdict"] == "labelled_ai"
+    assert result["aigc_labels"]
+

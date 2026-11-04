@@ -108,9 +108,10 @@ EXAMPLE_LABELS = {
     "integrated_query_001.jpg": "换脸样例 1（高分辨率）",
     "integrated_query_002.jpg": "换脸样例 2",
     "integrated_query_003.jpg": "换脸样例 3",
-    "aigc_fake_image.jpg": "小尺寸人脸裁剪（高风险样例）",
-    "aigc_real_image.jpg": "小尺寸人脸裁剪（低风险样例）",
-    "no_face_image.jpg": "无人脸图片（证据不足样例）",
+    "aigc_fake_image.jpg": "小尺寸人脸裁剪 1",
+    "aigc_real_image.jpg": "小尺寸人脸裁剪 2",
+    "no_face_image.jpg": "无人脸图片",
+    "labelled_demo_video.mp4": "带隐式标识的视频（标识为人工写入）",
 }
 
 
