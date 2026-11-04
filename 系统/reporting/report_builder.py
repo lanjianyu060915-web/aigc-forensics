@@ -440,6 +440,28 @@ def _evidence_matrix_lines(
     return lines
 
 
+def _overall_lines(technical: Mapping[str, Any]) -> list[str]:
+    """有总体档位时先写各路分档，后面的方法和分数都是整图分支的明细。"""
+    overall = _mapping(technical.get("overall"))
+    if not overall:
+        return []
+    lines = [
+        f"总体档位依据：{_text(overall.get('reason'))}",
+        "各路分档（分数性质不同，不相加）：",
+    ]
+    for item in overall.get("branches") or []:
+        branch = _mapping(item)
+        label = _text(branch.get("label"))
+        if branch.get("status") == "success":
+            lines.append(f"- {label}：{_text(branch.get('band_label'))}，分数 {_fmt(branch.get('score'))}")
+        elif branch.get("status") == "no_face":
+            lines.append(f"- {label}：不适用，没有检出可用的人脸")
+        else:
+            lines.append(f"- {label}：未完成，{_text(branch.get('error_message'))}")
+    lines.append("以下是整图分支的明细，只作提示，不影响总体档位。")
+    return lines
+
+
 def _file_provenance_lines(provenance: Mapping[str, Any]) -> list[str]:
     """文件自带的生成标识：只陈列文件里实际存在的内容。"""
 
@@ -525,6 +547,7 @@ def render_text_report(report: Mapping[str, Any]) -> str:
             "二、AIGC 鉴伪",
             f"模块状态：{_text(deepfake.get('status'))}",
             f"结论：{_text(deepfake.get('headline'))}",
+            *_overall_lines(dt),
             f"检测方法：{_text(dt.get('method_name'))}",
         ]
     )
