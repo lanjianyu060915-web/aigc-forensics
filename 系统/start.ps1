@@ -34,7 +34,7 @@ function Resolve-FrontendPython {
     if ($null -ne $pythonCommand -and (Test-FrontendPython -Executable $pythonCommand.Source)) {
         return $pythonCommand.Source
     }
-    throw "未找到可导入 Streamlit 的前端 Python。请确认 python_runtime 目录完整。"
+    throw "未找到可导入 Streamlit 的前端 Python。请先双击“搭建环境.bat”搭建运行环境。"
 }
 
 function Test-PortFree {

@@ -5,6 +5,13 @@
 /系统/packaging_v0.4/resources/portable_python_v2/
 /系统/packaging_v0.3/resources/portable_python/
 /系统/packaging_v0.3/resources/deepfake_runtime/
+/系统/.runtime-cache/
+/系统/.runtime-setup.lock
+/系统/.bootstrap-*/
+/系统/.*.build-*/
+/系统/.*.old-*/
+/系统/packaging_v0.3/resources/.*.build-*/
+/系统/packaging_v0.4/resources/.*.build-*/
 
 # 运行产物和本地数据
 /用户数据/
