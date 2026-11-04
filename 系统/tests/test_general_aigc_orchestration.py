@@ -187,3 +187,28 @@ def test_general_branch_is_skipped_when_deepfake_not_selected(tmp_path: Path) ->
     config = _config(tmp_path, general=_section(tmp_path / "must_not_run.py"))
     status = run_task(_query(tmp_path), selected_modules={"source"}, config_path=config)
     assert not (Path(status["task_dir"]) / "general_aigc_result.json").exists()
+
+
+NO_FACE_RUNNER = """
+import json, sys
+output = sys.argv[sys.argv.index('--output') + 1]
+payload = {'status': 'error', 'query_image': 'query.jpg', 'candidates': [], 'runtime_seconds': 0.1,
+           'error_message': '图片中未检测到人脸: query.jpg'}
+open(output, 'w', encoding='utf-8').write(json.dumps(payload, ensure_ascii=False))
+raise SystemExit(1)
+"""
+
+
+def test_no_face_is_not_applicable_rather_than_a_failure(tmp_path: Path) -> None:
+    config_path = _config(tmp_path, general=None)
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config["identity"]["runner"] = str(_write_runner(tmp_path / "no_face.py", NO_FACE_RUNNER))
+    config_path.write_text(json.dumps(config, ensure_ascii=False), encoding="utf-8")
+    status = run_task(_query(tmp_path), selected_modules={"identity"}, config_path=config_path)
+    identity = json.loads((Path(status["task_dir"]) / "identity_result.json").read_text(encoding="utf-8"))
+    assert identity["status"] == "skipped"
+    assert identity["not_applicable"] is True
+    assert identity["error_message"] is None
+    assert "不适用" in identity["details"]["reason"]
+    assert status["identity"]["not_applicable"] is True
+    assert not status["errors"]

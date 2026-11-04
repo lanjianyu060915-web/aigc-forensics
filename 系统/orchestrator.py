@@ -1200,6 +1200,27 @@ def _run_deepfake_module(
     )
 
 
+NO_FACE_REASON = "未检测到人脸，人脸身份比对不适用"
+
+
+def _identity_not_applicable(payload: Mapping[str, Any]) -> dict[str, Any] | None:
+    """通用内容没有人脸是常态：身份比对记为不适用，不算模块失败。"""
+
+    if payload.get("status") != "error" or "未检测到人脸" not in str(payload.get("error_message") or ""):
+        return None
+    return {
+        **payload,
+        "status": "skipped",
+        "error_message": None,
+        "not_applicable": True,
+        "details": {**_mapping_or_empty(payload.get("details")), "reason": NO_FACE_REASON},
+    }
+
+
+def _mapping_or_empty(value: Any) -> dict[str, Any]:
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
 def _mapping_get(value: Any, key: str) -> Any:
     return value.get(key) if isinstance(value, Mapping) else None
 
@@ -2570,6 +2591,14 @@ def run_task(
                 logs_dir=logs_dir,
                 exc=exc,
             )
+        if name == "identity":
+            not_applicable = _identity_not_applicable(results[name])
+            if not_applicable is not None:
+                results[name] = not_applicable
+                _write_json(output_paths[name], results[name])
+                metadata[name]["status"] = "skipped"
+                metadata[name]["error"] = None
+                metadata[name]["not_applicable"] = True
         if (
             name == "deepfake"
             and isinstance(general_aigc_section, Mapping)

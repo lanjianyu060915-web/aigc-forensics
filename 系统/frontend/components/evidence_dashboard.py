@@ -304,6 +304,13 @@ _BAND_TONES = {"high": "bad", "medium": "warn", "low": "muted"}
 
 def _not_ok_finding(title: str, data: Mapping[str, Any]) -> dict[str, str] | None:
     status = _result_status(data)
+    if data.get("not_applicable"):
+        return {
+            "title": title,
+            "value": "不适用",
+            "note": _safe_text(_mapping(data.get("details")).get("reason"), "这次输入不适用这个模块。"),
+            "tone": "muted",
+        }
     if status == "skipped" or status == "unknown":
         return {"title": title, "value": "本次未运行", "note": "这个模块没有被选中。", "tone": "muted"}
     if status != "success":
