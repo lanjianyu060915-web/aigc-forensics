@@ -5,6 +5,7 @@
 *.safetensors filter=lfs diff=lfs merge=lfs -text
 *.npz filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
 *.pptx filter=lfs diff=lfs merge=lfs -text
 系统/packaging_v0.3/resources/data/** filter=lfs diff=lfs merge=lfs -text
 系统/examples/*.jpg filter=lfs diff=lfs merge=lfs -text
