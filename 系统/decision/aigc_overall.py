@@ -84,7 +84,7 @@ def _branch_summary(key: str, label: str, payload: Mapping[str, Any], band: str 
         "status": payload.get("status"),
         "band": band,
         "band_label": payload.get("band_label") or details.get("band_label") or BAND_LABELS.get(band or ""),
-        "score": payload.get("score") if payload.get("score") is not None else payload.get("logit"),
+        "score": payload.get("logit") if payload.get("logit") is not None else payload.get("score"),
         "logit": payload.get("logit"),
         "error_message": payload.get("error_message"),
     }

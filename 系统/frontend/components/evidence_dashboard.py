@@ -559,7 +559,7 @@ def _render_overview_cards(
                     f"通用 AIGC 分支：{_safe_text(general.get('band_label') or general.get('error_message'))}"
                     f"，融合分数 {_six(general.get('logit'))}"
                 )
-                st.caption("下面是整图/人脸分支的结果。")
+                st.caption("下面是整图分支的结果，只作提示，不影响总体档位。")
             if details.get("video_band_rule"):
                 band_counts = _mapping(details.get("frame_band_counts"))
                 st.metric("视频级分带", _safe_text(details.get("band_label") or details.get("band")))
@@ -940,12 +940,18 @@ def _render_deepfake_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
     if data.get("overall"):
         render_overall_section(data)
         render_general_aigc_section(data)
-        render_face_branch_section(data)
+        render_face_branch_section(
+            data,
+            lambda path, caption: _render_evidence_image(
+                path, policy, caption=caption, key=f"{key_prefix}_{path}"
+            ),
+        )
         if data.get("legacy_error_message"):
-            st.warning(f"整图/人脸分支没有完成：{_safe_text(data.get('legacy_error_message'))}")
+            st.warning(f"整图分支没有完成：{_safe_text(data.get('legacy_error_message'))}")
             return
         st.divider()
-        st.markdown("#### 整图/人脸检测分支")
+        st.markdown("#### 整图检测分支（只作提示）")
+        st.caption("这一路的边界只在高清人像上标定过，普通内容上误报很高，不影响总体档位。")
     kernel = resolve_deepfake_kernel_view(data)
     if kernel is not None and kernel.get("branch") == "vit_full_image":
         _render_deepfake_kernel_page(data, policy, key_prefix, kernel)

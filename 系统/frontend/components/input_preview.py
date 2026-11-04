@@ -85,10 +85,10 @@ def describe_input(
     short_edge = min(width, height)
     notes: list[str] = []
     if short_edge >= routing_edge:
-        route_label = "二代整图分支（ViT）"
+        route_label = "整图模型（ViT）"
         route_reason = f"有效短边 {short_edge} px，不低于路由阈值 {routing_edge} px。"
     else:
-        route_label = "人脸裁剪分支（空间+频域）"
+        route_label = "人脸裁剪模型（空间+频域）"
         route_reason = f"有效短边 {short_edge} px，低于路由阈值 {routing_edge} px。"
     if short_edge < LOW_RESOLUTION_EDGE:
         notes.append("分辨率很低，人脸检测和素材局部复核都可能失败。")

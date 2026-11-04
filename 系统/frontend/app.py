@@ -1189,7 +1189,7 @@ def _render_query_panel(query: Any, routing_edge: int) -> InputPreview | None:
     if preview.width and preview.height:
         rows.append(("尺寸", f"{preview.width} × {preview.height}"))
     if preview.route_label:
-        rows.append(("鉴伪分支", preview.route_label))
+        rows.append(("整图分支", preview.route_label))
     if preview.route_reason:
         rows.append(("依据", preview.route_reason))
     rows.append(("SHA-256", preview.sha256))
@@ -1575,7 +1575,7 @@ def _render_guide_page() -> None:
 #### 基本流程
 
 1. 在“新建研判”选择文件，或先用内置示例试一遍。
-2. 确认右侧显示的鉴伪分支和文件哈希。
+2. 确认右侧显示的文件信息和哈希。
 3. 点“一键综合分析”，等待进度完成。
 4. 依次查看各结果页，需要留存时导出报告或生成证据包。
 

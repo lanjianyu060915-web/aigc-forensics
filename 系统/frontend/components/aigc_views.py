@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import streamlit as st
@@ -81,7 +81,11 @@ def provenance_finding(provenance: Mapping[str, Any]) -> dict[str, str]:
     }
 
 
-def _render_logit_scale(logit: float, thresholds: Mapping[str, Any]) -> None:
+def _render_logit_scale(
+    logit: float,
+    thresholds: Mapping[str, Any],
+    title: str = "融合分数（logit，越高越倾向生成）",
+) -> None:
     low_max = _number(thresholds.get("low_max"))
     medium_max = _number(thresholds.get("medium_max"))
     if low_max is None or medium_max is None:
@@ -104,7 +108,7 @@ def _render_logit_scale(logit: float, thresholds: Mapping[str, Any]) -> None:
                             "field": "start",
                             "type": "quantitative",
                             "scale": {"domain": [lower, upper]},
-                            "title": "融合分数（logit，越高越倾向生成）",
+                            "title": title,
                         },
                         "x2": {"field": "end"},
                         "color": {
@@ -298,8 +302,11 @@ def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
         st.warning(_text(text))
 
 
-def render_face_branch_section(deepfake: Mapping[str, Any]) -> None:
-    """人脸分支的证据明细：逐张裁剪的分数和所用的边界。"""
+def render_face_branch_section(
+    deepfake: Mapping[str, Any],
+    render_crop: Callable[[str, str], Any] | None = None,
+) -> None:
+    """人脸分支的证据明细：逐张裁剪的分数和所用的边界。render_crop 负责显示任务目录里的裁剪图。"""
     face = _mapping(_mapping(deepfake.get("general_aigc")).get("face_branch"))
     if not face:
         return
@@ -318,9 +325,14 @@ def render_face_branch_section(deepfake: Mapping[str, Any]) -> None:
     columns[1].metric("裁剪图均值分数", _logit_text(logit))
     columns[2].metric("人脸裁剪图", f"{len(crops)} 张")
     if logit is not None and thresholds:
-        _render_logit_scale(logit, thresholds)
+        _render_logit_scale(logit, thresholds, "人脸裁剪图分数（logit，越高越倾向生成）")
     if face.get("band_reason"):
         st.caption(f"分档依据：{face['band_reason']}")
+    if render_crop is not None and crops:
+        for column, item in zip(st.columns(max(len(crops), 3)), crops, strict=False):
+            crop = _mapping(item)
+            with column:
+                render_crop(f"face_crops/{_text(crop.get('file'))}", f"分数 {_logit_text(crop.get('logit'))}")
     st.caption(
         "用 CommunityForensics 打人脸裁剪图，分数只和真实人脸的分布比较。"
         "换脸检测跨数据集不稳，高分是复核线索，低分不能排除换脸。"
