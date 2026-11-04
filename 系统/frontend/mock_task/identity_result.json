@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "query_image": "query.svg",
+  "candidates": [
+    {"rank": 1, "identity_id": "person_001", "identity_name": "任务演示人员 1", "score": 0.94, "reference_image": "person_001/reference.svg"},
+    {"rank": 2, "identity_id": "person_002", "identity_name": "任务演示人员 2", "score": 0.86, "reference_image": "person_002/reference.svg"},
+    {"rank": 3, "identity_id": "person_003", "identity_name": "任务演示人员 3", "score": 0.79, "reference_image": "person_003/reference.svg"},
+    {"rank": 4, "identity_id": "person_004", "identity_name": "任务演示人员 4", "score": 0.71, "reference_image": "person_004/reference.svg"},
+    {"rank": 5, "identity_id": "person_005", "identity_name": "任务演示人员 5", "score": 0.63, "reference_image": "person_005/reference.svg"}
+  ],
+  "runtime_seconds": 0.42,
+  "error_message": null
+}
+

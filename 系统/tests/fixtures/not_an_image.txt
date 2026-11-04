@@ -1,0 +1,2 @@
+This is an intentional invalid-image fixture for controlled error handling.
+It contains no image bytes and must never produce a fabricated model result.

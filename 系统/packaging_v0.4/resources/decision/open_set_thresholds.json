@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "source_version": "m1-calibrated-20260920",
+  "calibration_note": "阈值由校准集（底图：OOT 案例01-05 + 主实验 query_001-005；身份：库内无该身份样本 + 主实验 query_001-005）按间隙中间 50% 规则确定，测试集未参与选阈值。",
+  "modules": {
+    "source": {
+      "high_global_score": 0.87480725,
+      "low_global_score": 0.64086575
+    },
+    "identity": {
+      "high_similarity": 0.46975398855283856,
+      "low_similarity": 0.22285549631342294,
+      "min_top1_top2_margin": 0.18740125775802882
+    }
+  }
+}

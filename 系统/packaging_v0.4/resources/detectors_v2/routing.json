@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "module": "deepfake_routing",
+  "rule": "按输入图像的有效短边路由",
+  "short_edge_threshold_px": 256,
+  "branches": {
+    "vit_full_image": {
+      "when": "输入短边 >= 阈值（整图/高分辨率照片）",
+      "runtime": "detectors_v2/communityforensics_vit/model.onnx",
+      "evidence_auc": {
+        "swan_df_cases_11_20": 0.9925,
+        "data_formal_test": 0.4309
+      }
+    },
+    "v040_face_crop": {
+      "when": "输入短边 < 阈值（小尺寸或已对齐的人脸裁剪）",
+      "runtime": "packaging_v0.3/resources/deepfake_runtime",
+      "evidence_auc": {
+        "data_formal_test": 0.8436,
+        "swan_df_cases_11_20": 0.4594
+      }
+    }
+  },
+  "evidence": {
+    "routing_auc_data_formal_test": 0.8436,
+    "routing_auc_swan_df": 0.8978,
+    "global_fusion_auc_swan_df": 0.4394,
+    "note": "在 data_formal/val 上拟合的全局融合权重给 ViT 分支的系数接近 0 甚至为负，跨域使用会把外部集 AUC 从 0.898 拉到 0.439；按输入分辨率路由则在两个域上都达到该域最优单分支水平。"
+  },
+  "limitations": [
+    "路由阈值 256px 由当前两个可用域（112px 裁剪 / 整图）的分布确定，尚需更多域验证。",
+    "两个分支都必须按各自的目标域校准集单独标定阈值。"
+  ]
+}

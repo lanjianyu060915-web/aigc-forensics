@@ -1,0 +1,178 @@
+{
+  "schema_version": "3.0",
+  "product_name": "AI换脸涉案图像智能鉴伪与原始素材溯源系统",
+  "product_version": "0.4.0",
+  "display_version": "2.1",
+  "upgrade": {
+    "track": "刑科技项目升级2.0",
+    "base_frozen_version": "0.4.0",
+    "base_frozen_archive": "GitHub Release backup-2026-10-05：baseline-v0.4.0-full.zip（22 个分卷）",
+    "base_frozen_archive_sha256": "5E8B6D04EB496C425B15FDCA938BFF47A9581F5404E7877D73507F96256675E3",
+    "upgraded_kernels": {
+      "deepfake": "deepfake_detection_v2",
+      "identity": "identity_search_v2",
+      "video": "video_frames_v2",
+      "source": "source_search_cached"
+    },
+    "note": "本工作副本以 v0.4.0 冻结版为基线，冻结原件只读保留；product_version 维持在 0.4.0 表示基线契约不变，升级标识与内核切换记录在本段。"
+  },
+  "runtime": {
+    "tasks_root": "{DATA_ROOT}/runtime/tasks",
+    "inbox_root": "{DATA_ROOT}/runtime/inbox",
+    "identity_cache": "{DATA_ROOT}/runtime/cache/identity",
+    "persistent_workers_enabled": true,
+    "persistent_startup_timeout_seconds": 180
+  },
+  "video": {
+    "enabled": true,
+    "python": "{CURRENT_PYTHON}",
+    "python_args": ["-B"],
+    "runner": "{APP_ROOT}\\modules\\video_frames_v2\\run_video_frames_v2.py",
+    "model_root": "{APP_ROOT}\\packaging_v0.3\\resources",
+    "candidate_frames": 24,
+    "max_key_frames": 5,
+    "det_size": 640,
+    "device": "cpu",
+    "ctx": -1,
+    "face_detector": "insightface",
+    "prefer_single_face": true,
+    "min_sharpness_ratio": 0.35,
+    "frame_selection_timeout_seconds": 900,
+    "deepfake_frames": 4,
+    "identity_frames": 3,
+    "source_frames": 1,
+    "kernel": "video_frames_v2",
+    "kernel_note": "视频入口：抽帧与关键帧选择在开发解释器（OpenCV+InsightFace）中完成，输出纯 JPEG 关键帧；三个模块逐帧运行后由 video_pipeline 聚合（鉴伪取帧级中位数+分带一致性、身份按跨帧平均余弦相似度、底图只用首要帧）。",
+    "aggregation": {
+      "deepfake": "band_majority",
+      "identity": "mean_across_frames",
+      "source": "primary_frame"
+    },
+    "decision_note": "视频级分带由帧级分带一致性规则（band_majority）导出，边界沿用整图标定集；M4.1 用 DFDC 抽样的 240 条视频做过独立视频校准，结论是视频级绝对阈值不可跨语料移植（DFDC 标定阈值会让 SWAN-DF 测试集召回降为 0/12，现行口径在 DFDC 真人视频上中/高风险误报 53.3%），故不启用新阈值，实测失效写进结果限制声明（见 docs/M4.1_视频级分带校准.md）。"
+  },
+  "deepfake": {
+    "enabled": true,
+    "persistent_enabled": true,
+    "python": "{APP_ROOT}\\packaging_v0.4\\resources\\portable_python_v2\\python.exe",
+    "python_args": ["-E", "-S", "-B"],
+    "kernel": "deepfake_detection_v2",
+    "persistent_worker": "{APP_ROOT}\\modules\\deepfake_detection_v2\\persistent_worker_v2.py",
+    "oneshot_runner": "{APP_ROOT}\\modules\\deepfake_detection_v2\\run_deepfake_detection_v2.py",
+    "kernel_note": "常驻与单次路径都使用二代内核（整图 ViT 分支 + 低于路由阈值时代理冻结人脸裁剪分支）。runner 与 install_root 保持指向冻结件，只用于哈希校验和冻结分支。",
+    "runner": "{APP_ROOT}\\modules\\deepfake_detection\\run_deepfake_detection.py",
+    "install_root": "{APP_ROOT}\\packaging_v0.3\\resources\\deepfake_runtime",
+    "install_root_read_only": true,
+    "device": "cpu",
+    "timeout_seconds": 180,
+    "hide_console": true,
+    "extra_args": [],
+    "known_sha256": {
+      "executable": "bc67e52b77fa0559d4d6fe04f024dcdb4a8edf43128f80f7d70947e3da490203",
+      "spatial_model": "5bb4b33936eb3adc631828ea271a466d62070a2b8de1902e5d96122317534794",
+      "frequency_model": "2ec6828eb2a3151784667eb0c105f07cdb41de6ec2df587d28b2766ceee063eb",
+      "fusion_config": "8f76abeabb55da1119b28689e15ccd31eac7f1066e401e766987efbb4603e0b2",
+      "adapter": "373ce764a5b05c03c56b204414218df6ef7d4d8173ecba696f4b189b587f0f3b",
+      "adapter_runtime": "e117ef6aeef718c4ddbc5eb92e0a615f0239bebe85f7bd830a0963c245e9ef54",
+      "adapter_inspector": "f2b46b0102afcca041f8a173ac9e9279548483632ba4932f25a4086eede03dba"
+    },
+    "detector_v2": {
+      "enabled": true,
+      "resources_root": "{APP_ROOT}\\packaging_v0.4\\resources\\detectors_v2",
+      "model": "{APP_ROOT}\\packaging_v0.4\\resources\\detectors_v2\\communityforensics_vit\\model.onnx",
+      "calibration": "{APP_ROOT}\\packaging_v0.4\\resources\\detectors_v2\\communityforensics_vit\\calibration.json",
+      "routing": "{APP_ROOT}\\packaging_v0.4\\resources\\detectors_v2\\routing.json",
+      "model_sha256": "a42c7d740fbb345ba9a26d469b22f301d73089ce3c6da993877ed2b6965a8ba1",
+      "routing_short_edge_threshold_px": 256,
+      "decision_bands": {
+        "low": "证据不足",
+        "medium": "需人工复核",
+        "high": "高风险提示"
+      },
+      "evidence": {
+        "swan_df_cases_11_20": {"auc": 0.9925, "auc_ci95": [0.9697, 1.0], "n_fake": 10},
+        "swan_df_all_100_reference": {"auc": 0.8978, "auc_ci95": [0.8006, 0.9709]},
+        "data_formal_test": {"auc": 0.4309, "note": "该分支在小尺寸对齐裁剪输入上无效，必须路由"},
+        "v040_on_swan_df": {"auc": 0.4594},
+        "v040_on_data_formal_test": {"auc": 0.8436},
+        "global_fusion_swan_df": {"auc": 0.4394, "note": "跨域套用他域校准权重会把成绩拉低"},
+        "routed": {"data_formal_test": 0.8436, "swan_df_all_100": 0.8978},
+        "robustness_swan_df_holdout": {
+          "source": "docs/M3_检测器鲁棒性评测.md（11 种退化 × 100 张，主指标为留出集案例11-20）",
+          "original": 0.9925,
+          "jpeg_q95": 0.9925,
+          "jpeg_q85": 0.9825,
+          "jpeg_q70": 0.95,
+          "jpeg_q50": 0.89,
+          "downscale_50": 0.995,
+          "downup_50": 0.9775,
+          "downup_25": 0.64,
+          "downscale_25": 0.595,
+          "double_jpeg_proxy": 0.8175,
+          "rephoto_proxy": 0.7675
+        }
+      },
+      "limitations": [
+        "换脸不等于 AIGC 生成图，本分支跨任务迁移的机理尚未解释。",
+        "分带边界来自 40 张真人图与 10 张换脸图的定标集，样本量小。",
+        "路由阈值仅由两个可用域的输入分布确定，尚无第三个域验证。",
+        "分带只在接近标定域的输入上成立：0.25 倍重采样后真人分数上移约 300~400 倍，冻结分带下真人误报率 0.56、提示精确率 0.24（近乎乱报）；强压缩 q50 则相反，提示召回从 0.50 掉到 0.20。同一套阈值无法同时适配两端，超域输入必须单独声明。",
+        "翻拍与视频二次编码目前只有近似代理（模糊+噪声 / 二次 JPEG+缩放），没有真实采集或原始视频验证；截图未单独评测。",
+        "留出集仅 10 张换脸，AUC 的 95% 置信区间宽约 ±0.15，±0.02 量级的差异不可分辨。"
+      ]
+    },
+    "boundary_notice": {
+      "enabled": false,
+      "reason": "当前版本没有经独立验证的决策边界带，仅显示实际阈值差值。"
+    }
+  },
+  "identity": {
+    "persistent_enabled": true,
+    "python": "{CURRENT_PYTHON}",
+    "runner": "{APP_ROOT}\\modules\\identity_search_v2\\run_identity_search_v2.py",
+    "persistent_worker": "{APP_ROOT}\\modules\\identity_search_v2\\persistent_worker_v2.py",
+    "det_size_chain": [1280, 640, 320],
+    "multi_face_policy": "largest_face",
+    "kernel": "identity_search_v2",
+    "kernel_note": "身份检索改用 Python runner + 常驻 worker v2：检索算法、库索引口径与冻结版一致，只在查询侧按检测尺度链 1280->640->320 回退。冻结版固定 det_size=1280，会把 720x1280 竖屏帧横向拉伸 1.78 倍，20 例换脸查询里 10 例检不到人脸；v2 端到端 20/20，库内 10/10 无退化。库索引仍按第一档 1280 构建，无需重建；冻结 exe 保留在 packaging_v0.3/work/dist 下不参与运行。",
+    "library": "{APP_ROOT}\\packaging_v0.3\\resources\\data\\identity_library",
+    "top_k": 5,
+    "timeout_seconds": 600,
+    "startup_timeout_seconds": 600,
+    "ctx": -1,
+    "model_root": "{APP_ROOT}\\packaging_v0.3\\resources",
+    "offline": true
+  },
+  "source": {
+    "python": "{CURRENT_PYTHON}",
+    "python_args": ["-B"],
+    "runner": "{APP_ROOT}\\modules\\source_search\\run_source_search.py",
+    "feature_cache": "{DATA_ROOT}/runtime/cache/source",
+    "kernel": "source_search_cached",
+    "kernel_note": "检索算法、权重与排序口径不变，只把库侧特征（人脸掩膜框、全局特征、SIFT）做成增量缓存；逐案例与冻结 EXE 比对的结果见 tools/verify_source_cache.py 的输出。",
+    "library": "{APP_ROOT}\\packaging_v0.3\\resources\\data\\source_library",
+    "top_k": 5,
+    "timeout_seconds": 600
+  },
+  "decision": {
+    "open_set_thresholds": "{APP_ROOT}\\packaging_v0.4\\resources\\decision\\open_set_thresholds.json",
+    "calibration_version": "m1-calibrated-20260920",
+    "note": "开放集三态判定与证据质量层是附加判定层，不修改三个模块的原始结果；代码优先读取本项指向的标定配置，缺失时才回落到内置占位阈值并在结论中声明未标定。",
+    "evidence": {
+      "source": {
+        "signal": "global_score",
+        "test_negative": "15/15 判为「当前库中未发现可靠候选」",
+        "test_positive": "25/25 判为「高可信候选」"
+      },
+      "identity": {
+        "signal": "mean_similarity + top1_top2_margin",
+        "test_negative": "10/10 判为「当前库中未发现可靠候选」",
+        "test_positive": "12/12 判为「高可信候选」"
+      }
+    }
+  },
+  "frontend": {
+    "python": "{CURRENT_PYTHON}",
+    "address": "127.0.0.1",
+    "port": 8767
+  }
+}

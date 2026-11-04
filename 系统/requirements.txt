@@ -1,0 +1,7 @@
+# 主 UI 环境（Python 3.14）
+streamlit>=1.54,<2.0
+
+# 三个算法模块使用隔离运行时，不应把下面的冲突依赖强装进 UI 环境：
+# - AIGC：安装态 Python 3.12 / torch 2.11.0+cpu / torchvision 0.26.0+cpu
+# - 身份：modules/identity_search/requirements.txt
+# - 底图：modules/source_search/requirements.lock.txt

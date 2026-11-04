@@ -1,0 +1,36 @@
+{
+  "schema_version": "2.0-test",
+  "product_name": "frontend_smoke_without_models",
+  "runtime": {
+    "tasks_root": "runtime/tasks",
+    "inbox_root": "runtime/inbox",
+    "identity_cache": "runtime/cache/identity",
+    "persistent_workers_enabled": false
+  },
+  "deepfake": {
+    "enabled": false,
+    "persistent_enabled": false,
+    "python": "missing/python.exe",
+    "runner": "missing/deepfake.py"
+  },
+  "identity": {
+    "enabled": false,
+    "persistent_enabled": false,
+    "python": "missing/python.exe",
+    "runner": "missing/identity.py",
+    "library": "../sample_data/identity_libraries/demo",
+    "model_root": "missing/models",
+    "ctx": -1
+  },
+  "source": {
+    "enabled": false,
+    "python": "missing/python.exe",
+    "runner": "missing/source.py",
+    "library": "../sample_data/source_libraries/demo"
+  },
+  "frontend": {
+    "python": "{CURRENT_PYTHON}",
+    "address": "127.0.0.1",
+    "port": 8766
+  }
+}

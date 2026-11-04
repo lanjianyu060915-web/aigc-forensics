@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "query_image": "query.svg",
+  "is_deepfake": true,
+  "score": 0.72,
+  "label": "deepfake",
+  "runtime_seconds": 0.31,
+  "details": {
+    "native_status": "SUCCESS",
+    "actual_device": "mock",
+    "decision_threshold": 0.5,
+    "score_semantics": "仅用于前端布局测试，不是算法推理或准确率证据。",
+    "disclaimer": "Mock 数据，不得作为鉴定结论。"
+  },
+  "error_message": null
+}

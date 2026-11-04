@@ -1,0 +1,13 @@
+# 仅用于审计和重建同等 Python 3.12 CPU 运行环境。
+# 正式集成默认只读复用已安装且通过 50/50 哈希冻结校验的运行时，
+# 不会自动在安装目录执行 pip install。
+torch==2.11.0
+torchvision==0.26.0
+opencv-python==4.11.0.86
+numpy==2.5.1
+scikit-learn==1.9.0
+joblib==1.5.3
+Pillow==12.3.0
+streamlit==1.59.1
+matplotlib==3.11.0
+pandas==3.0.3

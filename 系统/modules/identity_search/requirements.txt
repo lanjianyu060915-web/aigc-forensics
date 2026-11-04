@@ -1,0 +1,9 @@
+# Direct dependencies verified for the Python 3.12 CPU baseline.
+# The exhaustive transitive lock is ../manifests/A_REQUIREMENTS_LOCK.txt.
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+insightface==0.7.3
+onnxruntime==1.20.1
+pytest==8.3.5
+Pillow==11.1.0
+scipy==1.15.2

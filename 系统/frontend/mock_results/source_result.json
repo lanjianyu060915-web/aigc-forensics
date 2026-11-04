@@ -1,0 +1,49 @@
+{
+  "status": "success",
+  "query_image": "queries/mock_query.svg",
+  "candidates": [
+    {
+      "rank": 1,
+      "file_path": "source_001.svg",
+      "global_score": 0.92,
+      "local_score": 0.89,
+      "final_score": 0.90,
+      "visualization_path": "visualizations/match_001.svg"
+    },
+    {
+      "rank": 2,
+      "file_path": "source_002.svg",
+      "global_score": 0.84,
+      "local_score": 0.81,
+      "final_score": 0.82,
+      "visualization_path": "visualizations/match_002.svg"
+    },
+    {
+      "rank": 3,
+      "file_path": "source_003.svg",
+      "global_score": 0.77,
+      "local_score": 0.73,
+      "final_score": 0.75,
+      "visualization_path": "visualizations/match_003.svg"
+    },
+    {
+      "rank": 4,
+      "file_path": "source_004.svg",
+      "global_score": 0.69,
+      "local_score": 0.66,
+      "final_score": 0.68,
+      "visualization_path": "visualizations/match_004.svg"
+    },
+    {
+      "rank": 5,
+      "file_path": "source_005.svg",
+      "global_score": 0.61,
+      "local_score": 0.58,
+      "final_score": 0.59,
+      "visualization_path": "visualizations/match_005.svg"
+    }
+  ],
+  "runtime_seconds": 0.87,
+  "error_message": null
+}
+
