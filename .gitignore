@@ -20,3 +20,6 @@ __pycache__/
 /系统/tests/.run_tmp/
 /系统/tests/.runtime_service_tmp/
 /系统/frontend/tests/.tmp/
+
+# 本机开发配置
+/.claude/

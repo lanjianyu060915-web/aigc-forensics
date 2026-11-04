@@ -505,7 +505,7 @@ def _deepfake_video_explanation(
         output["basis"].append(f"帧级一致性：{consistency}")
     if frozen_frames:
         output["basis"].append("冻结内核没有校准分带，其帧级结论按冻结阈值二值判定后并入一致性规则。")
-    output["basis"].append("三个模块的分数属于不同任务，不能相加，也不产生跨模块综合概率。")
+    output["basis"].append("各模块的分数属于不同任务，不能相加，也不产生跨模块综合概率。")
 
     primary_frame: dict[str, Any] = {}
     per_frame = details.get("per_frame")

@@ -19,6 +19,10 @@ def _mapping(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
 
 
+def _seconds(value: Any) -> float:
+    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0.0
+
+
 def _legacy_band(payload: Mapping[str, Any]) -> str | None:
     band = _mapping(payload.get("details")).get("band")
     if band in _ORDER:
@@ -103,6 +107,9 @@ def attach_general_aigc(
 
     band, reason = decide_overall(general_band, legacy_band)
     merged["warnings"] = warnings
+    merged["runtime_seconds"] = _seconds(deepfake.get("runtime_seconds")) + _seconds(
+        general_data.get("runtime_seconds")
+    )
     merged["overall"] = {
         "band": band,
         "band_label": BAND_LABELS.get(band or "") or "未标定",

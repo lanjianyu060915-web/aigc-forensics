@@ -101,7 +101,7 @@ def render_evidence_summary(
     deepfake: dict[str, Any], identity: dict[str, Any], source: dict[str, Any]
 ) -> None:
     st.subheader("最终证据汇总")
-    st.info("三个模块解决不同问题，本区只并列汇总证据，不计算、不暗示任何跨模块综合概率。")
+    st.info("各模块解决不同问题，本区只并列汇总证据，不计算、不暗示任何跨模块综合概率。")
     summary = build_evidence_summary(deepfake, identity, source)
     columns = st.columns(3)
     for column, key in zip(columns, ("deepfake", "identity", "source"), strict=True):

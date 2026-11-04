@@ -1607,7 +1607,7 @@ def _render_evidence_chain_page(
         st.caption("该任务没有保存可读进度事件。")
     status = _mapping(task_status)
     if status:
-        with st.expander("任务状态与三个模块原始状态"):
+        with st.expander("任务状态与各模块原始状态"):
             st.json(status)
 
 

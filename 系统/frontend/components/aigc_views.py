@@ -114,7 +114,7 @@ def _render_logit_scale(logit: float, thresholds: Mapping[str, Any]) -> None:
                                 "domain": [item["grade"] for item in bands],
                                 "range": [item["color"] for item in bands],
                             },
-                            "legend": {"title": "档位", "orient": "right"},
+                            "legend": {"title": "档位", "orient": "top", "direction": "horizontal"},
                         },
                         "tooltip": [
                             {"field": "grade", "title": "档位"},
@@ -134,7 +134,7 @@ def _render_logit_scale(logit: float, thresholds: Mapping[str, Any]) -> None:
                     },
                 },
             ],
-            "height": 80,
+            "height": 70,
         },
         width="stretch",
     )
