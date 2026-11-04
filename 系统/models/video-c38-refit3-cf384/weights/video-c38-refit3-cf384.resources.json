@@ -1,0 +1,12 @@
+{
+  "clip_sha256": "b5c470b722ab12e0c74ad587c3942d46edee921cb9d2578ba9aacf4364cfd4c0",
+  "community_weights_sha256": "b89f36275f3bf5e2b040eee36597a8f19db051bff9a473a9cf7b2466284fb387",
+  "refit_heads_sha256": [
+    "5972dfb5f8dc7a8aa3c4dabf8ad9b46c65cf268c3cbc4ae328bf45fe94f57ed8",
+    "f6b66368a717972cddee618d638f580e7bdb8741961a3990d8266fc663abca1d",
+    "8905dbbe7c411691aec9e198780e72c08844e63bfd741bc645dc3200bdebf84e"
+  ],
+  "clip_weight": 0.8,
+  "refit_weight": 0.5,
+  "research_only": true
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "model_id": "video-c38-refit3-cf384-20261103",
+  "architecture": "video_clip_community_fusion_v1",
+  "checkpoint": "weights/video-c38-refit3-cf384.pt",
+  "checkpoint_sha256": "cb13d9c28d404aeec7b1f40208f0731034470d8847bfba55e5cbfe5e67fc3c0f",
+  "score_type": "raw_logit",
+  "score_direction": "higher_is_fake",
+  "formula": "0.8 × [0.5 × CLIP 原头 + 0.5 × 3 个重训头均值] + 0.2 × CommunityForensics",
+  "preprocessing": {
+    "clip": "10 帧（图片 1 帧）× 5 个 224 原尺寸裁剪",
+    "community": "4 帧（图片 1 帧），短边 440 双线性缩放后中心裁剪 384"
+  },
+  "status": "research_only"
+}

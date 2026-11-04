@@ -1,0 +1,98 @@
+{
+  "retrieved_at_utc": "2026-10-07T07:02:06Z",
+  "scope": "ViF-CoT-4K current source_videos archive: Panda-70M pairs only for local non-commercial computational research; Kinetics media excluded.",
+  "upstream_revisions": {
+    "panda_70m": {
+      "repository": "https://github.com/snap-research/Panda-70M",
+      "commit": "9afd40bc95a0b9ced71513ef9076661a205a1873"
+    },
+    "hd_vila_100m": {
+      "repository": "https://github.com/microsoft/XPretrain",
+      "commit": "902d083e18e753ada0a52b15139619e18d114ecf"
+    },
+    "skyra": {
+      "repository": "https://github.com/JoeLeelyf/Skyra",
+      "commit": "51dc07cb95287a586f69172132e477b67da1bb9e"
+    },
+    "vif_cot_4k": {
+      "repository": "https://huggingface.co/datasets/JoeLeelyf/ViF-CoT-4K",
+      "revision": "c9e9b30e47e216f72c50664c43750674a79c0ded"
+    }
+  },
+  "files": {
+    "panda-LICENSE.txt": {
+      "url": "https://raw.githubusercontent.com/snap-research/Panda-70M/9afd40bc95a0b9ced71513ef9076661a205a1873/LICENSE",
+      "sha256": "229b1fe79312a8734cb1c7025cb2d2e6ba036c154df37c8f18513aebdbaa7e83"
+    },
+    "panda-README.md": {
+      "url": "https://raw.githubusercontent.com/snap-research/Panda-70M/9afd40bc95a0b9ced71513ef9076661a205a1873/README.md",
+      "sha256": "1dfc8e5d881ab3dc937495317290725497d65193e179a8b4c9b1b4a101e3cc9f"
+    },
+    "panda-dataset-dataloading-README.md": {
+      "url": "https://raw.githubusercontent.com/snap-research/Panda-70M/9afd40bc95a0b9ced71513ef9076661a205a1873/dataset_dataloading/README.md",
+      "sha256": "f15b17038d059bd230a43710da87f4f54dc7471e9b2c311c72e06fe5c2a7e8c5"
+    },
+    "hd-vila-LICENSE.txt": {
+      "url": "https://raw.githubusercontent.com/microsoft/XPretrain/902d083e18e753ada0a52b15139619e18d114ecf/hd-vila-100m/LICENSE",
+      "sha256": "20382f4cd48c3dcd01edadc1ba73c854167021eecaa3677f640514aca1fda67c"
+    },
+    "hd-vila-README.md": {
+      "url": "https://raw.githubusercontent.com/microsoft/XPretrain/902d083e18e753ada0a52b15139619e18d114ecf/hd-vila-100m/README.md",
+      "sha256": "f25682a3ff2c3e1f1ef0a029fc616044898947bdc1a66de5d66dffd567c89e39"
+    },
+    "skyra-README.md": {
+      "url": "https://raw.githubusercontent.com/JoeLeelyf/Skyra/51dc07cb95287a586f69172132e477b67da1bb9e/README.md",
+      "sha256": "1ec2b794c3c6bf3a90edfd2f1c4cde32b0645357421aa40299be82422dba630b"
+    }
+  },
+  "archive": {
+    "name": "source_videos.zip",
+    "url": "https://huggingface.co/datasets/JoeLeelyf/ViF-CoT-4K/resolve/c9e9b30e47e216f72c50664c43750674a79c0ded/source_videos.zip",
+    "declared_lfs_sha256": "6f47fc9935c6545c7c237a6d15ef8c0e7e26a6826160bb54a6f2f5e83d2c6fae",
+    "declared_size_bytes": 1294907616,
+    "metadata_member": "source_videos/normalized.json",
+    "metadata_sha256": "33218338a98e23925beeed70ea0bbcd025eb625cf981b767ba6560509a4d7e11"
+  },
+  "allowed_scope": {
+    "panda_hd_vila": "local_noncommercial_computational_research_only",
+    "media_redistribution": false,
+    "commercial_use": false,
+    "competition_use": "unconfirmed",
+    "retain_origin_id_and_attribution": true,
+    "trained_weights": "Results under the HD-VILA R-UDA only within its non-commercial research restriction; not automatically approved for competition use."
+  },
+  "source_groups": {
+    "Panda-70M": {
+      "pair_count": 2306,
+      "status": "allowed_under_local_research_scope",
+      "reason": "Panda directs users to the HD-VILA R-UDA; that R-UDA permits non-commercial computational research while restricting commercial use."
+    },
+    "kinetics": {
+      "pair_count": 1196,
+      "status": "media_training_excluded",
+      "reason": "The original Kinetics release identified clips by YouTube IDs/times; current source media lacks a per-item exception to YouTube content restrictions."
+    }
+  },
+  "grouping_contract": {
+    "panda_official_metadata": "Panda's downloader contract uses URL and timestamp columns, and states that three clips are sampled from each source video.",
+    "vif_normalized_json": "Provides video_id and paired paths, but not the Panda URL or timestamp fields.",
+    "required_group_key": "Preserve ViF video_id. Do not infer an original YouTube recording ID from filename substrings; obtain the matching Panda URL/timestamp record before grouping separate ViF IDs as one recording."
+  },
+  "project_exploratory_policy": {
+    "known_relations": "Preserve author video_id, real/fake parent pairing and generator; close identical SHA and confirmed near-duplicate relations.",
+    "suspected_relation": "The first 11 characters of the observed Panda clip naming shape may be used only as suspected_filename_component:v1, a conservative split constraint. This does not establish a YouTube ID or original-recording identity.",
+    "unknown_fields": [
+      "group_id",
+      "identity_id",
+      "original_id"
+    ],
+    "constraint_field": "derivation_group_id; record rule, members and evidence in a sidecar",
+    "competition_approved": false,
+    "scope": "Exploratory local noncommercial research only; report origin-mapping and source-holdout gaps."
+  },
+  "limitations": [
+    "Skyra's CC BY 4.0 statement is a project release statement and expressly requires compliance with Kinetics-400, Panda-70M and HD-VILA-100M source terms.",
+    "The HD-VILA R-UDA disclaims a representation or warranty that the provider has rights in the data.",
+    "This record is a research-use and provenance decision, not legal advice or a competition external-data approval."
+  ]
+}
