@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
+from decision.aigc_overall import attach_general_aigc
 from progress_events import AUTO_PERCENT, ProgressEventWriter
 from reporting.report_builder import generate_task_reports
 from video_pipeline.aggregate import (
@@ -1199,6 +1200,195 @@ def _run_deepfake_module(
     )
 
 
+def _mapping_get(value: Any, key: str) -> Any:
+    return value.get(key) if isinstance(value, Mapping) else None
+
+
+def _general_aigc_failure(input_path: Path, runtime: float, message: str) -> dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "module": "general_aigc",
+        "status": "error",
+        "input_file": input_path.name,
+        "score": None,
+        "logit": None,
+        "band": None,
+        "band_label": None,
+        "runtime_seconds": max(0.0, float(runtime)),
+        "warnings": [],
+        "limitations": [],
+        "error_message": message,
+    }
+
+
+def _run_general_aigc(
+    *,
+    section: Mapping[str, Any],
+    config_path: Path,
+    input_path: Path,
+    output_path: Path,
+    logs_dir: Path,
+    progress: _ProgressReporter,
+    services: Any,
+) -> dict[str, Any]:
+    """常驻服务优先，不可用时起隔离子进程；任何失败都收成结果，不打断鉴伪模块。"""
+
+    started = time.perf_counter()
+    try:
+        timeout = float(section.get("timeout_seconds", 300))
+        if not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError(f"timeout_seconds 无效：{timeout}")
+    except (TypeError, ValueError) as exc:
+        return _general_aigc_failure(input_path, 0.0, f"general_aigc 配置无效：{exc}")
+    deadline = time.monotonic() + timeout
+    progress.emit(
+        "general_aigc_started",
+        "正在运行通用 AIGC 检测分支。",
+        "deepfake",
+        status="running",
+        progress_percent=None,
+        details={"input": input_path.name},
+    )
+
+    def finish(payload: dict[str, Any], mode: str, fallback: str | None = None) -> dict[str, Any]:
+        payload.setdefault("runtime", {})
+        payload["runtime"]["execution_mode"] = mode
+        if fallback:
+            payload["runtime"]["fallback_reason"] = fallback
+        _write_json(output_path, payload)
+        progress.emit(
+            "general_aigc_finished",
+            (
+                f"通用 AIGC 分支完成：{payload.get('band_label')}"
+                if payload.get("status") == "success"
+                else f"通用 AIGC 分支失败：{payload.get('error_message')}"
+            ),
+            "deepfake",
+            status="running" if payload.get("status") == "success" else "warning",
+            progress_percent=None,
+            details={"logit": payload.get("logit"), "band": payload.get("band")},
+        )
+        return payload
+
+    service_error: str | None = None
+    method = _service_method(services, "run_general_aigc")
+    if method is not None:
+        try:
+            remaining = _remaining_timeout(deadline, module="general_aigc")
+            payload = _invoke_service(
+                method,
+                kwargs={"input_path": input_path, "output_path": output_path, "timeout": remaining},
+                timeout=remaining,
+            )
+            if not isinstance(payload, dict) or "status" not in payload:
+                raise ValueError("通用 AIGC 服务返回格式无效")
+            return finish(payload, "service")
+        except Exception as exc:
+            service_error = f"{type(exc).__name__}: {exc}"
+            progress.emit(
+                "general_aigc_service_fallback",
+                "通用 AIGC 常驻服务不可用，切换隔离子进程……",
+                "deepfake",
+                status="warning",
+                progress_percent=None,
+                details={"fallback_reason": service_error},
+            )
+
+    stdout = stderr = ""
+    try:
+        python_path = resolve_path(section["python"], config_path)
+        runner_path = resolve_path(section["runner"], config_path)
+        if not python_path.is_file():
+            raise FileNotFoundError(f"引擎 Python 不存在：{python_path}")
+        if not runner_path.is_file():
+            raise FileNotFoundError(f"runner 不存在：{runner_path}")
+        python_args = section.get("python_args", ["-B"])
+        command = [
+            str(python_path),
+            *[str(item) for item in python_args],
+            str(runner_path),
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--device",
+            str(section.get("device", "auto")),
+        ]
+        if section.get("model_package"):
+            command += ["--model-package", str(resolve_path(section["model_package"], config_path))]
+        completed = _run_subprocess(
+            command,
+            cwd=runner_path.parent,
+            timeout=_remaining_timeout(deadline, module="general_aigc"),
+            hide_console=bool(section.get("hide_console", True)),
+            executable_worker=False,
+            extra_environment={"PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"},
+        )
+        stdout, stderr = completed.stdout, completed.stderr
+        payload = json.loads(output_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict) or "status" not in payload:
+            raise ValueError("通用 AIGC 结果格式无效")
+    except subprocess.TimeoutExpired as exc:
+        stdout, stderr = str(exc.stdout or ""), str(exc.stderr or "")
+        payload = _general_aigc_failure(
+            input_path, time.perf_counter() - started, f"通用 AIGC 分支超时（预算 {timeout:g} 秒）"
+        )
+    except (KeyError, OSError, TimeoutError, ValueError) as exc:
+        payload = _general_aigc_failure(
+            input_path, time.perf_counter() - started, f"通用 AIGC 分支无法运行：{exc}"
+        )
+    _write_text(logs_dir / "general_aigc_stdout.log", stdout)
+    _write_text(logs_dir / "general_aigc_stderr.log", stderr)
+    return finish(payload, "subprocess", service_error)
+
+
+def _run_file_provenance(
+    *,
+    section: Any,
+    config_path: Path,
+    input_path: Path,
+    output_path: Path,
+    display_name: str,
+    progress: _ProgressReporter,
+) -> dict[str, Any] | None:
+    """解析文件自带的 AI 标识和元数据：不跑模型、很快，所有任务都做；失败不影响其他模块。"""
+
+    if not isinstance(section, Mapping) or section.get("enabled") is False:
+        return None
+    try:
+        from modules.provenance.parser import analyze_file
+
+        ffprobe = section.get("ffprobe")
+        payload = analyze_file(
+            input_path,
+            ffprobe=str(resolve_path(ffprobe, config_path)) if ffprobe else None,
+            timeout_seconds=float(section.get("timeout_seconds", 20)),
+        )
+        payload["input_file"] = display_name
+    except Exception as exc:  # noqa: BLE001 - 这一步只是附加线索，不能打断任务
+        payload = {
+            "schema_version": "1.0",
+            "module": "provenance",
+            "status": "error",
+            "error_message": f"文件标识解析失败：{type(exc).__name__}: {exc}",
+            "input_file": display_name,
+            "verdict": None,
+        }
+    _write_json(output_path, payload)
+    progress.emit(
+        "file_provenance_finished",
+        (
+            f"文件标识解析完成：{payload.get('verdict_label')}"
+            if payload.get("status") == "success"
+            else str(payload.get("error_message"))
+        ),
+        status="running" if payload.get("status") == "success" else "warning",
+        progress_percent=None,
+        details={"verdict": payload.get("verdict")},
+    )
+    return payload
+
+
 def _run_search_module(
     *,
     name: str,
@@ -2157,6 +2347,17 @@ def run_task(
     results: dict[str, dict[str, Any]] = {}
     metadata: dict[str, dict[str, Any]] = {}
     selected_completed = 0
+    general_aigc_section = config.get("general_aigc")
+    general_aigc_output = task_dir / "general_aigc_result.json"
+    file_provenance_output = task_dir / "file_provenance_result.json"
+    file_provenance = _run_file_provenance(
+        section=config.get("provenance"),
+        config_path=resolved_config,
+        input_path=video_path if video_path is not None else query_path,
+        output_path=file_provenance_output,
+        display_name=str(input_status["original_file_name"]),
+        progress=progress,
+    )
 
     video_selection: dict[str, Any] | None = None
     video_section: Mapping[str, Any] = (
@@ -2369,6 +2570,31 @@ def run_task(
                 logs_dir=logs_dir,
                 exc=exc,
             )
+        if (
+            name == "deepfake"
+            and isinstance(general_aigc_section, Mapping)
+            and general_aigc_section.get("enabled") is not False
+        ):
+            general_payload = _run_general_aigc(
+                section=general_aigc_section,
+                config_path=resolved_config,
+                input_path=video_path if video_path is not None else query_path,
+                output_path=general_aigc_output,
+                logs_dir=logs_dir,
+                progress=progress,
+                services=services,
+            )
+            results[name] = attach_general_aigc(results[name], general_payload)
+            _write_json(output_paths[name], results[name])
+            metadata[name]["status"] = results[name]["status"]
+            metadata[name]["error"] = results[name].get("error_message")
+            metadata[name]["general_aigc"] = {
+                "status": general_payload.get("status"),
+                "runtime_seconds": general_payload.get("runtime_seconds"),
+                "execution_mode": _mapping_get(general_payload.get("runtime"), "execution_mode"),
+            }
+            if isinstance(general_payload.get("runtime_seconds"), (int, float)):
+                metadata[name]["runtime_seconds"] += float(general_payload["runtime_seconds"])
         module_status = str(results[name].get("status") or "error")
         progress.emit(
             f"{name}_finished",
@@ -2464,6 +2690,16 @@ def run_task(
         "errors": errors,
     }
 
+    if file_provenance is not None:
+        provenance_reference = {
+            "status": file_provenance.get("status"),
+            "verdict": file_provenance.get("verdict"),
+            "verdict_label": file_provenance.get("verdict_label"),
+            "result_file": file_provenance_output.name,
+        }
+        unified["file_provenance"] = provenance_reference
+        task_status["file_provenance"] = provenance_reference
+
     video_summary: dict[str, Any] | None = None
     if video_selection is not None:
         video_summary = build_video_summary(
@@ -2486,6 +2722,14 @@ def run_task(
             ],
         }
     extra_artifacts: list[tuple[str, str, str, str]] = []
+    if file_provenance is not None:
+        extra_artifacts.append(
+            (file_provenance_output.name, "overall", "file_provenance", "文件标识与元数据解析结果")
+        )
+    if general_aigc_output.is_file():
+        extra_artifacts.append(
+            (general_aigc_output.name, "deepfake", "general_aigc_result", "通用 AIGC 分支结果")
+        )
     if video_path is not None:
         extra_artifacts.append(
             (video_path.name, "overall", "query_video", "本次任务固化的查询视频")

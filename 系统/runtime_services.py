@@ -26,6 +26,8 @@ import uuid
 
 
 PROTOCOL_NAME = "face-source-trace-runtime-v1"
+# 按此顺序逐个启动：通用 AIGC 模型加载最慢，排最后，不拖住其他模块就绪。
+WORKER_NAMES = ("deepfake", "identity", "general_aigc")
 
 
 class RuntimeServiceError(RuntimeError):
@@ -632,6 +634,10 @@ class RuntimeServiceManager:
     def _worker_spec(self, name: str) -> tuple[list[str], Path, dict[str, str], float] | None:
         section = self._config.get(name)
         if not isinstance(section, dict):
+            if name == "general_aigc":
+                # 这个分支可选：配置里没有就按关闭处理，不影响其他模块的就绪状态。
+                self._static_status[name] = self._status_record("disabled")
+                return None
             self._static_status[name] = self._status_record(
                 "unavailable", error=f"配置缺少 {name} 节"
             )
@@ -687,7 +693,10 @@ class RuntimeServiceManager:
             default_worker = (
                 self.config_path.parent
                 / "modules"
-                / ("deepfake_detection" if name == "deepfake" else "identity_search")
+                / {
+                    "deepfake": "deepfake_detection",
+                    "general_aigc": "general_aigc",
+                }.get(name, "identity_search")
                 / "persistent_worker.py"
             )
             worker_value = section.get("persistent_worker", default_worker)
@@ -722,6 +731,8 @@ class RuntimeServiceManager:
             command.extend(str(item) for item in explicit)
         elif name == "deepfake":
             command.extend(self._deepfake_worker_args(section, runtime))
+        elif name == "general_aigc":
+            command.extend(self._general_aigc_worker_args(section))
         else:
             command.extend(self._identity_worker_args(section, runtime))
 
@@ -790,6 +801,14 @@ class RuntimeServiceManager:
             args.append("--no-preload")
         return args
 
+    def _general_aigc_worker_args(self, section: Mapping[str, Any]) -> list[str]:
+        args = ["--device", str(section.get("device", "auto"))]
+        if section.get("model_package"):
+            args.extend(
+                ["--model-package", str(_resolve_path(section["model_package"], self.config_path))]
+            )
+        return args
+
     def _identity_worker_args(
         self, section: Mapping[str, Any], runtime: Mapping[str, Any]
     ) -> list[str]:
@@ -849,7 +868,7 @@ class RuntimeServiceManager:
                 return self.get_status()
             self._started = True
 
-        for name in ("deepfake", "identity"):
+        for name in WORKER_NAMES:
             try:
                 spec = self._worker_spec(name)
                 if spec is None:
@@ -904,7 +923,7 @@ class RuntimeServiceManager:
 
         with self._lock:
             statuses: dict[str, dict[str, Any]] = {}
-            for name in ("deepfake", "identity"):
+            for name in WORKER_NAMES:
                 channel = self._channels.get(name)
                 if channel is not None:
                     statuses[name] = channel.snapshot()
@@ -984,6 +1003,37 @@ class RuntimeServiceManager:
             timeout,
         )
         return self._payload_from_response("deepfake", response)
+
+    def _wait_until_started(self, name: str, deadline: float) -> None:
+        """模型还在加载时等它就绪，避免再起一个进程重复加载同一份权重。"""
+
+        while time.monotonic() < deadline:
+            with self._lock:
+                if not self._started or self._closed or name in self._static_status:
+                    return
+                channel = self._channels.get(name)
+            if channel is not None and channel.snapshot().get("state") != "starting":
+                return
+            time.sleep(0.2)
+
+    def run_general_aigc(
+        self,
+        input_path: str | Path,
+        output_path: str | Path,
+        timeout: float,
+    ) -> dict[str, Any]:
+        deadline = time.monotonic() + float(timeout)
+        self._wait_until_started("general_aigc", deadline)
+        channel = self._channel_for("general_aigc")
+        response = channel.request(
+            "run",
+            {
+                "input_path": str(Path(input_path).expanduser().resolve(strict=False)),
+                "output_path": str(Path(output_path).expanduser().resolve(strict=False)),
+            },
+            timeout,
+        )
+        return self._payload_from_response("general_aigc", response)
 
     def run_identity(
         self,

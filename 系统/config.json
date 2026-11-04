@@ -125,6 +125,24 @@
       "reason": "当前版本没有经独立验证的决策边界带，仅显示实际阈值差值。"
     }
   },
+  "general_aigc": {
+    "enabled": true,
+    "persistent_enabled": true,
+    "python": "{APP_ROOT}\\engine_runtime\\python.exe",
+    "python_args": ["-B"],
+    "runner": "{APP_ROOT}\\modules\\general_aigc\\run_general_aigc.py",
+    "persistent_worker": "{APP_ROOT}\\modules\\general_aigc\\persistent_worker.py",
+    "model_package": "{APP_ROOT}\\models\\video-c38-refit3-cf384",
+    "device": "auto",
+    "timeout_seconds": 300,
+    "startup_timeout_seconds": 600,
+    "kernel_note": "通用 AIGC 分支：C38 原头与 3 个重训头取均值后按 0.8/0.2 与 CommunityForensics 融合。图片按一帧视频处理，视频整段抽 10 帧 × 5 裁剪和 4 帧。"
+  },
+  "provenance": {
+    "enabled": true,
+    "ffprobe": "{APP_ROOT}\\ffmpeg\\ffprobe.exe",
+    "timeout_seconds": 20
+  },
   "identity": {
     "persistent_enabled": true,
     "python": "{CURRENT_PYTHON}",
