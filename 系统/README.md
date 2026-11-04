@@ -63,7 +63,7 @@
 ```bash
 cd 系统
 python_runtime/python.exe -B -m pytest tests frontend/tests -q -p no:cacheprovider
-engine_runtime/python.exe -B -m pytest engine/tests -q -p no:cacheprovider
+engine_runtime/python.exe -B tools/run_engine_tests.py
 python_runtime/python.exe -B -X utf8 tools/self_check.py
 ```
 

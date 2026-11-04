@@ -271,6 +271,48 @@ def blind_splits(folder: Path, kind: str, output: str, notes: dict[str, str], us
     target.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in slim), encoding="utf-8", newline="\n")
 
 
+def face_blind() -> None:
+    """换脸盲测：原始文件是主结果，统一编码副本是对照，两个都报告。"""
+    folder = DATA / "face_blind"
+    report: dict[str, Any] = {
+        "note": "模型、公式和边界都没有动，只跑一次。人物身份分组不完整，是带限制的补充盲测。",
+        "thresholds": {
+            "general": {k: CALIBRATION["image"][k] for k in ("low_max", "medium_max")},
+            "face": {k: CALIBRATION["face_crop"][k] for k in ("low_max", "medium_max")},
+        },
+    }
+    slim: list[dict[str, Any]] = []
+    for view, note in (("raw", "原始文件（主结果）"), ("normalized", "统一成 512×512、JPEG q95（对照）")):
+        scores_path = folder / f"{view}.scores.jsonl"
+        features_path = folder / f"features_{view}.npz"
+        if not (scores_path.is_file() and features_path.is_file()):
+            return
+        rows = _jsonl(scores_path)
+        faces = face_scores(features_path)
+        for row in rows:
+            row["face"] = faces.get(row["sample_id"])
+            row["whole_band"] = whole_image_band(row.get("community_logit"))
+            slim.append(
+                {
+                    key: row.get(key)
+                    for key in ("sample_id", "label", "source", "generator", "transform", "group_id", "logit", "community_logit", "face")
+                }
+            )
+        section: dict[str, Any] = {"note": note, "all": summarize_group(rows, "logit", CALIBRATION["image"])}
+        by_method = {}
+        for method in sorted({row["generator"] for row in rows if int(row["label"]) == 1}):
+            fakes = [row for row in rows if row["generator"] == method]
+            sources = {row["source"] for row in fakes}
+            # 真实图只取同一来源的，不同来源的真实图内容差别太大。
+            subset = fakes + [row for row in rows if int(row["label"]) == 0 and row["source"] in sources]
+            by_method[method] = summarize_group(subset, "logit", CALIBRATION["image"])
+        section["by_method"] = by_method
+        report[view] = section
+    write("换脸盲测-20261104/summary.json", report)
+    target = OUT / "换脸盲测-20261104" / "scores.jsonl"
+    target.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in slim), encoding="utf-8", newline="\n")
+
+
 def source_search() -> None:
     path = DATA / "source_eval" / "results.reduced.jsonl"
     if not path.is_file():
@@ -422,6 +464,7 @@ def main() -> int:
         },
         use_whole_image=False,
     )
+    face_blind()
     source_search()
     if (OUT / "视频盲测-20261104/summary.json").is_file():
         figure_specs()

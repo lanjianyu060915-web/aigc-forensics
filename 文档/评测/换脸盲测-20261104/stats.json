@@ -1,0 +1,308 @@
+{
+  "time_utc": "2026-11-04T11:45:07.065971+00:00",
+  "seed": 20261104,
+  "original_count": 300,
+  "normalized_count": 300,
+  "identity_grouping_complete": false,
+  "identity_grouping_scope": "Published same-original associations and conservative filename-prefix groups only; source, original id and filename fields are not verified complete target/donor person identities.",
+  "independent_copy_policy": "Normalized files are paired derivatives, not additional independent samples; raw count is not a claim of person-level independence.",
+  "raw": {
+    "count": 300,
+    "labels": {
+      "0": 150,
+      "1": 150
+    },
+    "sources": {
+      "DGM4": 200,
+      "OpenRL_DeepFakeFace": 100
+    },
+    "methods": {
+      "real": 150,
+      "SimSwap": 50,
+      "InsightFace": 50,
+      "InfoSwap": 50
+    },
+    "groups": 150,
+    "by_label": {
+      "0": {
+        "count": 150,
+        "formats": {
+          "JPEG": 148,
+          "PNG": 2
+        },
+        "resolutions": {
+          "976x549": 27,
+          "440x587": 2,
+          "976x650": 1,
+          "440x440": 1,
+          "297x374": 1,
+          "426x256": 28,
+          "600x608": 1,
+          "440x623": 1,
+          "440x547": 1,
+          "624x351": 33,
+          "440x634": 1,
+          "440x635": 1,
+          "400x743": 1,
+          "300x382": 1,
+          "464x261": 4,
+          "259x494": 1,
+          "440x629": 1,
+          "976x976": 1,
+          "400x560": 1,
+          "440x618": 1,
+          "440x293": 3,
+          "375x408": 1,
+          "540x577": 1,
+          "440x599": 1,
+          "440x621": 1,
+          "384x256": 2,
+          "440x1026": 1,
+          "440x551": 1,
+          "500x533": 1,
+          "276x335": 1,
+          "3400x2319": 1,
+          "440x586": 1,
+          "940x529": 1,
+          "400x573": 1,
+          "480x343": 1,
+          "440x633": 1,
+          "640x360": 2,
+          "440x558": 1,
+          "400x353": 1,
+          "440x808": 1,
+          "500x333": 1,
+          "440x292": 1,
+          "318x500": 1,
+          "440x661": 1,
+          "440x660": 1,
+          "440x294": 1,
+          "400x523": 1,
+          "440x593": 1,
+          "440x539": 1,
+          "440x383": 1,
+          "440x485": 1,
+          "520x347": 1,
+          "440x929": 1,
+          "300x443": 1,
+          "440x291": 1,
+          "349x753": 1,
+          "440x548": 1
+        },
+        "numeric": {
+          "width": {
+            "count": 150,
+            "min": 259,
+            "max": 3400,
+            "median": 464.0,
+            "mean": 602.1466666666666
+          },
+          "height": {
+            "count": 150,
+            "min": 256,
+            "max": 2319,
+            "median": 351.0,
+            "mean": 444.94666666666666
+          },
+          "file_size": {
+            "count": 150,
+            "min": 16542,
+            "max": 1891922,
+            "median": 55687.5,
+            "mean": 94602.92666666667
+          }
+        }
+      },
+      "1": {
+        "count": 150,
+        "formats": {
+          "JPEG": 150
+        },
+        "resolutions": {
+          "976x549": 27,
+          "426x256": 28,
+          "512x512": 50,
+          "624x351": 33,
+          "640x360": 2,
+          "464x261": 4,
+          "3400x2319": 1,
+          "384x256": 2,
+          "976x650": 1,
+          "976x976": 1,
+          "940x529": 1
+        },
+        "numeric": {
+          "width": {
+            "count": 150,
+            "min": 384,
+            "max": 3400,
+            "median": 512.0,
+            "mean": 631.12
+          },
+          "height": {
+            "count": 150,
+            "min": 256,
+            "max": 2319,
+            "median": 512.0,
+            "mean": 439.49333333333334
+          },
+          "file_size": {
+            "count": 150,
+            "min": 21389,
+            "max": 1492618,
+            "median": 43754.5,
+            "mean": 79773.90666666666
+          }
+        }
+      }
+    },
+    "source_method_label": [
+      {
+        "source": "DGM4",
+        "generator": "InfoSwap",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "DGM4",
+        "generator": "SimSwap",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "DGM4",
+        "generator": "real",
+        "label": 0,
+        "count": 100
+      },
+      {
+        "source": "OpenRL_DeepFakeFace",
+        "generator": "InsightFace",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "OpenRL_DeepFakeFace",
+        "generator": "real",
+        "label": 0,
+        "count": 50
+      }
+    ]
+  },
+  "normalized": {
+    "count": 300,
+    "labels": {
+      "0": 150,
+      "1": 150
+    },
+    "sources": {
+      "DGM4": 200,
+      "OpenRL_DeepFakeFace": 100
+    },
+    "methods": {
+      "real": 150,
+      "SimSwap": 50,
+      "InsightFace": 50,
+      "InfoSwap": 50
+    },
+    "groups": 150,
+    "by_label": {
+      "0": {
+        "count": 150,
+        "formats": {
+          "JPEG": 150
+        },
+        "resolutions": {
+          "512x512": 150
+        },
+        "numeric": {
+          "width": {
+            "count": 150,
+            "min": 512,
+            "max": 512,
+            "median": 512.0,
+            "mean": 512
+          },
+          "height": {
+            "count": 150,
+            "min": 512,
+            "max": 512,
+            "median": 512.0,
+            "mean": 512
+          },
+          "file_size": {
+            "count": 150,
+            "min": 40122,
+            "max": 164364,
+            "median": 71602.0,
+            "mean": 78282.77333333333
+          }
+        }
+      },
+      "1": {
+        "count": 150,
+        "formats": {
+          "JPEG": 150
+        },
+        "resolutions": {
+          "512x512": 150
+        },
+        "numeric": {
+          "width": {
+            "count": 150,
+            "min": 512,
+            "max": 512,
+            "median": 512.0,
+            "mean": 512
+          },
+          "height": {
+            "count": 150,
+            "min": 512,
+            "max": 512,
+            "median": 512.0,
+            "mean": 512
+          },
+          "file_size": {
+            "count": 150,
+            "min": 34345,
+            "max": 152183,
+            "median": 67919.5,
+            "mean": 73119.58
+          }
+        }
+      }
+    },
+    "source_method_label": [
+      {
+        "source": "DGM4",
+        "generator": "InfoSwap",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "DGM4",
+        "generator": "SimSwap",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "DGM4",
+        "generator": "real",
+        "label": 0,
+        "count": 100
+      },
+      {
+        "source": "OpenRL_DeepFakeFace",
+        "generator": "InsightFace",
+        "label": 1,
+        "count": 50
+      },
+      {
+        "source": "OpenRL_DeepFakeFace",
+        "generator": "real",
+        "label": 0,
+        "count": 50
+      }
+    ]
+  }
+}

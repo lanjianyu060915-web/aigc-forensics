@@ -55,3 +55,25 @@ def test_powershell_scripts_parse(name: str) -> None:
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
 
+
+def test_setup_script_finds_its_own_directory_when_started_with_file() -> None:
+    # 搭建环境.bat 就是这样启动的。无效组件会在开始下载之前报错，走不到这一步说明默认路径取不到。
+    powershell = shutil.which("powershell.exe")
+    if powershell is None:
+        pytest.skip("没有 PowerShell")
+    completed = subprocess.run(
+        [
+            powershell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+            str(ROOT / "tools" / "setup_runtime.ps1"), "-Components", "nothing",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+        timeout=60,
+    )
+    output = completed.stdout + completed.stderr
+    assert "Split-Path" not in output, output
+    assert "nothing" in output, output
+    assert completed.returncode != 0
+

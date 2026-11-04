@@ -1,12 +1,15 @@
 ﻿[CmdletBinding()]
 param(
-    [string]$Root = (Split-Path -Parent $PSScriptRoot),
+    [string]$Root,
     [ValidateSet('cu128', 'cpu')][string]$EngineBackend,
     [string[]]$Components = @('app', 'vit', 'engine', 'ffmpeg', 'frozen'),
     [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
+# 用 -File 启动时，参数默认值里的 $PSScriptRoot 是空的，所以在这里取。
+$ToolsDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-not $Root) { $Root = Split-Path -Parent $ToolsDir }
 $exitCode = 1
 $bootstrap = $null
 $oldOutputEncoding = $OutputEncoding
@@ -51,7 +54,7 @@ try {
         Write-Host '[引导] 未找到 Python 3.12+，使用 Windows HTTPS 引导固定 Python；正常下载由 Python 完成。'
         $bootstrap = Join-Path $Root ('.bootstrap-' + [Guid]::NewGuid().ToString('N').Substring(0,8))
         [System.IO.Directory]::CreateDirectory($bootstrap) | Out-Null
-        $manifestPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'requirements\runtime-sources.json'
+        $manifestPath = Join-Path (Split-Path -Parent $ToolsDir) 'requirements\runtime-sources.json'
         $source = (Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json).python
         $archive = Join-Path $bootstrap 'python.nupkg'
         $cacheDirectory = Join-Path $Root '.runtime-cache'
@@ -78,7 +81,7 @@ try {
         $python = Join-Path $bootstrap 'expanded\tools\python.exe'
     }
     Write-Host "[引导] 下载与构建助手：$python（不会改动该环境）"
-    $arguments = @('-I', '-B', (Join-Path $PSScriptRoot 'runtime_builder.py'), '--root', $Root, '--components', ($selected -join ','))
+    $arguments = @('-I', '-B', (Join-Path $ToolsDir 'runtime_builder.py'), '--root', $Root, '--components', ($selected -join ','))
     if ($EngineBackend) { $arguments += @('--engine-backend', $EngineBackend) }
     if ($Force) { $arguments += '--force' }
     & $python @arguments
