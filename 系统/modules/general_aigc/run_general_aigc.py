@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
@@ -14,6 +15,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", required=True)
     parser.add_argument("--model-package", default=None)
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
+    parser.add_argument("--face-crops-json", default=None, help="人脸裁剪图路径列表（JSON 文件）")
     return parser
 
 
@@ -42,7 +44,10 @@ def main() -> int:
         )
         print(f"通用 AIGC 模型加载失败：{exc}", file=sys.stderr)
         return 2
-    payload = runtime.run(args.input, output)
+    face_crops = None
+    if args.face_crops_json:
+        face_crops = json.loads(Path(args.face_crops_json).read_text(encoding="utf-8"))
+    payload = runtime.run(args.input, output, face_crops)
     return 0 if payload.get("status") == "success" else 1
 
 

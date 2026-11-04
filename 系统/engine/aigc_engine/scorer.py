@@ -27,12 +27,17 @@ from .media import (
     _pil_resize_crop,
     _run_output,
     decode_video,
+    decode_video_by_seek,
+    probe_duration,
 )
 from .models import ClipCommunityFusionClassifier, load_checkpoint
 
 
 IMAGE_MAX_PIXELS = 40_000_000
 VIDEO_TIMEOUT_SECONDS = 180.0
+# 超过这个时长改为按时间点取帧：完整解码要把全片过一遍，长视频会超时。短片保持原路径，分数不变。
+SEEK_AFTER_SECONDS = 90.0
+SEEK_MAX_DURATION_SECONDS = 4 * 3600.0
 DEFAULT_FRAME_BATCH_SIZE = 16
 
 
@@ -194,6 +199,30 @@ class GeneralAigcScorer:
             return str(torch.cuda.get_device_name(self.device))
         return "CPU"
 
+    @torch.inference_mode()
+    def score_face_crops(self, paths: list[str | Path]) -> list[float]:
+        """人脸裁剪图直接缩放到 384，过 CommunityForensics，返回每张的 logit。"""
+        from PIL import Image  # noqa: PLC0415
+
+        preprocessing = self.model.community.preprocessing
+        _, height, width = preprocessing["input_size"]
+        logits: list[float] = []
+        for start in range(0, len(paths), self.frame_batch_size):
+            pictures = []
+            for path in paths[start : start + self.frame_batch_size]:
+                with Image.open(path) as image:
+                    pictures.append(
+                        np.asarray(
+                            image.convert("RGB").resize(
+                                (width, height), resample=Image.Resampling.BILINEAR
+                            ),
+                            dtype=np.uint8,
+                        )
+                    )
+            tensor = normalize_rgb(np.stack(pictures), preprocessing).to(self.device)
+            logits.extend(float(value) for value in self.model.community.backbone(tensor)[:, -1].float().cpu())
+        return logits
+
     def score_image(self, path: str | Path) -> ScoreResult:
         started = time.perf_counter()
         rgb, warnings = load_image_rgb(Path(path))
@@ -226,6 +255,31 @@ class GeneralAigcScorer:
         source = Path(path)
         stream = select_video_stream(source)
         warnings: list[str] = []
+        length = probe_duration(source, replace(self.clip_view, stream_index=stream))
+        if length > SEEK_AFTER_SECONDS:
+            clip_video = decode_video_by_seek(
+                source,
+                replace(self.clip_view, stream_index=stream, max_duration_seconds=SEEK_MAX_DURATION_SECONDS),
+            )
+            community_video = decode_video_by_seek(
+                source,
+                replace(self.community_view, stream_index=stream, max_duration_seconds=SEEK_MAX_DURATION_SECONDS),
+            )
+            warnings.append(f"视频时长 {length:.0f} 秒，按均匀时间点取帧检测。")
+            return self._score(
+                kind="video",
+                clip_rgb=clip_video.frames,
+                community_rgb=community_video.frames,
+                crops=self.clip_view.native_crops,
+                frame_timestamps=clip_video.timestamps_seconds,
+                community_timestamps=community_video.timestamps_seconds,
+                width=clip_video.display_width or clip_video.original_width,
+                height=clip_video.display_height or clip_video.original_height,
+                duration=clip_video.original_duration_seconds,
+                decode_mode="seek",
+                decode_seconds=time.perf_counter() - started,
+                warnings=warnings,
+            )
         try:
             clip_video = decode_video(source, replace(self.clip_view, stream_index=stream))
             community_video = decode_video(

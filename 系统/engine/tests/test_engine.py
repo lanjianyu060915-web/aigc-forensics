@@ -25,6 +25,7 @@ from aigc_engine.media import (  # noqa: E402
     _pil_resize_crop,
     _tolerant_timestamps,
     decode_video,
+    decode_video_by_seek,
 )
 from aigc_engine.media_tools import media_tool  # noqa: E402
 from aigc_engine.metrics import UndefinedMetricError, evaluate_binary  # noqa: E402
@@ -231,6 +232,24 @@ def video_file(tmp_path_factory) -> Path:
     return path
 
 
+def test_face_crop_scoring_resizes_any_size_and_keeps_order(
+    scorer: GeneralAigcScorer, tmp_path: Path
+) -> None:
+    from PIL import Image
+
+    paths = []
+    for index, size in enumerate(((64, 64), (130, 97), (500, 500))):
+        rng = np.random.default_rng(index)
+        path = tmp_path / f"face_{index}.jpg"
+        Image.fromarray(rng.integers(0, 255, (size[1], size[0], 3), dtype=np.uint8)).save(path)
+        paths.append(path)
+    logits = scorer.score_face_crops(paths)
+    assert len(logits) == 3
+    assert all(isinstance(value, float) for value in logits)
+    assert scorer.score_face_crops(paths[1:2])[0] == pytest.approx(logits[1], abs=1e-3)
+    assert scorer.score_face_crops([]) == []
+
+
 def test_video_scoring_path(scorer: GeneralAigcScorer, video_file: Path) -> None:
     result = scorer.score_video(video_file)
     assert result.kind == "video"
@@ -263,6 +282,25 @@ def test_tolerant_mode_can_read_a_truncated_video(tmp_path: Path, video_file: Pa
     except MediaError:
         pytest.skip("这个截断位置连容错模式也读不出，测试素材不适用")
     assert frames.shape[1:] == (8, 8, 3)
+
+
+def test_long_video_uses_seek_sampling(
+    scorer: GeneralAigcScorer, video_file: Path, monkeypatch
+) -> None:
+    import aigc_engine.scorer as scorer_module
+
+    monkeypatch.setattr(scorer_module, "SEEK_AFTER_SECONDS", 0.5)
+    result = scorer.score_video(video_file)
+    assert result.decode_mode == "seek"
+    assert len(result.frame_logits[0]) == 5
+    assert any("时间点" in text for text in result.warnings)
+    assert result.frame_timestamps[0] == 0.0
+    assert result.frame_timestamps[-1] > result.frame_timestamps[0]
+
+
+def test_seek_and_full_decode_read_the_same_first_frame(video_file: Path) -> None:
+    config = VideoConfig(n_frames=2, height=8, width=8, resize_mode="native_center_crop", native_crops=5)
+    assert decode_video_by_seek(video_file, config).frames.shape == decode_video(video_file, config).frames.shape
 
 
 def test_missing_file_is_a_media_error(tmp_path: Path) -> None:

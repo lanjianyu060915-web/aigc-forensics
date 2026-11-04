@@ -58,7 +58,9 @@ def _serve(runtime: Any) -> int:
         if action != "run":
             _emit("response", request_id=request_id, ready=True, health="ok", ok=False, error=f"不支持的 action：{action!r}")
             continue
-        payload = runtime.run(message.get("input_path"), message.get("output_path"))
+        payload = runtime.run(
+            message.get("input_path"), message.get("output_path"), message.get("face_crops")
+        )
         # 单个文件解码失败是这次结果的一部分，不算服务故障，编排层按 payload 的 status 处理。
         _emit("response", request_id=request_id, ready=True, health="ok", ok=True, payload=payload)
     return 0

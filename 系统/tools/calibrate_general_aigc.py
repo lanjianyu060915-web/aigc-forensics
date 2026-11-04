@@ -51,7 +51,7 @@ def load_real_scores(paths: list[Path], group_key: str) -> dict[str, list[float]
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="计算通用 AIGC 分支的分档边界")
-    parser.add_argument("--kind", choices=("image", "video"), required=True)
+    parser.add_argument("--kind", choices=("image", "video", "face_crop"), required=True)
     parser.add_argument("--scores", type=Path, nargs="+", required=True)
     parser.add_argument("--group-key", default="source")
     parser.add_argument("--output", type=Path, required=True, help="模型包里的 calibration.json")
@@ -66,7 +66,7 @@ def main() -> int:
     medium_max = pooled_quantile(groups, 0.99)
     payload = json.loads(args.output.read_text(encoding="utf-8")) if args.output.is_file() else {}
     payload["version"] = args.version
-    payload["semantics"] = "边界是真实样本融合 logit 的 p95 和 p99，按来源等权；不是概率。"
+    payload["semantics"] = "边界是真实样本 logit 的 p95 和 p99，按来源等权；不是概率。"
     payload[args.kind] = {
         "low_max": round(low_max, 6),
         "medium_max": round(medium_max, 6),

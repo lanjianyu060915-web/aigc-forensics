@@ -17,6 +17,7 @@ from aigc_engine.media import MediaError  # noqa: E402
 from aigc_engine.scorer import GeneralAigcScorer, logit_to_score  # noqa: E402
 from general_aigc_core import (  # noqa: E402
     error_payload,
+    face_branch_payload,
     input_kind,
     load_calibration,
     success_payload,
@@ -57,7 +58,24 @@ class GeneralAigcRuntime:
             ),
         }
 
-    def run(self, input_value: Any, output_value: Any) -> dict[str, Any]:
+    def _face_branch(self, face_crops: Any) -> dict[str, Any] | None:
+        """face_crops 为 None 表示这次没有做裁脸；空列表表示做了但没有人脸。"""
+        if face_crops is None:
+            return None
+        paths = [Path(str(item)) for item in face_crops]
+        try:
+            logits = self.scorer.score_face_crops(paths) if paths else []
+        except (OSError, ValueError, RuntimeError) as exc:
+            return {
+                "status": "error",
+                "logit": None,
+                "band": None,
+                "band_label": "未完成",
+                "error_message": f"人脸分支执行失败：{exc}",
+            }
+        return face_branch_payload(logits, [path.name for path in paths], self.calibration)
+
+    def run(self, input_value: Any, output_value: Any, face_crops: Any = None) -> dict[str, Any]:
         started = time.perf_counter()
         query = Path(str(input_value)).expanduser().resolve(strict=False)
         output = Path(str(output_value)).expanduser().resolve(strict=False)
@@ -92,6 +110,9 @@ class GeneralAigcRuntime:
             payload = error_payload(
                 query, f"通用 AIGC 分支执行失败：{exc}", started=started, error_type=type(exc).__name__
             )
+        face_branch = self._face_branch(face_crops)
+        if face_branch is not None:
+            payload["face_branch"] = face_branch
         self.request_count += 1
         write_json(output, payload)
         return payload

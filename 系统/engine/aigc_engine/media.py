@@ -519,3 +519,112 @@ def decode_video(path: str | Path, config: VideoConfig | None = None) -> VideoDa
         display_height,
     )
 
+
+def probe_duration(path: str | Path, config: VideoConfig) -> float:
+    """容器记录的时长；读不出时返回 0，由调用方走完整解码。"""
+    source = _local_file(path)
+    metadata = _probe(
+        source,
+        str(config.stream_index) if config.stream_index is not None else "v:0",
+        config.timeout_seconds,
+        video_only=True,
+        tolerant=True,
+    )
+    try:
+        return _duration(metadata, float("inf"))
+    except MediaError:
+        return 0.0
+
+
+def decode_video_by_seek(path: str | Path, config: VideoConfig) -> VideoData:
+    """长视频按时间点定位取帧，不解码全片；取帧位置是均匀时间点，不做帧号对齐。"""
+    source = _local_file(path)
+    stream = str(config.stream_index) if config.stream_index is not None else "v:0"
+    metadata = _probe(source, stream, config.timeout_seconds, video_only=True, tolerant=True)
+    duration = _duration(metadata, config.max_duration_seconds)
+    width = int(metadata["streams"][0]["width"])
+    height = int(metadata["streams"][0]["height"])
+    if width <= 0 or height <= 0 or width * height > config.max_source_pixels:
+        raise MediaError("dimension_limit", "source dimensions exceed limits")
+    display_width, display_height = _display_dimensions(
+        metadata["streams"][0],
+        allow_arbitrary_rotation=config.resize_mode != "pil_center_crop",
+    )
+    # 取到结尾前一点，避开末尾常见的不完整帧。
+    targets = np.linspace(0.0, max(duration * 0.98 - 0.5, 0.0), config.n_frames)
+    decoded_width, decoded_height = display_width, display_height
+    if config.resize_mode == "native_center_crop":
+        decoded_width = max(display_width, config.width)
+        decoded_height = max(display_height, config.height)
+        spatial_filter = (
+            f"format=rgb24,pad='max(iw,{config.width})':'max(ih,{config.height})':"
+            "'floor((ow-iw)/2)':'floor((oh-ih)/2)':black"
+        )
+    elif config.resize_mode == "pil_center_crop":
+        spatial_filter = "format=rgb24"
+    else:
+        raise ValueError("seek decoding supports native_center_crop and pil_center_crop")
+    frame_bytes = decoded_height * decoded_width * 3
+    if frame_bytes * config.n_frames > config.max_output_bytes:
+        raise MediaError("output_limit", "selected RGB frames exceed output limit")
+    pictures: list[NDArray[np.uint8]] = []
+    kept: list[float] = []
+    for target in targets:
+        raw, _ = _run_output(
+            [
+                "ffmpeg",
+                "-v",
+                "error",
+                "-nostdin",
+                "-threads",
+                "1",
+                "-protocol_whitelist",
+                "file,pipe",
+                "-ss",
+                f"{float(target):.3f}",
+                "-i",
+                source,
+                "-map",
+                f"0:{config.stream_index}" if config.stream_index is not None else "0:v:0",
+                "-an",
+                "-frames:v",
+                "1",
+                "-vf",
+                f"{spatial_filter},setsar=1",
+                "-pix_fmt",
+                "rgb24",
+                "-f",
+                "rawvideo",
+                "pipe:1",
+            ],
+            config.timeout_seconds,
+            frame_bytes + 1,
+        )
+        if len(raw) == frame_bytes:
+            pictures.append(
+                np.frombuffer(raw, dtype=np.uint8).reshape(decoded_height, decoded_width, 3).copy()
+            )
+            kept.append(float(target))
+    if not pictures:
+        raise MediaError("no_frames", "no frame could be decoded at the sampled timestamps")
+    frames = np.stack(pictures)
+    if config.resize_mode == "pil_center_crop":
+        frames = _pil_resize_crop(frames, config)
+    if config.native_crops != 1:
+        frames = _native_crops(frames, config)
+    elif config.resize_mode == "native_center_crop":
+        left = _crop_offset(frames.shape[2], config.width, 0.5)
+        top = _crop_offset(frames.shape[1], config.height, 0.5)
+        frames = frames[:, top : top + config.height, left : left + config.width]
+    return VideoData(
+        frames,
+        tuple(kept),
+        tuple(-1 for _ in kept),
+        tuple(float(t) for t in targets),
+        width,
+        height,
+        duration,
+        display_width,
+        display_height,
+    )
+

@@ -137,6 +137,13 @@
     "device": "auto",
     "timeout_seconds": 300,
     "startup_timeout_seconds": 600,
+    "face_crops": {
+      "enabled": true,
+      "python": "{CURRENT_PYTHON}",
+      "runner": "{APP_ROOT}\\modules\\face_crops\\run_face_crops.py",
+      "model_root": "{APP_ROOT}\\packaging_v0.3\\resources",
+      "timeout_seconds": 120
+    },
     "kernel_note": "通用 AIGC 分支：C38 原头与 3 个重训头取均值后按 0.8/0.2 与 CommunityForensics 融合。图片按一帧视频处理，视频整段抽 10 帧 × 5 裁剪和 4 帧。"
   },
   "provenance": {

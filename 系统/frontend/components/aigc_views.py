@@ -207,13 +207,13 @@ def _render_crop_table(general: Mapping[str, Any]) -> None:
 
 
 def render_overall_section(deepfake: Mapping[str, Any]) -> None:
-    """总体结论和两路分档并排；没有通用分支的旧任务不显示。"""
+    """总体结论和各路分档并排；没有通用分支的旧任务不显示。"""
     overall = _mapping(deepfake.get("overall"))
     if not overall:
         return
     st.markdown("#### 总体结论")
     verdict_card(
-        "两路分档推导的总体档位",
+        "由各路分档推导的总体档位",
         _text(overall.get("band_label"), "未标定"),
         _text(overall.get("reason")),
         BAND_TONES.get(str(overall.get("band")), "muted"),
@@ -227,8 +227,15 @@ def render_overall_section(deepfake: Mapping[str, Any]) -> None:
                 verdict_card(
                     _text(branch.get("label")),
                     _text(branch.get("band_label"), "未标定"),
-                    f"显示分 {_logit_text(branch.get('score'))}",
+                    f"分数 {_logit_text(branch.get('score'))}",
                     BAND_TONES.get(str(branch.get("band")), "muted"),
+                )
+            elif branch.get("status") == "no_face":
+                verdict_card(
+                    _text(branch.get("label")),
+                    "不适用",
+                    "画面里没有可用的人脸，这一路不参与总体结论。",
+                    "muted",
                 )
             else:
                 verdict_card(
@@ -237,7 +244,7 @@ def render_overall_section(deepfake: Mapping[str, Any]) -> None:
                     _text(branch.get("error_message")),
                     "muted",
                 )
-    st.caption("两路分数性质不同，不相加；总体档位只由两路档位推导。")
+    st.caption("各路分数性质不同，不相加。通用 AIGC 分支定主结论，人脸分支最多抬一级，整图分支只作提示。")
 
 
 def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
@@ -281,7 +288,7 @@ def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
                 ("校准样本", _text(calibration.get("description"))),
                 ("运算设备", _text(runtime.get("device_name"))),
                 ("分辨率", f"{_text(media.get('width'))} × {_text(media.get('height'))}"),
-                ("解码方式", {"strict": "严格", "tolerant": "容错", "image": "图片"}.get(str(media.get("decode_mode")), "—")),
+                ("解码方式", {"strict": "严格", "tolerant": "容错", "seek": "按时间点取帧", "image": "图片"}.get(str(media.get("decode_mode")), "—")),
                 ("推理耗时", f"{_logit_text(runtime.get('inference_seconds'))} 秒"),
             ]
         )
@@ -289,6 +296,35 @@ def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
             st.caption(f"· {text}")
     for text in _list(general.get("warnings")):
         st.warning(_text(text))
+
+
+def render_face_branch_section(deepfake: Mapping[str, Any]) -> None:
+    """人脸分支的证据明细：逐张裁剪的分数和所用的边界。"""
+    face = _mapping(_mapping(deepfake.get("general_aigc")).get("face_branch"))
+    if not face:
+        return
+    st.markdown("#### 人脸分支")
+    if face.get("status") == "no_face":
+        st.caption("没有检出可用的人脸（人脸框短边不足 40 像素也算没有），这一路不参与总体结论。")
+        return
+    if face.get("status") != "success":
+        st.warning(f"这一路没有完成：{_text(face.get('error_message'))}")
+        return
+    logit = _number(face.get("logit"))
+    thresholds = _mapping(face.get("band_thresholds"))
+    crops = _list(face.get("crops"))
+    columns = st.columns(3)
+    columns[0].metric("档位", _text(face.get("band_label"), "未标定"))
+    columns[1].metric("裁剪图均值分数", _logit_text(logit))
+    columns[2].metric("人脸裁剪图", f"{len(crops)} 张")
+    if logit is not None and thresholds:
+        _render_logit_scale(logit, thresholds)
+    if face.get("band_reason"):
+        st.caption(f"分档依据：{face['band_reason']}")
+    st.caption(
+        "用 CommunityForensics 打人脸裁剪图，分数只和真实人脸的分布比较。"
+        "换脸检测跨数据集不稳，高分是复核线索，低分不能排除换脸。"
+    )
 
 
 def render_provenance_page(provenance: Mapping[str, Any]) -> None:

@@ -1021,6 +1021,7 @@ class RuntimeServiceManager:
         input_path: str | Path,
         output_path: str | Path,
         timeout: float,
+        face_crops: Sequence[str] | None = None,
     ) -> dict[str, Any]:
         deadline = time.monotonic() + float(timeout)
         self._wait_until_started("general_aigc", deadline)
@@ -1030,6 +1031,7 @@ class RuntimeServiceManager:
             {
                 "input_path": str(Path(input_path).expanduser().resolve(strict=False)),
                 "output_path": str(Path(output_path).expanduser().resolve(strict=False)),
+                "face_crops": None if face_crops is None else [str(item) for item in face_crops],
             },
             timeout,
         )

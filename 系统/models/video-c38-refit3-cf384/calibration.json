@@ -1,6 +1,6 @@
 {
   "version": "calibration-20261104",
-  "semantics": "边界是真实样本融合 logit 的 p95 和 p99，按来源等权；不是概率。",
+  "semantics": "边界是真实样本 logit 的 p95 和 p99，按来源等权；不是概率。",
   "video": {
     "low_max": 0.518756,
     "medium_max": 1.896675,
@@ -27,6 +27,26 @@
         "genvid400": -1.4234,
         "platform148": -3.6485,
         "vif310": -3.8431
+      }
+    }
+  },
+  "face_crop": {
+    "low_max": -4.949833,
+    "medium_max": -4.210364,
+    "calibration_set": {
+      "description": "DFDC 和 SWAN-DF 的真实人脸（按来源等权），这些集合选模时看过，不是盲测",
+      "n_real": 201,
+      "sources": {
+        "DFDC": 120,
+        "SWAN-DF": 81
+      },
+      "per_source_p95": {
+        "DFDC": -4.8499,
+        "SWAN-DF": -9.8683
+      },
+      "per_source_median": {
+        "DFDC": -6.9256,
+        "SWAN-DF": -11.4723
       }
     }
   }

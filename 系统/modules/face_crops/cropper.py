@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+"""检测最大人脸并裁出带边距的方形区域。在界面环境里运行（insightface、opencv）。"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+CROP_MARGIN = 1.3
+MIN_FACE_PIXELS = 40
+
+
+class FaceCropper:
+    def __init__(self, model_root: str | Path, *, det_size: int = 640) -> None:
+        from insightface.app import FaceAnalysis
+
+        self.app = FaceAnalysis(
+            name="buffalo_l",
+            root=str(model_root),
+            allowed_modules=["detection"],
+            providers=["CPUExecutionProvider"],
+        )
+        self.app.prepare(ctx_id=-1, det_size=(det_size, det_size))
+
+    def largest_face_box(self, frame: np.ndarray) -> tuple[int, int, int, int] | None:
+        faces = self.app.get(frame)
+        if not faces:
+            return None
+        best = max(faces, key=lambda item: float((item.bbox[2] - item.bbox[0]) * (item.bbox[3] - item.bbox[1])))
+        return tuple(int(value) for value in best.bbox)  # type: ignore[return-value]
+
+    def largest_face_crop(self, frame: np.ndarray) -> np.ndarray | None:
+        box = self.largest_face_box(frame)
+        return square_crop(frame, box) if box is not None else None
+
+
+def square_crop(frame: np.ndarray, box: tuple[int, int, int, int]) -> np.ndarray | None:
+    """以人脸框中心取边长为长边 1.3 倍的方块，超出画面的部分收缩，不补边。"""
+    left, top, right, bottom = box
+    width, height = right - left, bottom - top
+    if min(width, height) < MIN_FACE_PIXELS:
+        return None
+    half = int(max(width, height) * CROP_MARGIN / 2)
+    center_x, center_y = (left + right) // 2, (top + bottom) // 2
+    x0, y0 = max(0, center_x - half), max(0, center_y - half)
+    x1, y1 = min(frame.shape[1], center_x + half), min(frame.shape[0], center_y + half)
+    return frame[y0:y1, x0:x1].copy() if x1 > x0 and y1 > y0 else None
+
+
+def video_frames(path: str | Path, count: int) -> list[np.ndarray]:
+    """均匀取帧；读不出的帧跳过。"""
+    capture = cv2.VideoCapture(str(path))
+    try:
+        total = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        if total <= 0:
+            return []
+        frames = []
+        for index in np.linspace(0, max(total - 1, 0), count).astype(int):
+            capture.set(cv2.CAP_PROP_POS_FRAMES, int(index))
+            ok, frame = capture.read()
+            if ok and frame is not None:
+                frames.append(frame)
+        return frames
+    finally:
+        capture.release()

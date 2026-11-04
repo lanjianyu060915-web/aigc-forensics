@@ -1242,6 +1242,61 @@ def _general_aigc_failure(input_path: Path, runtime: float, message: str) -> dic
     }
 
 
+def _extract_face_crops(
+    *,
+    section: Any,
+    config_path: Path,
+    task_dir: Path,
+    query_path: Path,
+    is_video: bool,
+    logs_dir: Path,
+) -> tuple[list[str] | None, list[dict[str, Any]]]:
+    """裁出人脸，返回（裁剪图绝对路径，裁剪记录）。没配置或失败时路径为 None，人脸分支不跑。"""
+
+    if not isinstance(section, Mapping) or section.get("enabled") is False:
+        return None, []
+    out_dir = task_dir / "face_crops"
+    try:
+        command = [
+            str(resolve_path(section.get("python", "{CURRENT_PYTHON}"), config_path)),
+            "-B",
+            str(resolve_path(section["runner"], config_path)),
+            "--out-dir",
+            str(out_dir),
+        ]
+        if is_video:
+            command += [
+                "--frame-selection",
+                str(task_dir / "frame_selection.json"),
+                "--key-frames-dir",
+                str(task_dir / "key_frames"),
+            ]
+        else:
+            command += [
+                "--image",
+                str(query_path),
+                "--model-root",
+                str(resolve_path(section["model_root"], config_path)),
+            ]
+        completed = _run_subprocess(
+            command,
+            cwd=out_dir.parent,
+            timeout=float(section.get("timeout_seconds", 120)),
+            hide_console=True,
+            executable_worker=False,
+            extra_environment={"PYTHONDONTWRITEBYTECODE": "1"},
+        )
+        _write_text(logs_dir / "face_crops_stderr.log", completed.stderr)
+        payload = json.loads((out_dir / "crops.json").read_text(encoding="utf-8"))
+    except (KeyError, OSError, TypeError, ValueError, subprocess.TimeoutExpired) as exc:
+        _write_text(logs_dir / "face_crops_stderr.log", f"{type(exc).__name__}: {exc}\n")
+        return None, []
+    if payload.get("status") != "success":
+        return None, []
+    crops = [item for item in payload.get("crops") or [] if isinstance(item, Mapping)]
+    return [str(out_dir / str(item.get("file"))) for item in crops], [dict(item) for item in crops]
+
+
 def _run_general_aigc(
     *,
     section: Mapping[str, Any],
@@ -1251,6 +1306,7 @@ def _run_general_aigc(
     logs_dir: Path,
     progress: _ProgressReporter,
     services: Any,
+    face_crops: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """常驻服务优先，不可用时起隔离子进程；任何失败都收成结果，不打断鉴伪模块。"""
 
@@ -1298,7 +1354,12 @@ def _run_general_aigc(
             remaining = _remaining_timeout(deadline, module="general_aigc")
             payload = _invoke_service(
                 method,
-                kwargs={"input_path": input_path, "output_path": output_path, "timeout": remaining},
+                kwargs={
+                    "input_path": input_path,
+                    "output_path": output_path,
+                    "timeout": remaining,
+                    "face_crops": None if face_crops is None else list(face_crops),
+                },
                 timeout=remaining,
             )
             if not isinstance(payload, dict) or "status" not in payload:
@@ -1337,6 +1398,10 @@ def _run_general_aigc(
         ]
         if section.get("model_package"):
             command += ["--model-package", str(resolve_path(section["model_package"], config_path))]
+        if face_crops is not None:
+            crops_list = output_path.with_name(".face_crops.json")
+            _write_json(crops_list, list(face_crops))
+            command += ["--face-crops-json", str(crops_list)]
         completed = _run_subprocess(
             command,
             cwd=runner_path.parent,
@@ -2604,6 +2669,14 @@ def run_task(
             and isinstance(general_aigc_section, Mapping)
             and general_aigc_section.get("enabled") is not False
         ):
+            face_crop_paths, face_crop_records = _extract_face_crops(
+                section=general_aigc_section.get("face_crops"),
+                config_path=resolved_config,
+                task_dir=task_dir,
+                query_path=query_path,
+                is_video=video_path is not None,
+                logs_dir=logs_dir,
+            )
             general_payload = _run_general_aigc(
                 section=general_aigc_section,
                 config_path=resolved_config,
@@ -2612,7 +2685,11 @@ def run_task(
                 logs_dir=logs_dir,
                 progress=progress,
                 services=services,
+                face_crops=face_crop_paths,
             )
+            if isinstance(general_payload.get("face_branch"), dict):
+                general_payload["face_branch"]["records"] = face_crop_records
+                _write_json(general_aigc_output, general_payload)
             results[name] = attach_general_aigc(results[name], general_payload)
             _write_json(output_paths[name], results[name])
             metadata[name]["status"] = results[name]["status"]
@@ -2758,6 +2835,10 @@ def run_task(
     if general_aigc_output.is_file():
         extra_artifacts.append(
             (general_aigc_output.name, "deepfake", "general_aigc_result", "通用 AIGC 分支结果")
+        )
+    for crop_path in sorted((task_dir / "face_crops").glob("*.jpg")):
+        extra_artifacts.append(
+            (f"face_crops/{crop_path.name}", "deepfake", "face_crop", "人脸分支使用的裁剪图")
         )
     if video_path is not None:
         extra_artifacts.append(

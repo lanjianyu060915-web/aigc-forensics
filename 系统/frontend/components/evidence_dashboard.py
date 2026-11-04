@@ -23,6 +23,7 @@ from decision.evidence_matrix import build_evidence_matrix
 from components.aigc_views import (
     overall_finding,
     provenance_finding,
+    render_face_branch_section,
     render_general_aigc_section,
     render_overall_section,
     render_provenance_page,
@@ -939,6 +940,7 @@ def _render_deepfake_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
     if data.get("overall"):
         render_overall_section(data)
         render_general_aigc_section(data)
+        render_face_branch_section(data)
         if data.get("legacy_error_message"):
             st.warning(f"整图/人脸分支没有完成：{_safe_text(data.get('legacy_error_message'))}")
             return

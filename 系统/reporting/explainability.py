@@ -587,10 +587,18 @@ def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, An
         )
     else:
         summary.append(f"通用 AIGC 分支未完成：{_text(general.get('error_message')) or '未知原因'}。")
+    face = _mapping(general.get("face_branch"))
+    if face.get("status") == "success":
+        summary.append(
+            f"人脸分支为{_text(face.get('band_label')) or '未标定'}，"
+            f"裁剪图均值分数 {_fmt(_number(face.get('logit')), 3)}。"
+        )
+    elif face.get("status") == "no_face":
+        summary.append("没有检出可用的人脸，人脸分支不参与。")
     if _text(output.get("summary")):
-        summary.append(f"整图/人脸分支：{output['summary']}")
+        summary.append(f"整图分支（只作提示）：{output['summary']}")
     output["summary"] = "".join(summary)
-    basis = [f"总体档位只由两路档位推导，两路分数不相加（{_text(overall.get('rule'))}）。"]
+    basis = [f"总体档位只由各路档位推导，分数不相加（{_text(overall.get('rule'))}）。"]
     if general.get("status") == "success":
         branches = _mapping(general.get("branches"))
         basis.append(
@@ -601,8 +609,10 @@ def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, An
         )
         if _text(general.get("band_reason")):
             basis.append(f"通用 AIGC 分支分档依据：{general['band_reason']}")
+    if _text(face.get("band_reason")):
+        basis.append(f"人脸分支分档依据：{face['band_reason']}")
     if branch_headline:
-        basis.append(f"整图/人脸分支结论：{branch_headline}。")
+        basis.append(f"整图分支结论（只作提示）：{branch_headline}。")
     output["basis"] = [*basis, *output["basis"]]
     output["warnings"] = [*_strings(general.get("warnings")), *output["warnings"]]
     output["limitations"] = [*_strings(general.get("limitations")), *output["limitations"]]
@@ -610,7 +620,7 @@ def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, An
     technical["overall"] = overall
     technical["general_aigc"] = {
         key: general.get(key)
-        for key in ("status", "logit", "score", "band", "band_label", "branches", "model", "media", "runtime")
+        for key in ("status", "logit", "score", "band", "band_label", "branches", "model", "media", "runtime", "face_branch")
     }
     output["technical"] = technical
     return output

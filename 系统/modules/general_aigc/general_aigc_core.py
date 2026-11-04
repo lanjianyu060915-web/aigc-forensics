@@ -51,6 +51,37 @@ def band_of(logit: float, thresholds: dict[str, Any] | None) -> tuple[str | None
     return "low", BAND_LABELS["low"], f"分数 {logit:.3f} 低于真实样本高分尾部的下界 {low_max:.3f}。"
 
 
+def face_branch_payload(
+    logits: list[float], crop_files: list[str], calibration: dict[str, Any]
+) -> dict[str, Any]:
+    """人脸裁剪上的 CommunityForensics 分数；多张裁剪取均值后分档。"""
+    if not logits:
+        return {"status": "no_face", "logit": None, "band": None, "band_label": "未检出人脸"}
+    logit = sum(logits) / len(logits)
+    thresholds = calibration.get("face_crop") if isinstance(calibration.get("face_crop"), dict) else None
+    band, band_label, band_reason = band_of(logit, thresholds)
+    return {
+        "status": "success",
+        "logit": logit,
+        "band": band,
+        "band_label": band_label,
+        "band_reason": band_reason,
+        "band_thresholds": (
+            {
+                "low_max": thresholds["low_max"],
+                "medium_max": thresholds["medium_max"],
+                "calibration_set": thresholds.get("calibration_set", {}),
+            }
+            if thresholds is not None
+            else None
+        ),
+        "crops": [
+            {"file": name, "logit": value}
+            for name, value in zip(crop_files, logits, strict=True)
+        ],
+    }
+
+
 def error_payload(query: Path, message: str, *, started: float, error_type: str) -> dict[str, Any]:
     runtime = time.perf_counter() - started
     return {

@@ -113,7 +113,7 @@ def test_explanation_leads_with_overall_and_keeps_branch_basis() -> None:
     output = build_deepfake_explanation(_merged())
     assert output["headline"] == "总体结论：高风险提示"
     assert "通用 AIGC 分支为高风险提示" in output["summary"]
-    assert any("两路档位推导" in item for item in output["basis"])
+    assert any("各路档位推导" in item for item in output["basis"])
     assert any("0.8 × [0.5 × CLIP 原头" in item for item in output["basis"])
     assert "通用分支局限" in output["limitations"]
     assert output["technical"]["general_aigc"]["logit"] == 2.9

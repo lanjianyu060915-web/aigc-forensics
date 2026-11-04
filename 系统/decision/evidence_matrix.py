@@ -69,7 +69,7 @@ def _deepfake_block(result: Mapping[str, Any]) -> dict[str, Any]:
             "grade_label": str(overall.get("band_label") or BAND_GRADES[str(overall["band"])]),
             "primary_value": _number(general.get("logit")),
             "primary_label": "通用 AIGC 融合分数",
-            "branch": "two_branch",
+            "branch": "multi_branch",
             "band_reason": overall.get("reason"),
             "text": f"总体档位：{overall.get('band_label')}",
         }
