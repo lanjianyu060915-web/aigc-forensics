@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """视频入口的编排层回归测试（不加载模型、不解码真实视频）。
 
-抽帧模块替换为 fixture runner，鉴伪与身份用假服务，底图沿用既有 fixture runner，
+抽帧模块替换为 fixture runner，鉴伪与身份用假服务，素材沿用既有 fixture runner，
 因此这里只验证编排契约：视频识别、关键帧落盘、逐帧分发、聚合口径与证据清单。
 真实视频端到端结果见 experiments/m4_video/results/。
 """
@@ -175,7 +175,7 @@ def test_video_task_runs_each_module_on_its_frame_plan(workspace_tmp_path: Path)
         "frame_002.jpg",
         "frame_003.jpg",
     ]
-    # 鉴伪与身份各跑 3 个关键帧；底图只跑首要帧。
+    # 鉴伪与身份各跑 3 个关键帧；素材只跑首要帧。
     assert services.deepfake_frames == ["frame_001.jpg", "frame_002.jpg", "frame_003.jpg"]
     assert services.identity_frames == ["frame_001.jpg", "frame_002.jpg", "frame_003.jpg"]
     for rank in (1, 2, 3):

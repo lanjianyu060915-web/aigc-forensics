@@ -35,7 +35,7 @@ DEFAULT_CONFIG = Path(
 ProgressCallback = Callable[[dict[str, Any]], None]
 MODULE_ORDER = ("deepfake", "identity", "source")
 SUPPORTED_IMAGE_EXTENSIONS = frozenset({".jpg", ".jpeg", ".png", ".webp", ".bmp"})
-VIDEO_EXTENSIONS = frozenset({".mp4", ".avi", ".mov", ".mkv"})
+VIDEO_EXTENSIONS = frozenset({".mp4", ".avi", ".mov", ".mkv", ".webm"})
 
 
 class RuntimeServices(Protocol):
@@ -1511,7 +1511,7 @@ def _run_search_module(
         (
             f"身份库检查完成：{identity_count} 人、{library_image_count} 张参考图片。"
             if name == "identity"
-            else f"底图库检查完成：发现 {library_image_count} 张支持格式图片。"
+            else f"素材库检查完成：发现 {library_image_count} 张支持格式图片。"
         ),
         name,
         status="running",
@@ -1665,7 +1665,7 @@ def _run_search_module(
             # 缓存目录不可用时不带该参数，模块按逐图实时扫描运行。
             progress.emit(
                 "source_feature_cache_unavailable",
-                f"底图特征缓存目录不可用：{exc}",
+                f"素材特征缓存目录不可用：{exc}",
                 name,
                 status="warning",
                 progress_percent=None,
@@ -2139,13 +2139,13 @@ def _run_video_module(
             aggregate = _standard_search_result(
                 primary_frame_path,
                 time.perf_counter() - started,
-                f"视频关键帧上的底图检索全部失败：{details_text}",
+                f"视频关键帧上的素材检索全部失败：{details_text}",
             )
         else:
             aggregate = annotate_single_frame(
                 base_payload,
                 frame=dict(frame_results[0]["frame"]),
-                role="底图检索（视频首要帧）",
+                role="素材检索（视频首要帧）",
                 extra_limitations=extra_limitations,
             )
     # 单帧结果里的证据路径相对于该帧输出目录，必须改写成任务目录相对路径，
@@ -2768,7 +2768,7 @@ def run_task(
     _write_json(task_dir / "unified_result.json", unified)
     progress.emit(
         "report_generation",
-        "正在根据三个模块的结构化真实结果生成统一报告。",
+        "正在根据各模块的结构化真实结果生成统一报告。",
         status="running",
         progress_current=selected_completed,
         progress_total=overall_work_total,
@@ -2791,7 +2791,7 @@ def run_task(
             unified_result=unified,
             product_name=str(
                 config.get("product_name")
-                or "AI换脸涉案图像智能鉴伪与原始素材溯源系统"
+                or "AIGC 图像视频鉴伪与溯源系统"
             ),
             product_version=str(
                 config.get("display_version") or config.get("product_version") or "0.3.0"

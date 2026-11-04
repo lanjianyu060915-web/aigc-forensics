@@ -1,8 +1,8 @@
 {
   "schema_version": "3.0",
-  "product_name": "AI换脸涉案图像智能鉴伪与原始素材溯源系统",
+  "product_name": "AIGC 图像视频鉴伪与溯源系统",
   "product_version": "0.4.0",
-  "display_version": "2.1",
+  "display_version": "3.0",
   "upgrade": {
     "track": "刑科技项目升级2.0",
     "base_frozen_version": "0.4.0",
@@ -42,7 +42,7 @@
     "identity_frames": 3,
     "source_frames": 1,
     "kernel": "video_frames_v2",
-    "kernel_note": "视频入口：抽帧与关键帧选择在开发解释器（OpenCV+InsightFace）中完成，输出纯 JPEG 关键帧；三个模块逐帧运行后由 video_pipeline 聚合（鉴伪取帧级中位数+分带一致性、身份按跨帧平均余弦相似度、底图只用首要帧）。",
+    "kernel_note": "视频入口：抽帧与关键帧选择在开发解释器（OpenCV+InsightFace）中完成，输出纯 JPEG 关键帧；三个模块逐帧运行后由 video_pipeline 聚合（鉴伪取帧级中位数+分带一致性、身份按跨帧平均余弦相似度、素材只用首要帧）。",
     "aggregation": {
       "deepfake": "band_majority",
       "identity": "mean_across_frames",

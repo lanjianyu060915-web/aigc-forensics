@@ -330,7 +330,7 @@ class TestReportSection:
         summary_at = text.index("六、并列证据总结")
         assert matrix_at < summary_at
         section = text[matrix_at:summary_at]
-        for label in ("AIGC鉴伪", "人脸身份检索", "原始底图溯源", "开放集风险"):
+        for label in ("AIGC鉴伪", "人脸身份比对", "原始素材溯源", "开放集风险"):
             assert label in section
         assert "综合可信度" not in text
 
@@ -343,4 +343,4 @@ class TestReportSection:
         limitations = " ".join(explanations["identity"]["limitations"])
         assert "不能表述为已确认身份" in limitations
         source_limitations = " ".join(explanations["source"]["limitations"])
-        assert "不能表述为已确认原始底图" in source_limitations
+        assert "不能表述为已确认原始素材" in source_limitations

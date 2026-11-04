@@ -77,8 +77,18 @@ def module_availability(snapshot: Mapping[str, Any], key: str) -> ModuleAvailabi
     title = {
         "deepfake": "AIGC 模型",
         "identity": "身份数据库",
-        "source": "底图数据库",
+        "source": "素材数据库",
+        "general_aigc": "通用 AIGC 模型",
     }.get(key, key)
+
+    if key == "general_aigc":
+        kinds = raw.get("calibrated_kinds")
+        calibrated = "、".join(str(item) for item in kinds) if isinstance(kinds, list) and kinds else "无"
+        value = "可用" if available else "未启用" if raw.get("status") == "disabled" else "不可用"
+        caption = f"{raw.get('model_name') or '—'} · 已标定：{calibrated}"
+        return ModuleAvailability(
+            key, title, available, False, value, caption, _message(raw, caption), raw
+        )
 
     if key == "deepfake":
         model = _first(raw, ("model_name", "model", "model_version", "architecture"))

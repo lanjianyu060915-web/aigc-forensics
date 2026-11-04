@@ -585,7 +585,7 @@ def _source_feature_cache_status(
             "feature_count": 0,
             "build_policy": "realtime_scan",
             "summary": "无持久 index，检索时实时扫描",
-            "message": "底图模块没有持久 index；每次任务实时扫描图库并提取特征",
+            "message": "素材模块没有持久 index；每次任务实时扫描图库并提取特征",
         }
     resolved_library = library_path.resolve(strict=False)
     key = hashlib.sha256(
@@ -880,11 +880,11 @@ def inspect_system_status(
         "status": "available" if source_available else "unavailable",
         "available": source_available,
         "message": (
-            f"底图库可用：{source_inventory['image_count']} 张图片；{source_index['summary']}"
+            f"素材库可用：{source_inventory['image_count']} 张图片；{source_index['summary']}"
             if source_available
             else source_inventory["message"]
             if not source_inventory["available"]
-            else "底图 worker 或 runner 不完整"
+            else "素材 worker 或 runner 不完整"
         ),
         "image_count": source_inventory["image_count"],
         "feature_count": source_index["feature_count"],
@@ -957,6 +957,43 @@ def inspect_system_status(
         "deepfake": deepfake_status,
         "identity": identity_status,
         "source": source_status,
+        "general_aigc": _inspect_general_aigc(config.get("general_aigc"), resolved_config),
+    }
+
+
+def _inspect_general_aigc(section: Any, config_path: Path) -> dict[str, Any]:
+    """只查文件是否齐全，不加载模型、不算权重哈希（哈希在模型加载时校验）。"""
+
+    if not isinstance(section, dict) or section.get("enabled") is False:
+        return {"status": "disabled", "available": False, "message": "通用 AIGC 分支未启用"}
+    missing: list[str] = []
+    python_path = _path_from_section(section, "python", config_path)
+    if python_path is None or not python_path.is_file():
+        missing.append(f"引擎 Python：{python_path}")
+    package = _path_from_section(section, "model_package", config_path)
+    details: dict[str, Any] = {}
+    if package is None or not (package / "manifest.json").is_file():
+        missing.append(f"模型包：{package}")
+    else:
+        manifest = json.loads((package / "manifest.json").read_text(encoding="utf-8"))
+        checkpoint = package / str(manifest.get("checkpoint"))
+        details["model_name"] = manifest.get("model_id")
+        if not checkpoint.is_file():
+            missing.append(f"权重文件：{checkpoint}")
+        calibration = package / "calibration.json"
+        if calibration.is_file():
+            payload = json.loads(calibration.read_text(encoding="utf-8"))
+            details["calibrated_kinds"] = [
+                kind for kind in ("image", "video") if isinstance(payload.get(kind), dict)
+            ]
+        else:
+            details["calibrated_kinds"] = []
+    available = not missing
+    return {
+        "status": "available" if available else "unavailable",
+        "available": available,
+        "message": "通用 AIGC 模型和运行环境齐全" if available else "；".join(missing),
+        **details,
     }
 
 

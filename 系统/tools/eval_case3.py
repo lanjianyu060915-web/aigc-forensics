@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""在当前系统上真实跑一遍案例3 的 20 个案例（身份 + 底图），输出命中情况和四态分布。
+"""在当前系统上真实跑一遍案例3 的 20 个案例（身份 + 素材），输出命中情况和四态分布。
 
 用法：python -B tools/eval_case3.py --case3 <案例3 目录> --libraries <案例3 库目录> --work <工作目录> --out <输出 JSON>
-身份真值：案例“身份图片”的文件名前缀（公众人物）或 caseN；底图真值：按内容 SHA-256 比较，
+身份真值：案例“身份图片”的文件名前缀（公众人物）或 caseN；素材真值：按内容 SHA-256 比较，
 因为案例3 的原始图片存在跨案例重复，按文件名判会误判。
 """
 
@@ -104,7 +104,7 @@ def main() -> int:
         )
         print(
             f"案例{case:>2} 身份 {top_identity}（期望 {expected_identity}，{summary.get('identity_label')}） "
-            f"底图 {rows[-1]['source_top']}（命中 {rows[-1]['source_hit']}，{summary.get('source_label')}） {elapsed:.1f} 秒",
+            f"素材 {rows[-1]['source_top']}（命中 {rows[-1]['source_hit']}，{summary.get('source_label')}） {elapsed:.1f} 秒",
             flush=True,
         )
 

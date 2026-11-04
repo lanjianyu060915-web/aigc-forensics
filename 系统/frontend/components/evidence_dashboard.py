@@ -20,20 +20,28 @@ from decision import (
     decide_source_open_set,
 )
 from decision.evidence_matrix import build_evidence_matrix
+from components.aigc_views import (
+    overall_finding,
+    provenance_finding,
+    render_general_aigc_section,
+    render_overall_section,
+    render_provenance_page,
+)
 
 
 PAGES = (
     "研判总览",
     "AIGC鉴伪证据",
-    "人脸身份检索",
-    "原始底图溯源",
+    "文件标识",
+    "人脸身份比对",
+    "原始素材溯源",
     "证据链与完整报告",
 )
 
 PAGE_KEYS = {
     "deepfake": "AIGC鉴伪证据",
-    "identity": "人脸身份检索",
-    "source": "原始底图溯源",
+    "identity": "人脸身份比对",
+    "source": "原始素材溯源",
 }
 
 # 视频级聚合口径的可读名；键来自 video_pipeline.aggregate 的规则常量。
@@ -267,7 +275,7 @@ def build_task_overview(
         or "CPU"
     )
     return {
-        "system_name": report_product.get("name") or "AI换脸涉案图像智能鉴伪与原始素材溯源系统",
+        "system_name": report_product.get("name") or "AIGC 图像视频鉴伪与溯源系统",
         "product_version": report_product.get("version") or product_version,
         "task_id": status.get("task_id") or (task_dir.name if task_dir else "—"),
         "query_file": original_name or (Path(query).name if query else "—"),
@@ -313,6 +321,9 @@ def _deepfake_finding(deepfake: Mapping[str, Any]) -> dict[str, str]:
     failed = _not_ok_finding(title, deepfake)
     if failed is not None:
         return failed
+    overall = overall_finding(deepfake)
+    if overall is not None:
+        return overall
     details = _mapping(deepfake.get("details"))
     score = _six(deepfake.get("score"))
     band_label = str(details.get("band_label") or "").strip()
@@ -374,8 +385,9 @@ def build_key_findings(
     deepfake: Mapping[str, Any],
     identity: Mapping[str, Any],
     source: Mapping[str, Any],
+    provenance: Mapping[str, Any] | None = None,
 ) -> tuple[list[dict[str, str]], list[str]]:
-    """把三个模块的结论翻译成白话并给出下一步建议；只读结果，不产生新的分数。"""
+    """把各模块的结论翻译成白话并给出下一步建议；只读结果，不产生新的分数。"""
 
     deepfake_card = _deepfake_finding(deepfake)
     identity_card, identity_state = _open_set_finding(
@@ -396,9 +408,10 @@ def build_key_findings(
         "这是库内比较结果，不等于确认来源。",
     )
     steps: list[str] = []
-    band = str(_mapping(deepfake.get("details")).get("band") or "")
+    overall_band = _mapping(deepfake.get("overall")).get("band")
+    band = str(overall_band or _mapping(deepfake.get("details")).get("band") or "")
     if source_state == STATE_HIGH and _result_status(deepfake) == "success" and band != "low":
-        steps.append("到“原始底图溯源”页把查询图和第一候选并排看：人脸以外基本一致而人脸不同，是换脸的直接线索。")
+        steps.append("到“原始素材溯源”页把查询图和第一候选并排看：人脸以外基本一致而人脸不同，是换脸的直接线索。")
     if band == "medium":
         steps.append("鉴伪落在“需人工复核”，建议结合原始文件和传播链做人工判断。")
     if band == "low":
@@ -406,22 +419,28 @@ def build_key_findings(
     if identity_state == STATE_HIGH:
         steps.append("身份候选只说明和库内该人员最相似，需要结合其他线索核实。")
     if STATE_NONE in {identity_state, source_state}:
-        steps.append("库中没有找到可靠候选时，可以扩充身份库或底图库后重新检索。")
+        steps.append("库中没有找到可靠候选时，可以扩充身份库或素材库后重新检索。")
     if STATE_INSUFFICIENT in {identity_state, source_state}:
         steps.append("证据不足的候选不要直接采信，建议换一张更清晰的图或帧再查。")
     if _integer(_mapping(identity.get("metrics")).get("query_face_count_original")):
         steps.append("这张图有多张人脸：如果要查的不是面积最大的那张，请裁剪后重新分析。")
-    return [deepfake_card, identity_card, source_card], steps
+    cards = [deepfake_card, identity_card, source_card]
+    if provenance:
+        cards.insert(1, provenance_finding(provenance))
+        if provenance.get("verdict") in {"labelled_ai", "labelled_possible"}:
+            steps.insert(0, "文件带有生成合成标识：到“文件标识”页查看生成服务方和传播平台代码，可作为向平台核实的线索。")
+    return cards, steps
 
 
 def _render_key_findings(
     deepfake: Mapping[str, Any],
     identity: Mapping[str, Any],
     source: Mapping[str, Any],
+    provenance: Mapping[str, Any] | None = None,
 ) -> None:
-    cards, steps = build_key_findings(deepfake, identity, source)
+    cards, steps = build_key_findings(deepfake, identity, source, provenance)
     st.markdown("#### 研判要点")
-    for column, card in zip(st.columns(3), cards, strict=True):
+    for column, card in zip(st.columns(len(cards)), cards, strict=True):
         with column:
             verdict_card(card["title"], card["value"], card["note"], card["tone"])
     if steps:
@@ -471,7 +490,7 @@ def _render_task_header(info: Mapping[str, Any], *, video: Mapping[str, Any] | N
     second = st.columns(4)
     second[0].metric("鉴伪耗时", f"{_number(info.get('deepfake_runtime')) or 0.0:.1f} 秒")
     second[1].metric("身份检索耗时", f"{_number(info.get('identity_runtime')) or 0.0:.1f} 秒")
-    second[2].metric("底图溯源耗时", f"{_number(info.get('source_runtime')) or 0.0:.1f} 秒")
+    second[2].metric("素材溯源耗时", f"{_number(info.get('source_runtime')) or 0.0:.1f} 秒")
     second[3].metric("运行设备", _safe_text(info.get("device")).upper())
     st.caption(f"任务编号：{_safe_text(info.get('task_id'))} · 系统版本 {_safe_text(info.get('product_version'))}")
     digest = _safe_text(info.get("input_sha256"))
@@ -524,6 +543,15 @@ def _render_overview_cards(
         with st.container(border=True):
             st.markdown("#### AIGC鉴伪")
             kernel = resolve_deepfake_kernel_view(deepfake)
+            overall = _mapping(deepfake.get("overall"))
+            if overall:
+                st.metric("总体档位", _safe_text(overall.get("band_label")))
+                general = _mapping(deepfake.get("general_aigc"))
+                st.caption(
+                    f"通用 AIGC 分支：{_safe_text(general.get('band_label') or general.get('error_message'))}"
+                    f"，融合分数 {_six(general.get('logit'))}"
+                )
+                st.caption("下面是整图/人脸分支的结果。")
             if details.get("video_band_rule"):
                 band_counts = _mapping(details.get("frame_band_counts"))
                 st.metric("视频级分带", _safe_text(details.get("band_label") or details.get("band")))
@@ -571,7 +599,7 @@ def _render_overview_cards(
     top2 = _mapping(candidates[1]) if len(candidates) > 1 else {}
     with columns[1]:
         with st.container(border=True):
-            st.markdown("#### 人脸身份检索")
+            st.markdown("#### 人脸身份比对")
             st.metric("当前库内第一候选", _safe_text(top_identity.get("identity_name") or top_identity.get("identity_id")))
             st.metric("人员级平均余弦相似度", _six(top_identity.get("mean_similarity") or top_identity.get("score")))
             pair = st.columns(2)
@@ -601,7 +629,7 @@ def _render_overview_cards(
     top_source = _mapping(source_candidates[0]) if source_candidates else {}
     with columns[2]:
         with st.container(border=True):
-            st.markdown("#### 原始底图溯源")
+            st.markdown("#### 原始素材溯源")
             st.metric("当前库内第一候选", _basename(top_source.get("file_path")))
             st.metric("最终分", _six(top_source.get("final_score")))
             pair = st.columns(2)
@@ -614,7 +642,7 @@ def _render_overview_cards(
             _render_open_set_badge(decide_source_open_set(source))
             st.caption("库内候选；检索分数不是来源概率。")
             st.button(
-                "查看底图证据 →",
+                "查看素材证据 →",
                 key=f"{key_prefix}_goto_source",
                 width="stretch",
                 on_click=_queue_page,
@@ -901,6 +929,14 @@ def _render_deepfake_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
     if _result_status(data) != "success":
         st.error(_safe_text(data.get("error_message"), "AIGC模块未成功完成。"))
         return
+    if data.get("overall"):
+        render_overall_section(data)
+        render_general_aigc_section(data)
+        if data.get("legacy_error_message"):
+            st.warning(f"整图/人脸分支没有完成：{_safe_text(data.get('legacy_error_message'))}")
+            return
+        st.divider()
+        st.markdown("#### 整图/人脸检测分支")
     kernel = resolve_deepfake_kernel_view(data)
     if kernel is not None and kernel.get("branch") == "vit_full_image":
         _render_deepfake_kernel_page(data, policy, key_prefix, kernel)
@@ -1113,7 +1149,7 @@ def _render_identity_score_chart(candidates: Sequence[Any]) -> None:
 
 
 def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key_prefix: str) -> None:
-    st.subheader("人脸身份检索证据")
+    st.subheader("人脸身份比对证据")
     st.info("适用边界：这是当前身份库内的闭集候选排序，余弦相似度不是身份概率，第一候选尚未确认。")
     if _result_status(data) != "success":
         st.error(_safe_text(data.get("error_message"), "身份模块未成功完成。"))
@@ -1245,7 +1281,7 @@ def _render_source_score_chart(candidates: Sequence[Any]) -> None:
             if value is not None:
                 values.append({"candidate": name, "score_type": label, "score": value})
     if not values:
-        st.warning("本次任务没有可绘制的底图候选分数。")
+        st.warning("本次任务没有可绘制的素材候选分数。")
         return
     spec = {
         "data": {"values": values},
@@ -1320,10 +1356,10 @@ def _render_global_components(candidates: Sequence[Any], visual: Mapping[str, An
 
 
 def _render_source_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key_prefix: str) -> None:
-    st.subheader("原始底图溯源证据")
-    st.info("适用边界：结果是当前底图库内的候选排序，检索相似度不是来源概率，不能单独确认原始底图。")
+    st.subheader("原始素材溯源证据")
+    st.info("适用边界：结果是当前素材库内的候选排序，检索相似度不是来源概率，不能单独确认原始素材。")
     if _result_status(data) != "success":
-        st.error(_safe_text(data.get("error_message"), "底图模块未成功完成。"))
+        st.error(_safe_text(data.get("error_message"), "素材模块未成功完成。"))
         return
     metrics = _mapping(data.get("metrics"))
     visual = _module_visual(data, "source")
@@ -1348,7 +1384,7 @@ def _render_source_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key
         _render_evidence_image(masked, policy, caption="后端实际使用的人脸屏蔽图", key=f"{key_prefix}_src_masked")
     st.caption(
         f"是否应用屏蔽：{'是' if metrics.get('face_mask_applied') is True else '否' if metrics.get('face_mask_applied') is False else '未记录'}。"
-        "屏蔽用于降低查询人脸身份对背景/底图检索的干扰，不改变底图库候选内容。"
+        "屏蔽用于降低查询人脸身份对背景/素材检索的干扰，不改变素材库候选内容。"
     )
 
     st.markdown("#### 2. 全库粗排漏斗")
@@ -1359,7 +1395,7 @@ def _render_source_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key
     displayed = min(5, len(candidates))
     funnel = st.columns(5)
     labels = [
-        ("底图库文件", total),
+        ("素材库文件", total),
         ("成功读取", decoded),
         ("跳过文件", skipped),
         ("进入局部复核", shortlist),
@@ -1393,7 +1429,7 @@ def _render_source_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key
                     or visual_candidate.get("candidate_image")
                     or candidate.get("file_path")
                 )
-                path = resolve_evidence_path(candidate_image, policy, kind="source", label="底图候选")
+                path = resolve_evidence_path(candidate_image, policy, kind="source", label="素材候选")
                 if path is not None and path.is_file():
                     st.image(str(path), width="stretch")
                 else:
@@ -1480,7 +1516,7 @@ def _render_evidence_chain_page(
     st.markdown("#### 证据矩阵（研判卡）")
     st.caption("逐模块证据质量分级；模块之间不做数值相加，也不生成综合可信概率。")
     matrix = build_evidence_matrix(deepfake, identity, source)
-    module_labels = {"deepfake": "AIGC鉴伪", "identity": "人脸身份检索", "source": "原始底图溯源"}
+    module_labels = {"deepfake": "AIGC鉴伪", "identity": "人脸身份比对", "source": "原始素材溯源"}
     matrix_rows: list[dict[str, Any]] = []
     for module_key, module_label in module_labels.items():
         block = _mapping(_mapping(matrix.get("modules")).get(module_key))
@@ -1541,7 +1577,7 @@ def _render_evidence_chain_page(
 
     st.markdown("#### 输入、模型与配置溯源")
     provenance_rows: list[dict[str, Any]] = []
-    for module, result in (("AIGC", deepfake), ("身份", identity), ("底图", source)):
+    for module, result in (("AIGC", deepfake), ("身份", identity), ("素材", source)):
         provenance = _mapping(result.get("provenance"))
         for key, value in provenance.items():
             if "path" in key.lower() and isinstance(value, str):
@@ -1678,7 +1714,7 @@ def render_video_input_panel(
     columns[3].metric("视频 SHA-256", f"{digest[:12]}…" if digest else "—")
     st.caption(
         "流程：抽帧 → 逐帧人脸检测 → 按清晰度/亮度/人脸数选关键帧 → 逐帧运行模块 → 视频级聚合。"
-        "鉴伪取帧级分数中位数与分带一致性，身份取跨帧平均余弦相似度，底图只检索首要帧；三个模块的数值不相加。"
+        "鉴伪取帧级分数中位数与分带一致性，身份取跨帧平均余弦相似度，素材只检索首要帧；三个模块的数值不相加。"
     )
     deepfake_module = _mapping(modules.get("deepfake"))
     if deepfake_module.get("band_rule") == "frozen_threshold":
@@ -1736,7 +1772,7 @@ def render_video_input_panel(
         support = identity_module.get("top1_frame_support")
         rows.append(
             {
-                "模块": "人脸身份搜索",
+                "模块": "人脸身份比对",
                 "视频级输出": _safe_text(identity_module.get("top1_identity_name")),
                 "数值": format_score(identity_module.get("top1_mean_similarity")),
                 "聚合规则": _safe_text(identity_module.get("rule")),
@@ -1747,7 +1783,7 @@ def render_video_input_panel(
     if source_module:
         rows.append(
             {
-                "模块": "原始底图搜索",
+                "模块": "原始素材检索",
                 "视频级输出": _safe_text(source_module.get("top1_candidate")),
                 "数值": format_score(source_module.get("top1_score")),
                 "聚合规则": _safe_text(source_module.get("rule")),
@@ -1792,6 +1828,7 @@ def render_evidence_workspace(
         label_visibility="collapsed",
     )
     st.divider()
+    provenance = _read_task_json(task_dir, "file_provenance_result.json")
     if selected == "研判总览":
         overview = build_task_overview(
             deepfake,
@@ -1802,10 +1839,10 @@ def render_evidence_workspace(
             task_dir=task_dir,
             product_version=product_version,
         )
-        _render_key_findings(deepfake, identity, source)
+        _render_key_findings(deepfake, identity, source, provenance)
         _render_task_header(overview, video=_read_task_json(task_dir, "video_summary.json"))
-        st.markdown("#### 三个模块的证据")
-        st.caption("三个模块解决不同问题；本页并列呈现证据，不相加、不生成所谓综合可信概率。")
+        st.markdown("#### 各模块的证据")
+        st.caption("各模块解决不同问题；本页并列呈现证据，不相加、不生成所谓综合可信概率。")
         _render_overview_cards(
             deepfake,
             identity,
@@ -1824,9 +1861,11 @@ def render_evidence_workspace(
             )
     elif selected == "AIGC鉴伪证据":
         _render_deepfake_page(deepfake, policy, key_prefix)
-    elif selected == "人脸身份检索":
+    elif selected == "文件标识":
+        render_provenance_page(provenance)
+    elif selected == "人脸身份比对":
         _render_identity_page(identity, policy, key_prefix)
-    elif selected == "原始底图溯源":
+    elif selected == "原始素材溯源":
         _render_source_page(source, policy, key_prefix)
     else:
         _render_evidence_chain_page(

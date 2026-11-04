@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""预先建好底图库的特征缓存（全局特征 + SIFT），之后每次检索只需几秒。
+"""预先建好素材库的特征缓存（全局特征 + SIFT），之后每次检索只需几秒。
 
-用法：python -B tools/build_source_cache.py --library <底图库> --cache-dir <缓存目录>
+用法：python -B tools/build_source_cache.py --library <素材库> --cache-dir <缓存目录>
 不改变任何检索分数；已缓存且未变化的文件直接跳过。
 """
 

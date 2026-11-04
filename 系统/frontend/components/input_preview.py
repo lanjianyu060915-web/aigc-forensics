@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
-VIDEO_SUFFIXES = {".mp4", ".mov", ".avi", ".mkv"}
+VIDEO_SUFFIXES = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 LOW_RESOLUTION_EDGE = 112
 DEFAULT_ROUTING_EDGE = 256
 
@@ -64,7 +64,7 @@ def describe_input(
             size_bytes=len(data),
             sha256=digest,
             route_label="抽帧后逐帧路由",
-            route_reason="先选关键帧，再按每帧的有效短边选择鉴伪分支；底图检索只用首要帧。",
+            route_reason="先选关键帧，再按每帧的有效短边选择鉴伪分支；素材检索只用首要帧。",
             notes=["视频级分带跨数据来源不可移植，结果只作线索。"],
         )
 
@@ -91,7 +91,7 @@ def describe_input(
         route_label = "人脸裁剪分支（空间+频域）"
         route_reason = f"有效短边 {short_edge} px，低于路由阈值 {routing_edge} px。"
     if short_edge < LOW_RESOLUTION_EDGE:
-        notes.append("分辨率很低，人脸检测和底图局部复核都可能失败。")
+        notes.append("分辨率很低，人脸检测和素材局部复核都可能失败。")
     if max(width, height) / max(short_edge, 1) > 3:
         notes.append("长宽比异常，可能是长截图或拼接图，建议先裁出人物区域。")
     return InputPreview(

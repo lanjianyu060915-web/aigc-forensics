@@ -13,9 +13,9 @@ MODULE_ORDER = ("deepfake", "identity", "source")
 MODULE_LABELS = {
     "overall": "总体",
     "video": "视频抽帧与选帧",
-    "deepfake": "AI换脸/深伪风险甄别",
-    "identity": "人脸身份搜索",
-    "source": "原始底图搜索",
+    "deepfake": "AIGC 鉴伪",
+    "identity": "人脸身份比对",
+    "source": "原始素材检索",
 }
 STATUS_LABELS = {
     "pending": "等待",

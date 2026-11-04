@@ -149,7 +149,7 @@ def _base_payload(query: Path) -> dict:
         "explanation": [],
         "warnings": [],
         "limitations": [
-            "结果是当前底图库内的候选排序，不构成原始底图确认。",
+            "结果是当前素材库内的候选排序，不构成原始素材确认。",
             "分数是检索相似度，不是来源概率。",
         ],
         "runtime": {"seconds": 0.0},
@@ -191,7 +191,7 @@ def main() -> int:
             reporter,
             "validate_source_input",
             "running",
-            "正在校验底图搜索输入、底图库和输出位置。",
+            "正在校验素材搜索输入、素材库和输出位置。",
             progress_percent=None,
             details={
                 "query_exists": args.query.is_file(),
@@ -276,7 +276,7 @@ def main() -> int:
             runtime_seconds=runtime_seconds,
             error_message=str(exc),
             runtime={"seconds": runtime_seconds},
-            explanation=[f"底图搜索未完成：{exc}"],
+            explanation=[f"素材搜索未完成：{exc}"],
             warnings=[str(exc)],
         )
         payload["diagnostics"] = {

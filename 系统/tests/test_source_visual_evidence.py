@@ -67,7 +67,7 @@ def test_source_visual_evidence_manifest_and_true_stage_events(
     tmp_path: Path,
 ) -> None:
     query = tmp_path / "查询 图.jpg"
-    library = tmp_path / "中文 底图库"
+    library = tmp_path / "中文 素材库"
     task_dir = tmp_path / "任务 case_source_evidence"
     library.mkdir()
     rng = np.random.default_rng(7391)

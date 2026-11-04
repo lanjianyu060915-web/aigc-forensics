@@ -34,7 +34,7 @@ EXECUTION_LABELS = {
     "disabled": "已关闭",
     "deadline_exhausted": "超出时限",
 }
-MODULE_LABELS = {"deepfake": "鉴伪", "identity": "身份", "source": "底图"}
+MODULE_LABELS = {"deepfake": "鉴伪", "identity": "身份", "source": "素材"}
 SUMMARY_COLUMNS = (
     ("started_at", "开始时间"),
     ("file_name", "文件"),
@@ -45,9 +45,9 @@ SUMMARY_COLUMNS = (
     ("identity_label", "身份结论"),
     ("identity_top", "身份第一候选"),
     ("identity_score", "身份相似度"),
-    ("source_label", "底图结论"),
-    ("source_top", "底图第一候选"),
-    ("source_score", "底图最终分"),
+    ("source_label", "素材结论"),
+    ("source_top", "素材第一候选"),
+    ("source_score", "素材最终分"),
     ("runtime_seconds", "耗时(秒)"),
     ("task_id", "任务编号"),
 )
@@ -99,7 +99,8 @@ def _deepfake_summary(result: Mapping[str, Any]) -> tuple[str, float | None]:
     if str(result.get("status") or "") != "success":
         return status_label(result.get("status") or "skipped"), None
     details = result.get("details") if isinstance(result.get("details"), Mapping) else {}
-    label = str(details.get("band_label") or "").strip()
+    overall = result.get("overall") if isinstance(result.get("overall"), Mapping) else {}
+    label = str(overall.get("band_label") or details.get("band_label") or "").strip()
     if not label:
         verdict = result.get("is_deepfake")
         label = "疑似AI换脸" if verdict is True else "未见明显换脸特征" if verdict is False else "证据不足"

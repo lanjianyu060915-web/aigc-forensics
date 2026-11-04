@@ -46,7 +46,7 @@ from video_pipeline.selection import (  # noqa: E402
 )
 
 
-VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv"}
+VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
 SHARPNESS_SHORT_EDGE = 360
 JPEG_QUALITY = 95
 SEQUENTIAL_SCAN_LIMIT = 20000

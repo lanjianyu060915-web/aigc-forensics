@@ -80,11 +80,12 @@ SOURCE_LIBRARY_ROOT = SAMPLE_ROOT / "source_libraries"
 EXAMPLES_ROOT = PRODUCT_ROOT / "examples"
 MODULE_KEYS = ("deepfake", "identity", "source")
 MODULE_LABELS = {
-    "deepfake": "AI换脸/深伪风险甄别",
-    "identity": "人脸身份搜索",
-    "source": "原始底图搜索",
+    "deepfake": "AIGC 鉴伪",
+    "identity": "人脸身份比对",
+    "source": "原始素材检索",
 }
-MODULE_SHORT_LABELS = {"deepfake": "鉴伪", "identity": "身份", "source": "底图"}
+MODULE_SHORT_LABELS = {"deepfake": "鉴伪", "identity": "身份", "source": "素材"}
+SERVICE_LABELS = {**MODULE_LABELS, "general_aigc": "通用 AIGC 模型"}
 PAGE_LABELS = {
     "Live Analysis": "新建研判",
     "Batch Analysis": "批量研判",
@@ -101,12 +102,12 @@ RESULT_MODE_LABELS = {
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 ALLOWED_UPLOAD_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_VIDEO_UPLOAD_BYTES = 200 * 1024 * 1024
-ALLOWED_VIDEO_SUFFIXES = {".mp4", ".mov", ".avi", ".mkv"}
+ALLOWED_VIDEO_SUFFIXES = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
 MAX_BATCH_FILES = 100
 EXAMPLE_LABELS = {
-    "integrated_query_001.jpg": "换脸查询图 1（高分辨率）",
-    "integrated_query_002.jpg": "换脸查询图 2",
-    "integrated_query_003.jpg": "换脸查询图 3",
+    "integrated_query_001.jpg": "换脸样例 1（高分辨率）",
+    "integrated_query_002.jpg": "换脸样例 2",
+    "integrated_query_003.jpg": "换脸样例 3",
     "aigc_fake_image.jpg": "小尺寸人脸裁剪（高风险样例）",
     "aigc_real_image.jpg": "小尺寸人脸裁剪（低风险样例）",
     "no_face_image.jpg": "无人脸图片（证据不足样例）",
@@ -261,7 +262,7 @@ def _execute_warm_job(
     library: Path,
     cache_dir: Path,
 ) -> None:
-    """建立底图特征缓存；放在同一串行执行器里，避免和分析任务抢资源。"""
+    """建立素材特征缓存；放在同一串行执行器里，避免和分析任务抢资源。"""
 
     _job_update(runtime, job_id, status="running")
     try:
@@ -350,7 +351,7 @@ def _cached_system_status(config_path_text: str) -> dict[str, Any]:
                 },
                 "source": {
                     "available": False,
-                    "message": "无法完成底图库检查。",
+                    "message": "无法完成素材库检查。",
                 },
             },
             "error": f"{type(exc).__name__}: {exc}",
@@ -482,7 +483,7 @@ def _load_task(
     results: TaskResults = load_task_results(
         task_dir,
         identity_roots=_parse_optional_root(identity_root_text, "身份库根"),
-        source_roots=_parse_optional_root(source_root_text, "底图库根"),
+        source_roots=_parse_optional_root(source_root_text, "素材库根"),
         sample_roots=_parse_optional_root(resource_root_text, "额外批准资源根"),
     )
     _store_results(
@@ -566,14 +567,14 @@ def _humanize_progress(event: Any) -> str:
         if module == "identity":
             return "正在检测人脸、提取身份特征并搜索数据库……"
         if module == "source":
-            return "正在提取底图特征并搜索数据库……"
+            return "正在提取素材特征并搜索数据库……"
         if stage:
             return f"任务进度：{stage}"
         return "正在执行分析任务……"
     message = str(event).strip()
     replacements = {
-        "正在进行人脸身份搜索": "正在检测人脸、提取身份特征并搜索身份数据库",
-        "正在进行原始底图搜索": "正在提取底图特征并搜索底图数据库",
+        "正在进行人脸身份比对": "正在检测人脸、提取身份特征并搜索身份数据库",
+        "正在进行原始素材检索": "正在提取素材特征并搜索素材数据库",
         "正在进行换脸鉴伪": "正在加载 AIGC 模型并检测图像",
     }
     for original, friendly in replacements.items():
@@ -600,14 +601,14 @@ def _start_live_analysis(
         else ()
     )
     source_root = (
-        _parse_optional_root(source_root_text, "底图库")
+        _parse_optional_root(source_root_text, "素材库")
         if "source" in modules
         else ()
     )
     if "identity" in modules and not identity_root:
-        raise ResultDataError("人脸身份搜索必须指定身份库。")
+        raise ResultDataError("人脸身份比对必须指定身份库。")
     if "source" in modules and not source_root:
-        raise ResultDataError("原始底图搜索必须指定底图库。")
+        raise ResultDataError("原始素材检索必须指定素材库。")
 
     _, _, inbox_root = _live_defaults()
     inbox_root.mkdir(parents=True, exist_ok=True)
@@ -672,12 +673,12 @@ def _start_batch_analysis(
         _parse_optional_root(identity_root_text, "身份库") if "identity" in modules else ()
     )
     source_root = (
-        _parse_optional_root(source_root_text, "底图库") if "source" in modules else ()
+        _parse_optional_root(source_root_text, "素材库") if "source" in modules else ()
     )
     if "identity" in modules and not identity_root:
-        raise ResultDataError("人脸身份搜索必须指定身份库。")
+        raise ResultDataError("人脸身份比对必须指定身份库。")
     if "source" in modules and not source_root:
-        raise ResultDataError("原始底图搜索必须指定底图库。")
+        raise ResultDataError("原始素材检索必须指定素材库。")
 
     _, _, inbox_root = _live_defaults()
     inbox_root.mkdir(parents=True, exist_ok=True)
@@ -817,11 +818,11 @@ def _render_loaded_results(mode: str) -> None:
     with st.expander("原始 JSON 与批准资源根"):
         st.markdown("#### 完整任务路径（技术详情）")
         st.code(str(loaded["source_label"]))
-        st.markdown("#### AI 换脸鉴伪 JSON")
+        st.markdown("#### AIGC 鉴伪 JSON")
         st.json(loaded["deepfake"])
-        st.markdown("#### 人脸身份搜索 JSON")
+        st.markdown("#### 人脸身份比对 JSON")
         st.json(loaded["identity"])
-        st.markdown("#### 原始底图搜索 JSON")
+        st.markdown("#### 原始素材检索 JSON")
         st.json(loaded["source"])
         st.markdown("#### 本次批准的资源根")
         for root in loaded["policy"].display_roots():
@@ -844,8 +845,8 @@ def _service_pill(bundle: Mapping[str, Any]) -> str:
     status = _runtime_service_snapshot(bundle)
     ready = [
         bool((status.get(key) or {}).get("ready"))
-        for key in ("deepfake", "identity")
-        if isinstance(status.get(key), Mapping)
+        for key in SERVICE_LABELS
+        if isinstance(status.get(key), Mapping) and status[key].get("state") != "disabled"
     ]
     if ready and all(ready):
         return pill("运行中", "ok")
@@ -858,8 +859,9 @@ def _render_sidebar_readiness(
 ) -> None:
     rows = [
         ("鉴伪模型", _module_pill(modules["deepfake"])),
+        ("通用 AIGC 模型", _module_pill(modules["general_aigc"])),
         ("身份库", _module_pill(modules["identity"])),
-        ("底图库", _module_pill(modules["source"])),
+        ("素材库", _module_pill(modules["source"])),
         ("模型服务", _service_pill(service_bundle)),
     ]
     body = "".join(
@@ -871,7 +873,7 @@ def _render_sidebar_readiness(
 def _render_status_strip(
     snapshot: Mapping[str, Any],
 ) -> tuple[dict[str, ModuleAvailability], tuple[str, str]]:
-    modules = {key: module_availability(snapshot, key) for key in MODULE_KEYS}
+    modules = {key: module_availability(snapshot, key) for key in (*MODULE_KEYS, "general_aigc")}
     device = device_label(snapshot)
     return modules, device
 
@@ -885,13 +887,13 @@ def _render_system_page(
 ) -> None:
     st.subheader("系统状态")
     st.caption("这里列出每个模块实际用到的模型、数据库和运行环境。")
-    columns = st.columns(4)
-    for column, key in zip(columns[:3], MODULE_KEYS, strict=True):
+    columns = st.columns(5)
+    for column, key in zip(columns[:4], ("deepfake", "general_aigc", "identity", "source"), strict=True):
         item = modules[key]
         column.metric(item.title, item.value)
         column.caption(item.caption)
-    columns[3].metric("运算设备", device[0])
-    columns[3].caption(device[1])
+    columns[4].metric("运算设备", device[0])
+    columns[4].caption(device[1])
     if inspection_error:
         st.error(f"系统状态检查失败：{inspection_error}")
 
@@ -905,17 +907,18 @@ def _render_system_page(
             service_status = _runtime_service_snapshot(service_bundle)
             service_ready = {
                 key: bool((service_status.get(key) or {}).get("ready"))
-                for key in ("deepfake", "identity")
+                for key in SERVICE_LABELS
                 if isinstance(service_status.get(key), Mapping)
+                and service_status[key].get("state") != "disabled"
             }
             if _services_starting(service_bundle):
                 st.info("常驻模型服务正在后台启动；身份库首次使用时要先建索引，约需 2 分钟。")
             elif service_bundle.get("manager") is None:
                 st.warning("常驻模型服务未启动；分析会改用隔离子进程，结果相同，只是每次要重新加载模型。")
             elif service_ready and all(service_ready.values()):
-                st.success("鉴伪和身份模型已常驻内存，后续分析可直接复用。")
+                st.success("模型已常驻内存，后续分析可直接复用。")
             else:
-                ready_names = [MODULE_LABELS[key] for key, ready in service_ready.items() if ready]
+                ready_names = [SERVICE_LABELS[key] for key, ready in service_ready.items() if ready]
                 ready_text = "、".join(ready_names) if ready_names else "无"
                 st.warning(
                     f"常驻服务部分可用（已就绪：{ready_text}）；其余模块自动改用隔离子进程。"
@@ -936,7 +939,7 @@ def _render_system_page(
                 st.json(service_status)
     with right:
         with st.container(border=True):
-            st.markdown("#### 底图特征缓存")
+            st.markdown("#### 素材特征缓存")
             source_index = modules["source"].raw.get("index")
             source_index = source_index if isinstance(source_index, Mapping) else {}
             st.write(str(source_index.get("message") or "未配置特征缓存"))
@@ -1003,7 +1006,7 @@ def _render_warm_controls() -> None:
             config, config_path = load_config(APP_CONFIG)
             cache_value = config["source"].get("feature_cache")
             if not cache_value:
-                raise ResultDataError("当前配置没有启用底图特征缓存。")
+                raise ResultDataError("当前配置没有启用素材特征缓存。")
             library = resolve_path(config["source"]["library"], config_path)
             cache_dir = resolve_path(cache_value, config_path)
             new_id = f"warm_{secrets.token_hex(8)}"
@@ -1028,7 +1031,7 @@ def _render_warm_status() -> None:
         return
     status = str(job.get("status"))
     if status in {"queued", "running"}:
-        st.info("正在建立底图特征缓存，图片较多时需要几分钟。")
+        st.info("正在建立素材特征缓存，图片较多时需要几分钟。")
     elif status == "success":
         result = job.get("result") if isinstance(job.get("result"), Mapping) else {}
         st.success(
@@ -1100,7 +1103,7 @@ def _render_active_job() -> None:
             selected_modules=selected,
             job_status=status,
             queued_message=(
-                "当前任务正在等待前一个任务结束；系统按提交顺序串行执行，避免模型与底图库争用。"
+                "当前任务正在等待前一个任务结束；系统按提交顺序串行执行，避免模型与素材库争用。"
                 if status == "queued"
                 else "正在创建独立任务目录……"
             ),
@@ -1200,18 +1203,18 @@ def _render_query_panel(query: Any, routing_edge: int) -> InputPreview | None:
 def _render_library_settings(
     live_config_error: str, default_identity: str, default_source: str
 ) -> tuple[str, str]:
-    with st.expander("高级设置：使用其他身份库或底图库"):
+    with st.expander("高级设置：使用其他身份库或素材库"):
         identity_root_text = st.text_input(
             "本次任务身份库",
             value=default_identity,
             key="live_identity_root",
         )
         source_root_text = st.text_input(
-            "本次任务底图库",
+            "本次任务素材库",
             value=default_source,
             key="live_source_root",
         )
-        st.caption("默认指向系统自带的库；身份库按“人员目录/参考图”组织，底图库是一个图片目录。")
+        st.caption("默认指向系统自带的库；身份库按“人员目录/参考图”组织，素材库是一个图片目录。")
     if live_config_error:
         st.error(f"配置读取失败：{live_config_error}")
     return identity_root_text, source_root_text
@@ -1269,7 +1272,7 @@ def _render_live_mode(
                 label_visibility="collapsed",
                 help=(
                     "上传文件只暂存于本机用户数据目录，调度器为每次分析创建独立任务目录。"
-                    "视频输入会先抽帧选关键帧，再逐帧鉴伪/身份检索，底图检索只用首要帧。"
+                    "视频输入会先抽帧选关键帧，再逐帧鉴伪/身份检索，素材检索只用首要帧。"
                 ),
                 key="live_query",
             )
@@ -1317,17 +1320,17 @@ def _render_live_mode(
             width="stretch",
         )
         deepfake_clicked = columns[1].button(
-            "AI换脸/深伪风险甄别",
+            "AIGC 鉴伪",
             disabled=common_blocked or not modules["deepfake"].runnable,
             width="stretch",
         )
         identity_clicked = columns[2].button(
-            "人脸身份搜索",
+            "人脸身份比对",
             disabled=common_blocked or not modules["identity"].runnable,
             width="stretch",
         )
         source_clicked = columns[3].button(
-            "原始底图搜索",
+            "原始素材检索",
             disabled=common_blocked or not modules["source"].runnable,
             width="stretch",
         )
@@ -1391,8 +1394,8 @@ def _render_batch_job() -> None:
         ("deepfake_score", "鉴伪风险分"),
         ("identity_label", "身份结论"),
         ("identity_top", "身份第一候选"),
-        ("source_label", "底图结论"),
-        ("source_top", "底图第一候选"),
+        ("source_label", "素材结论"),
+        ("source_top", "素材第一候选"),
         ("runtime_seconds", "耗时(秒)"),
     )
     rows = []
@@ -1534,7 +1537,7 @@ def _render_history_mode() -> None:
         st.caption("用于打开其他电脑或旧版本生成的任务目录；只读取结果文件，不会修改。")
         task_dir_text = st.text_input("task_dir", value=default_task_dir)
         identity_root_text = st.text_input("批准的身份库根", value=default_identity_root)
-        source_root_text = st.text_input("批准的底图库根", value=default_source_root)
+        source_root_text = st.text_input("批准的素材库根", value=default_source_root)
         resource_root_text = st.text_input("额外批准资源根（可留空）", value="")
         if st.button(
             "读取 Task Result",
@@ -1564,9 +1567,9 @@ def _render_guide_page() -> None:
 
 | 模块 | 回答的问题 | 怎么读结果 |
 | --- | --- | --- |
-| AI换脸/深伪风险甄别 | 这张图像是否有伪造迹象 | 看证据分带：证据不足 / 需人工复核 / 高风险提示。分数是风险筛查分，不是准确率 |
-| 人脸身份搜索 | 这张脸更像库里的谁 | 看四态结论：高可信候选 / 证据不足 / 库中未发现可靠候选 / 本次无法比对 |
-| 原始底图搜索 | 换脸前的原图可能是哪张 | 同样看四态结论；分数是检索相似度，不是来源概率 |
+| AIGC 鉴伪 | 这张图像是否有伪造迹象 | 看证据分带：证据不足 / 需人工复核 / 高风险提示。分数是风险筛查分，不是准确率 |
+| 人脸身份比对 | 这张脸更像库里的谁 | 看四态结论：高可信候选 / 证据不足 / 库中未发现可靠候选 / 本次无法比对 |
+| 原始素材检索 | 换脸前的原图可能是哪张 | 同样看四态结论；分数是检索相似度，不是来源概率 |
 
 #### 基本流程
 
@@ -1581,13 +1584,13 @@ def _render_guide_page() -> None:
 
 - 系统只提供侦查线索和辅助研判信息，不替代原始介质固定、哈希校验、人工复核或司法鉴定。
 - 三个模块的分数含义不同，不能相加，也没有“综合可信度”。
-- 身份和底图只在当前库内比较：库里没有的人或图不可能被找到，高可信候选也不等于确认身份或来源。
+- 身份和素材只在当前库内比较：库里没有的人或图不可能被找到，高可信候选也不等于确认身份或来源。
 - 鉴伪分带来自小规模定标集：强压缩、大幅缩放、翻拍或来源差异大的图像，分带可能失效。
 - 视频级结论最弱：在 DFDC 真人视频上中/高风险误报达 53.3%，只能作为线索。
 
 #### 常见问题
 
-- **第一次分析为什么慢？** 身份库要建索引，底图库要建特征缓存，只做一次。之后底图检索只需几秒。
+- **第一次分析为什么慢？** 身份库要建索引，素材库要建特征缓存，只做一次。之后素材检索只需几秒。
 - **分析结果在哪里？** 在程序目录旁边的“用户数据”文件夹里，每个任务一个目录。
 - **怎么退出？** 点左下角“关闭系统”，或直接关掉启动时弹出的黑色窗口。
 """
@@ -1596,7 +1599,7 @@ def _render_guide_page() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="换脸寻源系统",
+        page_title="AIGC 鉴伪溯源系统",
         page_icon="🔍",
         layout="wide",
     )
@@ -1612,8 +1615,8 @@ def main() -> None:
 
     with st.sidebar:
         render_html(
-            '<div class="fsts-brand"><div class="fsts-brand-name">换脸寻源系统</div>'
-            '<div class="fsts-brand-sub">AI换脸图像鉴伪与原始素材溯源</div></div>'
+            '<div class="fsts-brand"><div class="fsts-brand-name">AIGC 鉴伪溯源系统</div>'
+            '<div class="fsts-brand-sub">图片和视频的 AIGC 检测与溯源</div></div>'
         )
         mode_options = ["Live Analysis", "Batch Analysis", "Task Result", "System Status", "Guide"]
         if os.environ.get("FSTS_ENABLE_DEV_MOCK") == "1":
@@ -1638,7 +1641,7 @@ def main() -> None:
                 disabled=not identity_names,
             )
             selected_source = st.selectbox(
-                "选择演示底图库",
+                "选择演示素材库",
                 source_names or ["(无演示库)"],
                 disabled=not source_names,
             )
@@ -1653,7 +1656,7 @@ def main() -> None:
             load_button = False
         _render_shutdown(service_bundle)
 
-    st.title("AI换脸涉案图像智能鉴伪与原始素材溯源系统")
+    st.title("AIGC 图像视频鉴伪与溯源系统")
     render_html(
         '<div class="fsts-header">'
         + pill(f"版本 {_product_version()}")

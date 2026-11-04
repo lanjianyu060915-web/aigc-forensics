@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """开放集三态判定层。
 
-背景：v0.4.0 的身份检索与底图检索都是闭集 Top-K 排序，即使查询不属于库内，
+背景：v0.4.0 的身份检索与素材检索都是闭集 Top-K 排序，即使查询不属于库内，
 系统也一定会返回一个「第一名」。本模块把排序结果转成四态结论：
 
 - high_confidence        高可信候选
@@ -11,7 +11,7 @@
 
 判据来源（详见 docs/M1_开放集三态与证据质量层.md）：
 
-- 底图：只有 global_score 在库内命中与库外查询之间完全可分
+- 素材：只有 global_score 在库内命中与库外查询之间完全可分
   （库外 0.502-0.553，库内命中 0.968-0.998）。local_score、RANSAC 内点数、
   Top1-Top2 间隔在两组之间重叠，因此不作判据，只作为证据强度描述。
 - 身份：Top-1 人员均值余弦与 Top1-Top2 间隔均可分（命中 0.559-0.770 /
@@ -187,14 +187,14 @@ def _verdict(
 
 
 # --------------------------------------------------------------------------- #
-# 底图检索
+# 素材检索
 # --------------------------------------------------------------------------- #
 
 def decide_source_open_set(
     result: Mapping[str, Any] | None,
     thresholds: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """底图检索的开放集三态判定。"""
+    """素材检索的开放集三态判定。"""
 
     config, provenance = _threshold_context(thresholds, "source")
     high = _number(config.get("high_global_score"))
@@ -209,14 +209,14 @@ def decide_source_open_set(
     candidates = data.get("candidates")
     threshold_view = {"high_global_score": high, "low_global_score": low, **provenance}
     caveats = [
-        "底图检索为闭集排序，任何查询都会返回 Top-K；本判定说明的是该候选能否单独支撑结论。",
+        "素材检索为闭集排序，任何查询都会返回 Top-K；本判定说明的是该候选能否单独支撑结论。",
         "判定依据是全局相似度，不是「来源确认」；结论仍需与原始文件比对。",
     ]
     if provenance["config_origin"] == "builtin-default":
         caveats.append(UNCALIBRATED_CAVEAT)
 
     if data.get("status") != "success":
-        reason = "本次底图检索未成功完成，没有可判定的候选。"
+        reason = "本次素材检索未成功完成，没有可判定的候选。"
         return _verdict(
             module="source",
             state=STATE_UNAVAILABLE,
@@ -309,7 +309,7 @@ def decide_identity_open_set(
     result: Mapping[str, Any] | None,
     thresholds: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """人脸身份检索的开放集三态判定。"""
+    """人脸身份比对的开放集三态判定。"""
 
     config, provenance = _threshold_context(thresholds, "identity")
     high = _number(config.get("high_similarity"))

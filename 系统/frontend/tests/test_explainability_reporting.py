@@ -205,7 +205,7 @@ def source_result(*, candidates: bool = True, insufficient_matches: bool = False
         rows = [
             {
                 "rank": 1,
-                "file_path": r"D:\底图库\第一候选<script>.jpg",
+                "file_path": r"D:\素材库\第一候选<script>.jpg",
                 "global_score": global_score,
                 "local_score": local,
                 "final_score": final,
@@ -226,7 +226,7 @@ def source_result(*, candidates: bool = True, insufficient_matches: bool = False
             rows.append(
                 {
                     "rank": 2,
-                    "file_path": r"D:\底图库\第二候选.jpg",
+                    "file_path": r"D:\素材库\第二候选.jpg",
                     "global_score": 0.7,
                     "local_score": 0.5,
                     "final_score": 0.59,
@@ -394,9 +394,9 @@ class ExplainabilityTests(unittest.TestCase):
 
     def test_source_empty_library_and_module_failure(self) -> None:
         raw = source_result(candidates=False)
-        raw.update(status="error", error_message="底图库为空", metrics={"library_decoded": 0})
+        raw.update(status="error", error_message="素材库为空", metrics={"library_decoded": 0})
         explanation = build_source_explanation(raw)
-        self.assertIn("底图库为空", explanation["headline"])
+        self.assertIn("素材库为空", explanation["headline"])
         failure = build_deepfake_explanation(
             {
                 "status": "error",
@@ -503,7 +503,7 @@ class ReportBuilderTests(unittest.TestCase):
 
     def test_partial_success_and_skipped_module_still_report(self) -> None:
         source = source_result(candidates=False)
-        source.update(status="error", error_message="底图库为空", metrics={"library_decoded": 0})
+        source.update(status="error", error_message="素材库为空", metrics={"library_decoded": 0})
         with tempfile.TemporaryDirectory() as temporary:
             from PIL import Image
 
@@ -585,7 +585,7 @@ class DataLoaderV3CompatibilityTests(unittest.TestCase):
             source = source_result()
             source["query_image"] = str(query)
             source["explanation"] = [
-                "底图模块真实解释可以按字符串数组持久化。",
+                "素材模块真实解释可以按字符串数组持久化。",
             ]
             source["candidates"] = [source["candidates"][0]]
             source["candidates"][0].update(

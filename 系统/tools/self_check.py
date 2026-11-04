@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""一键自检：用内置示例真实跑一遍三个模块，确认系统可以演示。
+"""一键自检：用内置示例真实跑一遍全部模块，确认系统可以演示。
 
 通过标准只看结果是否与记录一致，不涉及准确率：
-  integrated_query_001.jpg 的身份第一候选应为 person_001，底图第一候选应为 122.jpg，
-  鉴伪应走二代整图分支，所有证据文件都能通过 SHA-256 校验。
+  integrated_query_001.jpg 的身份第一候选应为 person_001，素材第一候选应为 122.jpg，
+  鉴伪应走二代整图分支，通用 AIGC 分支和文件标识解析都要完成，
+  所有证据文件都能通过 SHA-256 校验。
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ def root_path_problem(root: Path) -> str:
         return ""
     return (
         f"所在目录路径 {length} 字符，超过 {MAX_ROOT_PATH_LENGTH} 字符，"
-        "部分证据图可能写不出来；请把整个目录移到短路径，例如 D:\\换脸寻源"
+        "部分证据图可能写不出来；请把整个目录移到短路径，例如 D:\\aigc-forensics"
     )
 
 
@@ -88,10 +89,10 @@ def main() -> int:
             original_file_name=f"自检_{QUERY.name}",
         )
     except Exception as exc:  # noqa: BLE001
-        report(results, "三模块综合分析", False, f"{type(exc).__name__}: {exc}")
+        report(results, "综合分析", False, f"{type(exc).__name__}: {exc}")
         return finish(results)
     elapsed = time.perf_counter() - started
-    report(results, "三模块综合分析", status.get("status") == "success", f"状态 {status.get('status')}，耗时 {elapsed:.1f} 秒")
+    report(results, "综合分析", status.get("status") == "success", f"状态 {status.get('status')}，耗时 {elapsed:.1f} 秒")
 
     task_dir = Path(str(status.get("task_dir")))
     summary = summarize_task(task_dir) or {}
@@ -100,7 +101,7 @@ def main() -> int:
         f"第一候选 {summary.get('identity_top')}（{summary.get('identity_label')}）",
     )
     report(
-        results, "底图检索结果", summary.get("source_top") == EXPECTED_SOURCE,
+        results, "素材检索结果", summary.get("source_top") == EXPECTED_SOURCE,
         f"第一候选 {summary.get('source_top')}（{summary.get('source_label')}）",
     )
     detection = json.loads((task_dir / "detection_result.json").read_text(encoding="utf-8"))
@@ -109,6 +110,17 @@ def main() -> int:
         results, "鉴伪使用二代内核", branch == EXPECTED_BRANCH,
         f"分支 {branch}，结论 {summary.get('deepfake_label')}",
     )
+    general = detection.get("general_aigc") or {}
+    report(
+        results, "通用 AIGC 分支", general.get("status") == "success",
+        f"档位 {general.get('band_label')}，融合分数 {general.get('logit')}，设备 "
+        f"{(general.get('runtime') or {}).get('device_name')}"
+        if general.get("status") == "success"
+        else str(general.get("error_message")),
+    )
+    provenance_path = task_dir / "file_provenance_result.json"
+    provenance = json.loads(provenance_path.read_text(encoding="utf-8")) if provenance_path.is_file() else {}
+    report(results, "文件标识解析", provenance.get("status") == "success", str(provenance.get("verdict_label")))
     evidence_warnings = identity_evidence_warnings(task_dir)
     report(
         results, "身份证据图", not evidence_warnings,

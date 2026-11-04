@@ -55,9 +55,9 @@ def _deepfake_evidence(data: dict[str, Any]) -> dict[str, str]:
     explanation = build_deepfake_explanation(data)
     status = explanation["status"]
     if status == "skipped":
-        return {"title": "AI换脸/深伪风险甄别", "state": "info", "headline": "未运行", "detail": explanation["summary"]}
+        return {"title": "AIGC 鉴伪", "state": "info", "headline": "未运行", "detail": explanation["summary"]}
     if status != "success":
-        return {"title": "AI换脸/深伪风险甄别", "state": "error", "headline": "执行失败", "detail": explanation["summary"]}
+        return {"title": "AIGC 鉴伪", "state": "error", "headline": "执行失败", "detail": explanation["summary"]}
     uncertain = data.get("is_deepfake") is None or str(data.get("label") or "").lower() in UNCERTAIN_DEEPFAKE_LABELS
     state = "warning" if data.get("is_deepfake") is not False or uncertain else "success"
     detail = explanation["summary"]
@@ -66,7 +66,7 @@ def _deepfake_evidence(data: dict[str, Any]) -> dict[str, str]:
     elif uncertain:
         detail += " 证据不足，不能解释为 REAL。"
     return {
-        "title": "AI换脸/深伪风险甄别",
+        "title": "AIGC 鉴伪",
         "state": state,
         "headline": explanation["headline"].replace("检测结论：", ""),
         "detail": detail,
@@ -76,13 +76,13 @@ def _deepfake_evidence(data: dict[str, Any]) -> dict[str, str]:
 def _identity_evidence(data: dict[str, Any]) -> dict[str, str]:
     explanation = build_identity_explanation(data)
     state = "info" if explanation["status"] == "skipped" else "error" if explanation["status"] == "error" else "warning" if not data.get("candidates") else "success"
-    return {"title": "人脸身份搜索", "state": state, "headline": explanation["headline"], "detail": explanation["summary"]}
+    return {"title": "人脸身份比对", "state": state, "headline": explanation["headline"], "detail": explanation["summary"]}
 
 
 def _source_evidence(data: dict[str, Any]) -> dict[str, str]:
     explanation = build_source_explanation(data)
     state = "info" if explanation["status"] == "skipped" else "error" if explanation["status"] == "error" else "warning" if not data.get("candidates") else "success"
-    return {"title": "原始底图搜索", "state": state, "headline": explanation["headline"], "detail": explanation["summary"]}
+    return {"title": "原始素材检索", "state": state, "headline": explanation["headline"], "detail": explanation["summary"]}
 
 
 def build_evidence_summary(
@@ -200,11 +200,11 @@ def _render_limitations(explanation: Mapping[str, Any]) -> None:
 
 
 def render_deepfake_result(data: dict[str, Any]) -> None:
-    st.subheader("AI换脸/深伪风险甄别依据")
+    st.subheader("AIGC 鉴伪依据")
     render_result_header(data)
     explanation = build_deepfake_explanation(data)
     if data["status"] == "skipped":
-        st.info(f"本次未运行AI换脸/深伪风险甄别：{_skip_reason(data)}")
+        st.info(f"本次未运行 AIGC 鉴伪：{_skip_reason(data)}")
         return
     if data["status"] != "success":
         st.error(explanation["summary"])
@@ -300,11 +300,11 @@ def _resolve_deepfake_images(
 
 
 def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolicy) -> None:
-    st.subheader("人脸身份搜索依据")
+    st.subheader("人脸身份比对依据")
     render_result_header(data)
     explanation = build_identity_explanation(data)
     if data["status"] == "skipped":
-        st.info(f"本次任务未运行人脸身份搜索：{_skip_reason(data)}")
+        st.info(f"本次任务未运行人脸身份比对：{_skip_reason(data)}")
         return
     if data["status"] != "success":
         st.error(explanation["headline"])
@@ -382,11 +382,11 @@ def _resolve_masked_image(explanation: Mapping[str, Any], policy: ResourcePathPo
 
 
 def render_source_results(data: dict[str, Any], path_policy: ResourcePathPolicy) -> None:
-    st.subheader("原始底图搜索依据")
+    st.subheader("原始素材检索依据")
     render_result_header(data)
     explanation = build_source_explanation(data)
     if data["status"] == "skipped":
-        st.info(f"本次任务未运行原始底图搜索：{_skip_reason(data)}")
+        st.info(f"本次任务未运行原始素材检索：{_skip_reason(data)}")
         return
     if data["status"] != "success":
         st.error(explanation["headline"])
@@ -401,7 +401,7 @@ def render_source_results(data: dict[str, Any], path_policy: ResourcePathPolicy)
         return
 
     st.success(explanation["headline"])
-    st.info("结果表示当前底图库内最相似候选，不是来源概率，也不等于已经确认原始底图。")
+    st.info("结果表示当前素材库内最相似候选，不是来源概率，也不等于已经确认原始素材。")
     technical = explanation["technical"]
     candidates = technical.get("candidates") if isinstance(technical.get("candidates"), list) else []
     top_metrics = candidates[0] if candidates else {}
@@ -432,7 +432,7 @@ def render_source_results(data: dict[str, Any], path_policy: ResourcePathPolicy)
         if masked_path is not None:
             render_image(masked_path, "屏蔽人脸后的查询图", "source_masked_query")
         elif technical.get("query_face_detected") is False or technical.get("face_mask_applied") is False:
-            st.info("查询图未检测到可屏蔽的人脸区域，本次按完整图像提取底图特征。")
+            st.info("查询图未检测到可屏蔽的人脸区域，本次按完整图像提取素材特征。")
         else:
             st.warning("结果未提供可安全展示的查询图人脸屏蔽图。")
     result_columns = st.columns(2)
@@ -443,7 +443,7 @@ def render_source_results(data: dict[str, Any], path_policy: ResourcePathPolicy)
     _render_basis(explanation)
     _render_warnings(explanation)
     _render_limitations(explanation)
-    with st.expander("展开查看全部底图候选和技术指标"):
+    with st.expander("展开查看全部素材候选和技术指标"):
         for item, candidate_metrics in zip(items, candidates, strict=False):
             st.markdown(
                 f"**第{item['rank']}名 `{display_name(item.get('file_path'))}`**　"

@@ -302,7 +302,7 @@ def _deepfake_kernel_explanation(
     if band == "high":
         output["headline"] = f"深伪风险提示：{band_label or '高风险'}"
         output["warnings"].append(
-            "高风险提示表示本次分数高于校准集真人图分布上界，不代表已确认换脸，"
+            "高风险提示表示本次分数高于校准集真人图分布上界，不代表已确认是生成或换脸内容，"
             "必须结合原始文件与其他证据人工复核。"
         )
     elif band == "medium":
@@ -420,7 +420,7 @@ def _deepfake_video_explanation(
             output["headline"] = f"视频级深伪风险提示：{band_label}（视频级中位分高于校准上界）"
             output["warnings"].append(
                 "视频级中位分高于独立视频校准集真人视频分布的 p99；"
-                "这不代表已确认换脸，必须结合原始视频与其他证据人工复核。"
+                "这不代表已确认是生成或换脸内容，必须结合原始视频与其他证据人工复核。"
             )
         else:
             output["headline"] = (
@@ -428,7 +428,7 @@ def _deepfake_video_explanation(
             )
             output["warnings"].append(
                 "视频级高风险提示表示关键帧分数高于校准集真人图分布上界，"
-                "不代表已确认换脸，必须结合原始视频与其他证据人工复核。"
+                "不代表已确认是生成或换脸内容，必须结合原始视频与其他证据人工复核。"
             )
     elif band == "medium":
         output["headline"] = f"视频级深伪风险提示：{band_label}"
@@ -569,16 +569,64 @@ def _deepfake_video_explanation(
 
 
 def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]:
+    """有通用 AIGC 分支时，结论以总体档位为准，原分支的说明保留在依据里。"""
+    output = _build_branch_explanation(result)
+    data = _mapping(result)
+    overall = _mapping(data.get("overall"))
+    if not overall or output.get("status") != "success":
+        return output
+    general = _mapping(data.get("general_aigc"))
+    branch_headline = _text(output.get("headline"))
+    band_label = _text(overall.get("band_label")) or "未标定"
+    output["headline"] = f"总体结论：{band_label}"
+    summary = [f"总体档位为{band_label}。{_text(overall.get('reason')) or ''}"]
+    if general.get("status") == "success":
+        summary.append(
+            f"通用 AIGC 分支为{_text(general.get('band_label')) or '未标定'}，"
+            f"融合分数 {_fmt(_number(general.get('logit')), 3)}。"
+        )
+    else:
+        summary.append(f"通用 AIGC 分支未完成：{_text(general.get('error_message')) or '未知原因'}。")
+    if _text(output.get("summary")):
+        summary.append(f"整图/人脸分支：{output['summary']}")
+    output["summary"] = "".join(summary)
+    basis = [f"总体档位只由两路档位推导，两路分数不相加（{_text(overall.get('rule'))}）。"]
+    if general.get("status") == "success":
+        branches = _mapping(general.get("branches"))
+        basis.append(
+            "通用 AIGC 分支融合公式：0.8 × [0.5 × CLIP 原头 "
+            f"{_fmt(_number(branches.get('clip_original_logit')), 3)} + 0.5 × 重训头 "
+            f"{_fmt(_number(branches.get('clip_refit_logit')), 3)}] + 0.2 × CommunityForensics "
+            f"{_fmt(_number(branches.get('community_logit')), 3)}。"
+        )
+        if _text(general.get("band_reason")):
+            basis.append(f"通用 AIGC 分支分档依据：{general['band_reason']}")
+    if branch_headline:
+        basis.append(f"整图/人脸分支结论：{branch_headline}。")
+    output["basis"] = [*basis, *output["basis"]]
+    output["warnings"] = [*_strings(general.get("warnings")), *output["warnings"]]
+    output["limitations"] = [*_strings(general.get("limitations")), *output["limitations"]]
+    technical = _mapping(output.get("technical"))
+    technical["overall"] = overall
+    technical["general_aigc"] = {
+        key: general.get(key)
+        for key in ("status", "logit", "score", "band", "band_label", "branches", "model", "media", "runtime")
+    }
+    output["technical"] = technical
+    return output
+
+
+def _build_branch_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]:
     data = _mapping(result)
     output = _base_result("deepfake", data)
     status = output["status"]
     if status == "skipped":
         reason = _text(_mapping(data.get("details")).get("reason")) or "本次任务未选择该模块。"
-        output.update(headline="未运行AI换脸/深伪风险甄别", summary=redact_text(reason))
+        output.update(headline="未运行 AIGC 鉴伪", summary=redact_text(reason))
         return output
     if status == "error":
         message = _text(data.get("error_message")) or "模块未返回可复核结果。"
-        output.update(headline="AI换脸/深伪风险甄别执行失败", summary=redact_text(message))
+        output.update(headline="AIGC 鉴伪执行失败", summary=redact_text(message))
         output["technical"] = {"error_message": message}
         return output
 
@@ -769,14 +817,14 @@ def build_identity_explanation(result: Mapping[str, Any] | None) -> dict[str, An
 
     if status == "skipped":
         reason = _text(_mapping(data.get("details")).get("reason")) or "本次任务未选择该模块。"
-        output.update(headline="未运行人脸身份搜索", summary=redact_text(reason))
+        output.update(headline="未运行人脸身份比对", summary=redact_text(reason))
         return output
     if status == "error":
         message = _text(data.get("error_message")) or "模块未返回可复核结果。"
         if query_face_count == 0 or "no face" in message.lower() or "无人脸" in message:
             headline = "未检测到可用于身份检索的人脸"
         else:
-            headline = "人脸身份搜索执行失败"
+            headline = "人脸身份比对执行失败"
         output.update(headline=headline, summary=redact_text(message))
         identity_decision = decide_identity_open_set(data)
         output["technical"] = {
@@ -993,11 +1041,11 @@ def build_source_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]
 
     if status == "skipped":
         reason = _text(_mapping(data.get("details")).get("reason")) or "本次任务未选择该模块。"
-        output.update(headline="未运行原始底图搜索", summary=redact_text(reason))
+        output.update(headline="未运行原始素材检索", summary=redact_text(reason))
         return output
     if status == "error":
         message = _text(data.get("error_message")) or "模块未返回可复核结果。"
-        headline = "底图库为空或没有可解码图片" if library_decoded == 0 or "empty" in message.lower() or "图库为空" in message else "原始底图搜索执行失败"
+        headline = "素材库为空或没有可解码图片" if library_decoded == 0 or "empty" in message.lower() or "图库为空" in message else "原始素材检索执行失败"
         output.update(headline=headline, summary=redact_text(message))
         source_decision = decide_source_open_set(data)
         output["technical"] = {
@@ -1007,16 +1055,16 @@ def build_source_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]
         }
         output["limitations"].append(
             f"开放集判定为「{source_decision['state_label']}」；"
-            "检索未完成时不能表述为「库中无该底图」。"
+            "检索未完成时不能表述为「库中无该素材」。"
         )
         return output
 
     if not candidates:
-        output.update(headline="当前底图库未返回候选", summary="检索已完成，但结果中没有可展示的库内候选。")
+        output.update(headline="当前素材库未返回候选", summary="检索已完成，但结果中没有可展示的库内候选。")
         output["warnings"].append("没有候选分数可用于排序解释。")
     else:
         top1 = candidates[0]
-        output["headline"] = f"当前底图库内最相似候选：{top1['file_name']}"
+        output["headline"] = f"当前素材库内最相似候选：{top1['file_name']}"
         output["summary"] = (
             f"第一候选的全局相似度为{_fmt(top1['global_score'])}，"
             f"局部相似度为{_fmt(top1['local_score'])}，最终相似度为{_fmt(top1['final_score'])}。"
@@ -1034,9 +1082,9 @@ def build_source_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]
         output["warnings"].append("候选分数复算的Top1与Top2差值和结果诊断字段不一致；解释采用候选原始分数复算值。")
 
     if face_mask_applied is True:
-        output["basis"].append("系统已屏蔽查询图片中的主要人脸区域，以降低身份区域对底图检索的干扰。")
+        output["basis"].append("系统已屏蔽查询图片中的主要人脸区域，以降低身份区域对素材检索的干扰。")
     elif query_face_detected is False or face_mask_applied is False:
-        output["basis"].append("查询图未检测到可屏蔽的人脸区域，本次按完整图像提取底图特征。")
+        output["basis"].append("查询图未检测到可屏蔽的人脸区域，本次按完整图像提取素材特征。")
     else:
         output["basis"].append("兼容结果未记录查询图人脸屏蔽状态，不能据此声称已成功屏蔽。")
     output["basis"].append("系统利用颜色、灰度、边缘和外围区域等全局特征进行库内粗检索，再对粗排候选执行SIFT局部复核。")
@@ -1097,7 +1145,7 @@ def build_source_explanation(result: Mapping[str, Any] | None) -> dict[str, Any]
     source_decision = decide_source_open_set(data)
     output["limitations"].append(
         f"开放集判定为「{source_decision['state_label']}」；"
-        "这是带拒识阈值的三态结论；最相似候选不能表述为已确认原始底图。"
+        "这是带拒识阈值的三态结论；最相似候选不能表述为已确认原始素材。"
     )
     output["basis"].append(f"开放集判定依据：{source_decision['reasons'][0]}")
     for reason in source_decision["reasons"][1:]:

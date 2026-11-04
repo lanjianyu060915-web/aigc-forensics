@@ -96,7 +96,7 @@ $env:STREAMLIT_BROWSER_GATHER_USAGE_STATS = "false"
 $InstallRoot = Split-Path -Parent $ProductRoot
 if ($InstallRoot.Length -gt 60) {
     # Windows 默认路径上限 260 字符，目录太深时部分证据图会写不出来。
-    Write-Warning "所在目录路径 $($InstallRoot.Length) 字符，超过 60 字符，部分证据图可能写不出来。建议把整个目录移到短路径，例如 D:\换脸寻源。"
+    Write-Warning "所在目录路径 $($InstallRoot.Length) 字符，超过 60 字符，部分证据图可能写不出来。建议把整个目录移到短路径，例如 D:\aigc-forensics。"
 }
 
 $FrontendPython = Resolve-FrontendPython

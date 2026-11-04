@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""逐案例比对：冻结 source_search.exe 与带特征缓存的 Python 底图检索。
+"""逐案例比对：冻结 source_search.exe 与带特征缓存的 Python 素材检索。
 
 用法：
-  python -B tools/verify_source_cache.py --queries <目录或文件...> --library <底图库> --out <输出 JSON>
+  python -B tools/verify_source_cache.py --queries <目录或文件...> --library <素材库> --out <输出 JSON>
 只读输入，所有产物写到 --work 指定的目录。Top-K 顺序不同或分数差超过容差即判不通过。
 """
 

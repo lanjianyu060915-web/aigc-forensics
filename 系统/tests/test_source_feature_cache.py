@@ -28,7 +28,7 @@ def _scene(seed: int, height: int = 240, width: int = 320) -> np.ndarray:
 
 
 def _library(tmp_path: Path, count: int = 8) -> tuple[Path, Path]:
-    library = tmp_path / "中文 底图库"
+    library = tmp_path / "中文 素材库"
     for index in range(count):
         write_image(library / f"scene_{index:02d}.jpg", _scene(100 + index))
     query = tmp_path / "查询 图.jpg"

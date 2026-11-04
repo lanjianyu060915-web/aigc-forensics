@@ -277,17 +277,26 @@ def run_checks(config_path: str | Path = DEFAULT_CONFIG) -> list[CheckResult]:
             resolved_config,
             "source",
             ("executable", "python"),
-            "底图运行器",
+            "素材运行器",
         ),
         _check_library(config, resolved_config, "identity", "identity_library"),
         _check_library(config, resolved_config, "source", "source_library"),
     ]
     checks.extend(_check_models(config, resolved_config))
     system = inspect_system_status(resolved_config)
+    general = system.get("general_aigc")
+    if isinstance(general, dict) and general.get("status") != "disabled":
+        checks.append(
+            CheckResult(
+                "PASS" if general.get("available") else "FAIL",
+                "通用 AIGC 引擎/模型包",
+                str(general.get("message")),
+            )
+        )
     for module_name, item in (
         ("deepfake", "AIGC EXE/模型/config/SHA"),
         ("identity", "身份库/embedding/index"),
-        ("source", "底图库/实时扫描状态"),
+        ("source", "素材库/实时扫描状态"),
     ):
         module = system[module_name]
         checks.append(

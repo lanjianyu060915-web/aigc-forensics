@@ -222,11 +222,11 @@ class StreamlitSmokeTests(unittest.TestCase):
         self.assertFalse(app.exception)
         self.assertEqual(
             app.title[0].value,
-            "AI换脸涉案图像智能鉴伪与原始素材溯源系统",
+            "AIGC 图像视频鉴伪与溯源系统",
         )
         labels = {button.label for button in app.button}
         self.assertTrue(
-            {"AI换脸/深伪风险甄别", "人脸身份搜索", "原始底图搜索", "一键综合分析"}
+            {"AIGC 鉴伪", "人脸身份比对", "原始素材检索", "一键综合分析"}
             <= labels
         )
         self.assertNotIn("加载 Mock 演示", labels)
@@ -238,7 +238,7 @@ class StreamlitSmokeTests(unittest.TestCase):
         self.assertNotIn('value=str(IDENTITY_LIBRARY_ROOT / "demo")', source)
         self.assertNotIn('value=str(SOURCE_LIBRARY_ROOT / "demo")', source)
 
-    def test_mock_mode_loads_five_evidence_pages(self) -> None:
+    def test_mock_mode_loads_evidence_pages(self) -> None:
         config = FRONTEND_ROOT / "tests" / "disabled_services_config.json"
         with patch.dict(
             os.environ,
@@ -257,8 +257,9 @@ class StreamlitSmokeTests(unittest.TestCase):
             [
                 "研判总览",
                 "AIGC鉴伪证据",
-                "人脸身份检索",
-                "原始底图溯源",
+                "文件标识",
+                "人脸身份比对",
+                "原始素材溯源",
                 "证据链与完整报告",
             ],
         )

@@ -19,9 +19,9 @@ from .explainability import build_explanations, display_name, redact_text
 from decision.evidence_matrix import build_evidence_matrix
 
 
-DEFAULT_PRODUCT_NAME = "AI换脸涉案图像智能鉴伪与原始素材溯源系统"
+DEFAULT_PRODUCT_NAME = "AIGC 图像视频鉴伪与溯源系统"
 DEFAULT_DISCLAIMER = (
-    "本系统用于深度伪造风险筛查、身份候选检索和底图候选检索，仅提供侦查线索和辅助研判信息，"
+    "本系统用于深度伪造风险筛查、身份候选检索和素材候选检索，仅提供侦查线索和辅助研判信息，"
     "不替代原始介质固定、哈希校验、人工复核或司法鉴定。"
 )
 _SAFE_COMPONENT_RE = re.compile(r"[^0-9A-Za-z._\-\u3400-\u9fff]+")
@@ -304,6 +304,7 @@ def build_final_report(
     product_version: str = "0.3",
     generated_at: str | None = None,
     input_metadata: Mapping[str, Any] | None = None,
+    file_provenance: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create the single structured source used by every report renderer."""
 
@@ -374,6 +375,7 @@ def build_final_report(
             "note": "三类证据并列呈现，不计算跨模块综合概率。",
         },
         "disclaimer": DEFAULT_DISCLAIMER,
+        "file_provenance": deepcopy(_json_value(_mapping(file_provenance))),
         "provenance": {
             "task_status": deepcopy(_json_value(status_data)),
             "unified_result": deepcopy(_json_value(unified)),
@@ -405,7 +407,7 @@ def _evidence_matrix_lines(
     """构造证据质量矩阵章节；只做逐模块分级，不合并跨模块数值。"""
 
     matrix = build_evidence_matrix(deepfake, identity, source)
-    module_labels = {"deepfake": "AIGC鉴伪", "identity": "人脸身份检索", "source": "原始底图溯源"}
+    module_labels = {"deepfake": "AIGC鉴伪", "identity": "人脸身份比对", "source": "原始素材溯源"}
     lines = [
         "",
         "五、证据质量矩阵（研判卡）",
@@ -438,6 +440,35 @@ def _evidence_matrix_lines(
     return lines
 
 
+def _file_provenance_lines(provenance: Mapping[str, Any]) -> list[str]:
+    """文件自带的生成标识：只陈列文件里实际存在的内容。"""
+
+    if not provenance:
+        return []
+    lines = ["", "文件标识（不跑模型，只读文件元数据）"]
+    if provenance.get("status") != "success":
+        lines.append(f"解析未完成：{redact_text(provenance.get('error_message'))}")
+        return lines
+    lines.append(f"结论：{_text(provenance.get('verdict_label'))}")
+    labels = provenance.get("aigc_labels")
+    for item in labels if isinstance(labels, list) else []:
+        label = _mapping(item)
+        lines.append(
+            f"- {_text(label.get('standard'))} 标识：{_text(label.get('label_meaning'))}；"
+            f"生成服务方 {_text(label.get('content_producer') or None, '未填写')}；"
+            f"传播平台 {_text(label.get('content_propagator') or None, '未填写')}"
+        )
+    c2pa = _mapping(provenance.get("c2pa"))
+    if c2pa.get("present"):
+        lines.append(f"- 存在 C2PA 内容凭证结构（{_text(c2pa.get('note'))}）")
+    hints = provenance.get("generator_hints")
+    for item in hints if isinstance(hints, list) else []:
+        hint = _mapping(item)
+        lines.append(f"- 生成工具痕迹（{_text(hint.get('source'))}）：{redact_text(str(hint.get('value'))[:200])}")
+    _append_list(lines, provenance.get("limitations"))
+    return lines
+
+
 def render_text_report(report: Mapping[str, Any]) -> str:
     """Render a UTF-8-friendly Chinese report without ordinary-view full paths."""
 
@@ -466,7 +497,7 @@ def render_text_report(report: Mapping[str, Any]) -> str:
         f"总耗时：{_fmt(runtimes.get('total'))} 秒",
         f"AIGC模块耗时：{_fmt(runtimes.get('deepfake'))} 秒",
         f"身份搜索耗时：{_fmt(runtimes.get('identity'))} 秒",
-        f"底图搜索耗时：{_fmt(runtimes.get('source'))} 秒",
+        f"素材搜索耗时：{_fmt(runtimes.get('source'))} 秒",
     ]
     video_input = _mapping(input_data.get("video"))
     if video_input:
@@ -483,13 +514,15 @@ def render_text_report(report: Mapping[str, Any]) -> str:
             ]
         )
 
+    lines.extend(_file_provenance_lines(_mapping(report.get("file_provenance"))))
+
     deepfake_raw, deepfake = _module(report, "deepfake")
     dt = _mapping(deepfake.get("technical"))
     df_formula = _mapping(dt.get("formula"))
     lines.extend(
         [
             "",
-            "二、AI换脸/深伪风险甄别",
+            "二、AIGC 鉴伪",
             f"模块状态：{_text(deepfake.get('status'))}",
             f"结论：{_text(deepfake.get('headline'))}",
             f"检测方法：{_text(dt.get('method_name'))}",
@@ -586,7 +619,7 @@ def render_text_report(report: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "三、人脸身份搜索",
+            "三、人脸身份比对",
             f"模块状态：{_text(identity.get('status'))}",
             f"结论：{_text(identity.get('headline'))}",
             f"查询图检测到人脸数量：{_text(it.get('query_face_count'))}",
@@ -626,13 +659,13 @@ def render_text_report(report: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "四、原始底图搜索",
+            "四、原始素材检索",
             f"模块状态：{_text(source.get('status'))}",
             f"结论：{_text(source.get('headline'))}",
             f"是否检测到查询图人脸：{_yes_no(st.get('query_face_detected'))}",
             f"是否应用人脸屏蔽：{_yes_no(st.get('face_mask_applied'))}",
             f"屏蔽图：{display_name(st.get('masked_query_path'))}",
-            f"底图库文件数：{_text(st.get('library_file_count'))}",
+            f"素材库文件数：{_text(st.get('library_file_count'))}",
             f"实际读取图片数：{_text(st.get('library_decoded'))}",
             f"跳过图片数：{_text(st.get('library_skipped'))}",
             f"粗排候选数量：{_text(st.get('shortlist_size'))}",
@@ -665,7 +698,7 @@ def render_text_report(report: Mapping[str, Any]) -> str:
         lines.append("无候选")
     lines.append("为什么第一候选排在第一：")
     _append_list(lines, source.get("basis"))
-    lines.append("说明：结果仅表示当前底图库内最相似候选，不能单独确认原始底图。")
+    lines.append("说明：结果仅表示当前素材库内最相似候选，不能单独确认原始素材。")
     lines.append("警告与限制：")
     _append_list(lines, [*(source.get("warnings") or []), *(source.get("limitations") or [])])
 
@@ -679,7 +712,7 @@ def render_text_report(report: Mapping[str, Any]) -> str:
             "六、并列证据总结",
             f"AIGC模块：{redact_text(summary.get('deepfake'))}",
             f"身份搜索模块：{redact_text(summary.get('identity'))}",
-            f"底图搜索模块：{redact_text(summary.get('source'))}",
+            f"素材搜索模块：{redact_text(summary.get('source'))}",
             "本报告不生成跨模块综合概率。",
             "",
             _text(report.get("disclaimer"), DEFAULT_DISCLAIMER),
@@ -776,6 +809,7 @@ def generate_task_reports(
     identity = _mapping(identity_result) or _read_optional_json(root / "identity_result.json")
     source = _mapping(source_result) or _read_optional_json(root / "source_result.json")
     unified = _mapping(unified_result) or _read_optional_json(root / "unified_result.json")
+    file_provenance = _read_optional_json(root / "file_provenance_result.json")
     resolved_task_id = str(task_id or status_data.get("task_id") or root.name)
     report = build_final_report(
         resolved_task_id,
@@ -787,6 +821,7 @@ def generate_task_reports(
         product_name=product_name,
         product_version=product_version,
         generated_at=generated_at,
+        file_provenance=file_provenance,
         input_metadata=_task_input_metadata(root, _query_value(
             {"deepfake": deepfake, "identity": identity, "source": source}, status_data
         )),

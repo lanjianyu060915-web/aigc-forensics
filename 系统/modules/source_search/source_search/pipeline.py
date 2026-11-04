@@ -144,7 +144,7 @@ def search_source_images(
         progress_reporter,
         "read_source_query",
         "running",
-        "正在读取底图检索查询图片。",
+        "正在读取素材检索查询图片。",
         progress_percent=None,
         details={"query_file_name": query_path.name},
         force=True,
@@ -156,7 +156,7 @@ def search_source_images(
         progress_reporter,
         "read_source_query",
         "success",
-        "底图检索查询图片读取完成。",
+        "素材检索查询图片读取完成。",
         progress_percent=None,
         details={
             "query_file_name": query_path.name,
@@ -245,7 +245,7 @@ def search_source_images(
                 kind="source_face_masked_query",
                 path=masked_query_path,
                 task_dir=output_dir,
-                description="实际用于底图全局检索的查询图人脸屏蔽结果。",
+                description="实际用于素材全局检索的查询图人脸屏蔽结果。",
             ),
         ]
     )
@@ -285,7 +285,7 @@ def search_source_images(
             progress_reporter,
             "decode_source_library",
             "running",
-            f"正在读取底图库：{current} / {total}",
+            f"正在读取素材库：{current} / {total}",
             progress_current=current,
             progress_total=total,
             # Decoding is preparatory work and is not assigned an invented share
@@ -314,7 +314,7 @@ def search_source_images(
             feature_cache = None
             cached_entries = []
             evidence_warnings.append(
-                f"底图特征缓存不可用，已回退实时扫描：{type(exc).__name__}: {exc}"
+                f"素材特征缓存不可用，已回退实时扫描：{type(exc).__name__}: {exc}"
             )
     if feature_cache is None:
         library, skipped = scan_library(
@@ -353,7 +353,7 @@ def search_source_images(
             progress_reporter,
             "scan_source_library",
             "running",
-            f"正在扫描底图库：{current} / {library_decoded}",
+            f"正在扫描素材库：{current} / {library_decoded}",
             progress_current=current,
             progress_total=library_decoded,
             progress_percent=100.0 * current / total_measured_work,
@@ -586,7 +586,7 @@ def search_source_images(
                     path=candidate_image_artifact_path,
                     task_dir=output_dir,
                     description=(
-                        f"最终第{rank}候选的实际底图库图像："
+                        f"最终第{rank}候选的实际素材库图像："
                         f"{candidate.path.name}。"
                     ),
                 ),
@@ -829,11 +829,11 @@ def search_source_images(
     warnings: list[str] = list(evidence_warnings)
     if q_box is None:
         warnings.append(
-            "查询图未检测到可屏蔽的人脸区域，本次按完整图像提取底图特征。"
+            "查询图未检测到可屏蔽的人脸区域，本次按完整图像提取素材特征。"
         )
     if skipped:
         warnings.append(
-            f"底图库中有 {len(skipped)} 张图片无法解码，已跳过。"
+            f"素材库中有 {len(skipped)} 张图片无法解码，已跳过。"
         )
 
     explanations: list[str] = []
@@ -941,7 +941,7 @@ def search_source_images(
                 "face_mask_applied": q_box is not None,
                 "masked_pixel_count": int((q_mask == 0).sum()),
                 "mask_purpose": (
-                    "降低换脸区域对原始场景底图检索的干扰；未检测到人脸时使用完整图像。"
+                    "降低换脸区域对原始场景素材检索的干扰；未检测到人脸时使用完整图像。"
                 ),
             },
             "global_stage": {
@@ -1018,7 +1018,7 @@ def search_source_images(
         "explanation": explanations,
         "warnings": warnings,
         "limitations": [
-            "结果是当前底图库内的候选排序，不构成原始底图确认。",
+            "结果是当前素材库内的候选排序，不构成原始素材确认。",
             "分数是检索相似度，不是来源概率。",
         ],
         "runtime": {"seconds": runtime_seconds},
@@ -1034,7 +1034,7 @@ def search_source_images(
         progress_reporter,
         "source_search_complete",
         "success",
-        "底图候选重排和匹配可视化已完成。",
+        "素材候选重排和匹配可视化已完成。",
         progress_percent=100.0,
         details={
             "library_decoded": library_decoded,

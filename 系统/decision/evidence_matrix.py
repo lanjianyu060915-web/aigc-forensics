@@ -2,7 +2,7 @@
 """证据质量层：把三个模块的结果整理成「证据矩阵」，不做跨模块数值相加。
 
 设计要点：
-- 三个模块的数值性质不同（鉴伪是模型风险分、身份是余弦相似度、底图是自定义
+- 三个模块的数值性质不同（鉴伪是模型风险分、身份是余弦相似度、素材是自定义
   融合分），因此本层只做证据质量分级与证据罗列，不产生「综合可信度」。
 - 每个模块的等级必须可追溯到结果文件中的具体字段。
 - 判定结论复用 decision.open_set 的三态结果。
@@ -60,6 +60,19 @@ def _deepfake_block(result: Mapping[str, Any]) -> dict[str, Any]:
             "primary_label": "深伪风险筛查分",
             "text": "本次AIGC鉴伪未成功完成。",
         }
+    overall = _mapping(data.get("overall"))
+    if overall.get("band") in BAND_GRADES:
+        general = _mapping(data.get("general_aigc"))
+        return {
+            "available": True,
+            "grade": str(overall["band"]),
+            "grade_label": str(overall.get("band_label") or BAND_GRADES[str(overall["band"])]),
+            "primary_value": _number(general.get("logit")),
+            "primary_label": "通用 AIGC 融合分数",
+            "branch": "two_branch",
+            "band_reason": overall.get("reason"),
+            "text": f"总体档位：{overall.get('band_label')}",
+        }
     band = details.get("band")
     if isinstance(band, str) and band in BAND_GRADES:
         grade = band
@@ -109,10 +122,10 @@ def _input_quality_block(
     if detection is not None:
         notes.append(f"查询图人脸检测分为 {detection:.4f}。")
     if source_metrics.get("query_face_detected") is False:
-        notes.append("底图检索未在查询图中检出人脸，掩膜未生效，全局特征包含人脸区域。")
+        notes.append("素材检索未在查询图中检出人脸，掩膜未生效，全局特征包含人脸区域。")
     query_keypoints = _integer(_mapping(source.get("metrics")).get("query_keypoint_count"))
     if query_keypoints is not None:
-        notes.append(f"底图检索查询图关键点数为 {query_keypoints}。")
+        notes.append(f"素材检索查询图关键点数为 {query_keypoints}。")
     if identity.get("status") == "success" and source_metrics.get("query_face_detected") is not False:
         grade = "良好"
     elif identity.get("status") == "success" or source_metrics.get("query_face_detected"):
@@ -139,7 +152,7 @@ def _library_coverage_block(identity: Mapping[str, Any], source: Mapping[str, An
     if skipped:
         notes.append(f"身份库有 {skipped} 张参考图未形成有效特征，对应身份可能覆盖不全。")
     if library_files is not None:
-        notes.append(f"底图库 {library_files} 张，已解码 {decoded} 张。")
+        notes.append(f"素材库 {library_files} 张，已解码 {decoded} 张。")
     covered = bool(identities) and bool(valid_embeddings)
     return {
         "identity_identities": identities,
@@ -164,7 +177,7 @@ def _geometry_block(source: Mapping[str, Any]) -> dict[str, Any]:
             "grade": "不适用",
             "inlier_count": None,
             "inlier_ratio": None,
-            "note": "本次底图检索没有可用的几何复核结果。",
+            "note": "本次素材检索没有可用的几何复核结果。",
         }
     if inliers >= 200:
         grade = "强"
@@ -234,16 +247,16 @@ def build_evidence_matrix(
         decision = modules[key]["decision"]
         if decision["state"] == STATE_NONE:
             open_set_notes.append(
-                f"{'身份' if key == 'identity' else '底图'}检索："
+                f"{'身份' if key == 'identity' else '素材'}检索："
                 "当前候选低于拒识阈值，属于库外风险。"
             )
         elif decision["state"] == STATE_INSUFFICIENT:
             open_set_notes.append(
-                f"{'身份' if key == 'identity' else '底图'}检索：候选落在不确定带内，需人工复核。"
+                f"{'身份' if key == 'identity' else '素材'}检索：候选落在不确定带内，需人工复核。"
             )
         elif decision["state"] == STATE_UNAVAILABLE:
             open_set_notes.append(
-                f"{'身份' if key == 'identity' else '底图'}检索：本次无法完成比对，"
+                f"{'身份' if key == 'identity' else '素材'}检索：本次无法完成比对，"
                 "不能据此得出「库中无该对象」的结论。"
             )
 

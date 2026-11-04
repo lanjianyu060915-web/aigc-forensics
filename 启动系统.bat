@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 chcp 65001 >nul
-title 换脸寻源系统 2.1
+title AIGC 鉴伪溯源系统 3.0
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0系统\start.ps1"
 if errorlevel 1 (
   echo.

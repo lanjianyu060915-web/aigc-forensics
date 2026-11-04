@@ -442,23 +442,23 @@ def test_annotate_single_frame_marks_video_role_and_frame():
     payload = {
         "status": "success",
         "candidates": [],
-        "limitations": ["底图检索为开放集候选排序。"],
+        "limitations": ["素材检索为开放集候选排序。"],
         "runtime": {},
     }
 
     output = annotate_single_frame(
         payload,
         frame={"frame_rank": 1, "file_name": "frame_001.jpg", "timestamp_seconds": 1.2},
-        role="底图检索（视频首要帧）",
+        role="素材检索（视频首要帧）",
     )
 
     assertion = output["details"]["video_aggregation"]
     assert assertion["rule"] == "primary_frame"
-    assert assertion["role"] == "底图检索（视频首要帧）"
+    assert assertion["role"] == "素材检索（视频首要帧）"
     assert assertion["frame"]["file_name"] == "frame_001.jpg"
     assert output["frame_evidence"][0]["status"] == "success"
     assert output["runtime"]["frames_analyzed"] == 1
-    assert "底图检索为开放集候选排序。" in output["limitations"]
+    assert "素材检索为开放集候选排序。" in output["limitations"]
 
 
 def test_build_video_summary_reads_runner_policy_and_module_fields():
