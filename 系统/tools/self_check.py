@@ -3,7 +3,7 @@
 
 通过标准只看结果是否与记录一致，不涉及准确率：
   integrated_query_001.jpg 的身份第一候选应为 person_001，素材第一候选应为 122.jpg，
-  鉴伪应走二代整图分支，通用 AIGC 分支和文件标识解析都要完成，
+  整图分支应走 ViT 模型，通用 AIGC 分支、人脸分支和文件标识解析都要完成，
   所有证据文件都能通过 SHA-256 校验。
 """
 
@@ -107,7 +107,7 @@ def main() -> int:
     detection = json.loads((task_dir / "detection_result.json").read_text(encoding="utf-8"))
     branch = (detection.get("method") or {}).get("branch")
     report(
-        results, "鉴伪使用二代内核", branch == EXPECTED_BRANCH,
+        results, "整图分支走 ViT 模型", branch == EXPECTED_BRANCH,
         f"分支 {branch}，结论 {summary.get('deepfake_label')}",
     )
     general = detection.get("general_aigc") or {}
@@ -117,6 +117,13 @@ def main() -> int:
         f"{(general.get('runtime') or {}).get('device_name')}"
         if general.get("status") == "success"
         else str(general.get("error_message")),
+    )
+    face = general.get("face_branch") or {}
+    report(
+        results, "人脸分支", face.get("status") == "success" and bool(face.get("crops")),
+        f"档位 {face.get('band_label')}，裁剪图均值分数 {face.get('logit')}"
+        if face.get("status") == "success"
+        else str(face.get("error_message") or face.get("status")),
     )
     provenance_path = task_dir / "file_provenance_result.json"
     provenance = json.loads(provenance_path.read_text(encoding="utf-8")) if provenance_path.is_file() else {}

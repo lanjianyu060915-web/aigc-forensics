@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 860" width="1280" height="860" font-family="'Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#52606d"/>
+    </marker>
+    <style>
+      .title { font-size: 26px; font-weight: 700; fill: #1b2733; }
+      .h { font-size: 19px; font-weight: 700; fill: #1b2733; }
+      .h2 { font-size: 17px; font-weight: 700; fill: #1b2733; }
+      .t { font-size: 15px; fill: #3e4c59; }
+      .s { font-size: 14px; fill: #52606d; }
+      .tag { font-size: 14px; font-weight: 700; }
+      .box { fill: #ffffff; stroke: #cbd2d9; stroke-width: 1.5; rx: 8; }
+      .group { fill: #f5f7fa; stroke: #cbd2d9; stroke-width: 1.5; rx: 12; }
+      .accent { fill: #e8f0f7; stroke: #1f4e79; stroke-width: 2; rx: 8; }
+      .line { stroke: #52606d; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+  <rect width="1280" height="860" fill="#ffffff"/>
+  <text x="640" y="42" text-anchor="middle" class="title">AIGC 图像视频鉴伪与溯源系统原理结构图</text>
+
+  <!-- input -->
+  <rect x="330" y="66" width="620" height="82" class="accent"/>
+  <text x="640" y="98" text-anchor="middle" class="h">输入固化与预处理</text>
+  <text x="640" y="125" text-anchor="middle" class="t">图片或视频复制进任务目录并记录 SHA-256；视频抽帧、逐帧检测人脸、选 5 个关键帧</text>
+
+  <path d="M 640 148 L 640 176 M 190 176 L 1100 176" class="line"/>
+  <path d="M 190 176 L 190 204" class="line" marker-end="url(#arrow)"/>
+  <path d="M 640 176 L 640 204" class="line" marker-end="url(#arrow)"/>
+  <path d="M 1100 176 L 1100 204" class="line" marker-end="url(#arrow)"/>
+
+  <!-- provenance -->
+  <rect x="30" y="206" width="320" height="432" class="group"/>
+  <text x="190" y="238" text-anchor="middle" class="h">第一层溯源：文件标识</text>
+  <text x="190" y="262" text-anchor="middle" class="s">不跑模型，只读文件本身</text>
+  <rect x="50" y="280" width="280" height="96" class="box"/>
+  <text x="66" y="308" class="h2">GB 45438-2025 隐式标识</text>
+  <text x="66" y="334" class="t">图片和视频元数据里的 AIGC 字段</text>
+  <text x="66" y="358" class="t">属于 / 可能 / 疑似三类标记</text>
+  <rect x="50" y="388" width="280" height="96" class="box"/>
+  <text x="66" y="416" class="h2">C2PA 内容凭证</text>
+  <text x="66" y="442" class="t">只识别文件里的容器结构</text>
+  <text x="66" y="466" class="t">不验证签名，不代表可信</text>
+  <rect x="50" y="496" width="280" height="96" class="box"/>
+  <text x="66" y="524" class="h2">XMP 和生成工具痕迹</text>
+  <text x="66" y="550" class="t">DigitalSourceType、生成工具字段</text>
+  <text x="66" y="574" class="t">编码器和软件字段</text>
+  <text x="190" y="620" text-anchor="middle" class="s">有标识是线索，没有标识不说明任何事</text>
+
+  <!-- detection -->
+  <rect x="370" y="206" width="540" height="432" class="group"/>
+  <text x="640" y="238" text-anchor="middle" class="h">三路 AIGC 检测</text>
+  <text x="640" y="262" text-anchor="middle" class="s">各路分别标定，分数不相加</text>
+
+  <rect x="390" y="280" width="164" height="212" class="box"/>
+  <text x="472" y="308" text-anchor="middle" class="h2">通用 AIGC 分支</text>
+  <text x="404" y="336" class="t">CLIP 视觉特征</text>
+  <text x="404" y="358" class="t">原检测头 + 3 个</text>
+  <text x="404" y="380" class="t">重训头（占 0.8）</text>
+  <text x="404" y="402" class="t">CF384 整帧（0.2）</text>
+  <text x="404" y="430" class="s">视频 10 帧 × 5 裁剪</text>
+  <text x="404" y="452" class="s">图片 1 帧 × 5 裁剪</text>
+  <text x="472" y="480" text-anchor="middle" class="tag" fill="#1f4e79">定主结论</text>
+
+  <rect x="558" y="280" width="164" height="212" class="box"/>
+  <text x="640" y="308" text-anchor="middle" class="h2">人脸分支</text>
+  <text x="572" y="336" class="t">最大人脸方形裁剪</text>
+  <text x="572" y="358" class="t">边距 1.3 倍</text>
+  <text x="572" y="380" class="t">CF384 打裁剪图</text>
+  <text x="572" y="402" class="t">多张取均值</text>
+  <text x="572" y="430" class="s">视频用关键帧的人脸框</text>
+  <text x="572" y="452" class="s">没有人脸时不参与</text>
+  <text x="640" y="480" text-anchor="middle" class="tag" fill="#1f4e79">最多抬一级</text>
+
+  <rect x="726" y="280" width="164" height="212" class="box"/>
+  <text x="808" y="308" text-anchor="middle" class="h2">整图分支</text>
+  <text x="740" y="336" class="t">短边 ≥ 256：</text>
+  <text x="740" y="358" class="t">CF384 ONNX</text>
+  <text x="740" y="380" class="t">短边 &lt; 256：</text>
+  <text x="740" y="402" class="t">冻结裁剪模型</text>
+  <text x="740" y="430" class="s">视频按关键帧聚合</text>
+  <text x="740" y="452" class="s">边界只适合高清人像</text>
+  <text x="808" y="480" text-anchor="middle" class="tag" fill="#52606d">只作提示</text>
+
+  <path d="M 472 492 L 472 526" class="line" marker-end="url(#arrow)"/>
+  <path d="M 640 492 L 640 526" class="line" marker-end="url(#arrow)"/>
+  <path d="M 808 492 L 808 526" class="line" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+  <rect x="390" y="528" width="500" height="92" class="accent"/>
+  <text x="640" y="560" text-anchor="middle" class="h">总体档位（只由档位推导）</text>
+  <text x="640" y="590" text-anchor="middle" class="t">证据不足 ／ 需人工复核 ／ 高风险提示</text>
+  <text x="640" y="610" text-anchor="middle" class="s">边界取真实样本分数的 p95 和 p99，不是概率</text>
+
+  <!-- trace -->
+  <rect x="930" y="206" width="320" height="432" class="group"/>
+  <text x="1090" y="238" text-anchor="middle" class="h">第二、三层溯源：库内比对</text>
+  <text x="1090" y="262" text-anchor="middle" class="s">开放集四态判定，可拒识</text>
+  <rect x="950" y="280" width="280" height="150" class="box"/>
+  <text x="966" y="308" class="h2">原始素材检索</text>
+  <text x="966" y="336" class="t">屏蔽人脸区域后提全局特征粗排</text>
+  <text x="966" y="360" class="t">Top-20 用 SIFT 和 RANSAC 复核</text>
+  <text x="966" y="384" class="t">几何内点和全局分融合排序</text>
+  <text x="966" y="412" class="s">回答：原图可能是哪张</text>
+  <rect x="950" y="442" width="280" height="150" class="box"/>
+  <text x="966" y="470" class="h2">人脸身份比对</text>
+  <text x="966" y="498" class="t">InsightFace 512 维人脸特征</text>
+  <text x="966" y="522" class="t">按人员取均值后排序</text>
+  <text x="966" y="546" class="t">相似度和前两名间隔定结论</text>
+  <text x="966" y="574" class="s">回答：这张脸更像库里的谁</text>
+  <text x="1090" y="620" text-anchor="middle" class="s">结论限于当前库内，不等于确认身份</text>
+
+  <!-- output -->
+  <path d="M 190 638 L 190 668 M 640 638 L 640 668 M 1090 638 L 1090 668 M 190 668 L 1090 668" class="line"/>
+  <path d="M 640 668 L 640 694" class="line" marker-end="url(#arrow)"/>
+  <rect x="230" y="696" width="820" height="88" class="accent"/>
+  <text x="640" y="728" text-anchor="middle" class="h">研判输出</text>
+  <text x="640" y="758" text-anchor="middle" class="t">结果页（证据并列）、统一报告（JSON／TXT／HTML）、证据清单（逐文件 SHA-256）、证据包（zip）</text>
+
+  <text x="640" y="816" text-anchor="middle" class="s">三个 Python 环境进程隔离：界面与溯源（python_runtime）、ONNX 整图检测（portable_python_v2）、PyTorch 引擎（engine_runtime）。任何一路失败，其他部分继续。</text>
+  <text x="640" y="840" text-anchor="middle" class="s">全程离线运行，结果只作侦查线索和辅助研判，不替代人工复核和司法鉴定。</text>
+</svg>
