@@ -110,6 +110,8 @@ def _deepfake_summary(result: Mapping[str, Any]) -> tuple[str, float | None]:
 
 
 def _open_set_label(result: Mapping[str, Any], decide) -> str:
+    if result.get("not_applicable"):
+        return "不适用"
     if str(result.get("status") or "") != "success":
         return status_label(result.get("status") or "skipped")
     try:

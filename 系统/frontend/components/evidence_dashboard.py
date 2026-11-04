@@ -275,6 +275,11 @@ def build_task_overview(
         or identity_runtime.get("device")
         or "CPU"
     )
+    general = _mapping(deepfake.get("general_aigc"))
+    # 通用分支可能在显卡上，其他模块都在 CPU；两个都写，避免只报 CPU。
+    general_device = str(_mapping(general.get("runtime")).get("device") or "")
+    if general_device and general_device.casefold() != str(device).casefold():
+        device = f"{general_device} + {device}"
     return {
         "system_name": report_product.get("name") or "AIGC 图像视频鉴伪与溯源系统",
         "product_version": report_product.get("version") or product_version,
@@ -285,7 +290,12 @@ def build_task_overview(
         "input_sha256": input_hash or "—",
         "task_status": status.get("status") or "已载入",
         "total_runtime": total_runtime,
-        "deepfake_runtime": _number(deepfake_runtime.get("module_elapsed_seconds")) or _number(deepfake.get("runtime_seconds")),
+        "deepfake_runtime": (
+            # 有通用分支时要算上它和裁脸，module_elapsed_seconds 只是整图分支的耗时。
+            _number(deepfake.get("runtime_seconds"))
+            if general
+            else _number(deepfake_runtime.get("module_elapsed_seconds")) or _number(deepfake.get("runtime_seconds"))
+        ),
         "identity_runtime": _number(identity_runtime.get("module_elapsed_seconds")) or _number(identity.get("runtime_seconds")),
         "source_runtime": _number(source_runtime.get("module_elapsed_seconds")) or _number(source.get("runtime_seconds")),
         "device": str(device),

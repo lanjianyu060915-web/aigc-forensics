@@ -246,6 +246,7 @@ def test_no_face_is_not_applicable_rather_than_a_failure(tmp_path: Path) -> None
     assert "不适用" in identity["details"]["reason"]
     assert status["identity"]["not_applicable"] is True
     assert not status["errors"]
+    assert status["status"] == "success"
 
 
 GOOD_CROPPER = """

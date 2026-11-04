@@ -2743,7 +2743,12 @@ def run_task(
             details={"last_completed_module": name},
         )
 
-    selected_statuses = [results[name]["status"] for name in MODULE_ORDER if name in selected]
+    # 没有人脸时身份比对是不适用，不是没完成，不能把任务拉成部分完成。
+    selected_statuses = [
+        "success" if results[name].get("not_applicable") else results[name]["status"]
+        for name in MODULE_ORDER
+        if name in selected
+    ]
     successes = selected_statuses.count("success")
     non_successes = sum(status != "success" for status in selected_statuses)
     overall_status = (

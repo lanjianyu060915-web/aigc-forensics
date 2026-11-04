@@ -1070,7 +1070,8 @@ def _render_live_summary() -> None:
         meta = _module_meta(task_status, key)
         status = str(meta.get("status") or meta.get("state") or "skipped")
         runtime = meta.get("runtime_seconds")
-        text = f"{MODULE_SHORT_LABELS[key]} {status_label(status)}"
+        label = "不适用" if meta.get("not_applicable") else status_label(status)
+        text = f"{MODULE_SHORT_LABELS[key]} {label}"
         if isinstance(runtime, (int, float)) and status != "skipped":
             text += f" {float(runtime):.1f} 秒"
         tone = {"success": "ok", "skipped": "muted", "error": "bad"}.get(status, "warn")
