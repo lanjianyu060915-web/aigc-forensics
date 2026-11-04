@@ -1,0 +1,33 @@
+{
+  "version": "calibration-20261104",
+  "semantics": "边界是真实样本融合 logit 的 p95 和 p99，按来源等权；不是概率。",
+  "video": {
+    "low_max": 0.518756,
+    "medium_max": 1.896675,
+    "calibration_set": {
+      "description": "5 个已有视频集合的真实样本 506 条（按集合等权），这些集合选模时看过，不是盲测",
+      "n_real": 506,
+      "sources": {
+        "first199": 118,
+        "fresh": 26,
+        "genvid400": 200,
+        "platform148": 73,
+        "vif310": 89
+      },
+      "per_source_p95": {
+        "first199": 0.2947,
+        "fresh": -0.1506,
+        "genvid400": 0.8049,
+        "platform148": 0.3589,
+        "vif310": -0.0502
+      },
+      "per_source_median": {
+        "first199": -2.8913,
+        "fresh": -3.7454,
+        "genvid400": -1.4234,
+        "platform148": -3.6485,
+        "vif310": -3.8431
+      }
+    }
+  }
+}
