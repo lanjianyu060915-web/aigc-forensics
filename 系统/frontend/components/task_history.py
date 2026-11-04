@@ -11,6 +11,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import re
 from typing import Any
 import zipfile
 
@@ -261,9 +262,15 @@ def verify_task_artifacts(task_dir: str | Path) -> dict[str, Any]:
             continue
         relative = str(item.get("path") or "").strip()
         expected = str(item.get("sha256") or "").strip().lower()
-        if not relative or not expected:
-            continue
+        if not relative and not expected:
+            continue  # 可选证据没有生成时留的空位。
         checked += 1
+        if not relative:
+            problems.append({"文件": "清单条目", "问题": "缺少证据文件路径"})
+            continue
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            problems.append({"文件": relative, "问题": "缺少或无效的 SHA-256，无法校验"})
+            continue
         path = _inside(root, relative)
         if path is None:
             problems.append({"文件": relative, "问题": "路径越出任务目录"})
@@ -273,6 +280,13 @@ def verify_task_artifacts(task_dir: str | Path) -> dict[str, Any]:
             problems.append({"文件": relative, "问题": "内容与清单记录的 SHA-256 不一致"})
         else:
             matched += 1
+    if checked == 0:
+        # 空清单不能说成“全部一致”：什么都没查，等于没有校验。
+        return {
+            "available": False,
+            "message": "证据清单里没有可校验的文件，这次没有完成完整性校验。",
+            "checked": 0, "matched": 0, "problems": [],
+        }
     return {
         "available": True,
         "message": (

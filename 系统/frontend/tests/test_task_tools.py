@@ -190,6 +190,37 @@ class TaskHistoryTests(unittest.TestCase):
         result = verify_task_artifacts(task)
         self.assertEqual(result["problems"][0]["问题"], "路径越出任务目录")
 
+    def _task_with_artifacts(self, artifacts: list[dict]) -> Path:
+        task = Path(tempfile.mkdtemp(dir=self.root))
+        (task / "artifact_manifest.json").write_text(json.dumps({"artifacts": artifacts}), encoding="utf-8")
+        return task
+
+    def test_verify_does_not_certify_an_empty_manifest(self) -> None:
+        for artifacts in ([], [{"path": None, "sha256": None}]):
+            result = verify_task_artifacts(self._task_with_artifacts(artifacts))
+            self.assertFalse(result["available"])
+            self.assertNotIn("全部", result["message"])
+
+    def test_verify_reports_entries_without_a_usable_hash(self) -> None:
+        task = self._task_with_artifacts([{"path": "a.json", "sha256": ""}])
+        (task / "a.json").write_text("{}", encoding="utf-8")
+        result = verify_task_artifacts(task)
+        self.assertEqual((result["checked"], result["matched"]), (1, 0))
+        self.assertEqual(len(result["problems"]), 1)
+        self.assertIn("SHA-256", result["problems"][0]["问题"])
+
+    def test_verify_does_not_skip_a_missing_hash_among_valid_entries(self) -> None:
+        good = hashlib.sha256(b"{}").hexdigest()
+        task = self._task_with_artifacts(
+            [{"path": "a.json", "sha256": good}, {"path": "b.json", "sha256": "not-a-hash"}, {"path": "", "sha256": good}]
+        )
+        (task / "a.json").write_bytes(b"{}")
+        (task / "b.json").write_bytes(b"{}")
+        result = verify_task_artifacts(task)
+        self.assertEqual((result["checked"], result["matched"]), (3, 1))
+        self.assertEqual(len(result["problems"]), 2)
+        self.assertNotIn("全部", result["message"])
+
     def test_verify_reports_old_task_without_manifest(self) -> None:
         task = _make_task(self.root, "case_h")
         (task / "artifact_manifest.json").unlink()
