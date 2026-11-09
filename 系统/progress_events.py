@@ -46,6 +46,18 @@ def _read_json_object(path: Path) -> dict[str, Any] | None:
     return value if isinstance(value, dict) else None
 
 
+def _replace_latest(temporary: Path, destination: Path) -> None:
+    """读者短暂占用 Windows 快照时有限重试，不重复追加事件。"""
+    for attempt in range(6):
+        try:
+            os.replace(temporary, destination)
+            return
+        except PermissionError as exc:
+            if getattr(exc, "winerror", None) not in {5, 32, 33} or attempt == 5:
+                raise
+            time.sleep(0.01 * (2 ** attempt))
+
+
 class _CrossProcessLock:
     """Small lock-file wrapper used for the JSONL append and latest replace."""
 
@@ -123,7 +135,8 @@ class ProgressEventWriter:
         self.min_percent_delta = float(min_percent_delta)
         self._started = time.perf_counter()
         self._elapsed_offset = 0.0
-        initial = _read_json_object(self.latest_path)
+        with _CrossProcessLock(self.lock_path):
+            initial = _read_json_object(self.latest_path)
         if initial and initial.get("task_id") == self.task_id:
             try:
                 self._elapsed_offset = max(0.0, float(initial.get("elapsed_seconds", 0.0)))
@@ -333,7 +346,7 @@ class ProgressEventWriter:
                         json.dump(event, stream, ensure_ascii=False, indent=2)
                         stream.write("\n")
                         stream.flush()
-                    os.replace(temporary, self.latest_path)
+                    _replace_latest(temporary, self.latest_path)
                 finally:
                     try:
                         temporary.unlink(missing_ok=True)

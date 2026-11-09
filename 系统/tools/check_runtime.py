@@ -15,7 +15,7 @@ TARGETS = {
     'engine': 'engine_runtime',
 }
 IMPORTS = {
-    'app': ['numpy', 'PIL', 'cv2', 'onnxruntime', 'insightface', 'streamlit', 'pytest'],
+    'app': ['numpy', 'PIL', 'cv2', 'onnxruntime', 'insightface', 'streamlit', 'pytest', 'reportlab', 'rapidocr_onnxruntime'],
     'vit': ['numpy', 'PIL', 'onnxruntime'],
     'engine': ['numpy', 'PIL', 'torch', 'torchvision', 'timm', 'transformers'],
 }

@@ -30,3 +30,16 @@ __pycache__/
 
 # 本机开发配置
 /.claude/
+
+# 私有配置与团队功能测试资料仅保留本机
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/AIGC_TestOnly/
+**/team_20261107/
+/人脸材料/
+
+# 默认关闭的可选 GenD 权重从上游取得，按 manifest 校验
+/系统/models/gend-face/model.safetensors

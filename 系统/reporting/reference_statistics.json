@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "pair": {
+    "status": "available",
+    "basis": "既有自动配对规则开发实验，非盲测；未达到原预设检出要求",
+    "same_background_other_person_tested": false,
+    "notes": [
+      "同地点不同人未测试；仅用于复核线索，不启用自动伪造类型结论",
+      "阳性检出使用来源可核实的限定子集；对照误判沿用原开发全量，两类分母不同",
+      "难负样本衡量非配对图片被误判同源，不是AIGC检测的真实样本误报率"
+    ],
+    "records": [
+      {
+        "metric": "original_face_replaced",
+        "title": "原图检出",
+        "scope": "DGM4与案例来源可核实的54组",
+        "numerator": 35,
+        "denominator": 54,
+        "rate": 0.6481481481481481,
+        "source": "M-pair-probe/limited_dgm4_case3_diagnostic.json",
+        "source_sha256": "0416bde931b9bb6c8cf7a8770a78f34e376b977552265cd9cf1fd917acbbe5f8"
+      },
+      {
+        "metric": "degraded_face_replaced",
+        "title": "退化图检出",
+        "scope": "同54组的六种退化，变体不独立",
+        "numerator": 191,
+        "denominator": 324,
+        "rate": 0.5895061728395061,
+        "source": "M-pair-probe/limited_dgm4_case3_diagnostic.json",
+        "source_sha256": "0416bde931b9bb6c8cf7a8770a78f34e376b977552265cd9cf1fd917acbbe5f8"
+      },
+      {
+        "metric": "copy_false_swap",
+        "title": "无害副本误判换脸",
+        "scope": "原开发清单全量副本对照",
+        "numerator": 0,
+        "denominator": 140,
+        "rate": 0.0,
+        "source": "M-pair-probe/dev_summary.json",
+        "source_sha256": "4d80bec663b0770d37376589f2d976fff0a15fbd93c2696a5b403f0bf3661190"
+      },
+      {
+        "metric": "beauty_false_swap",
+        "title": "模拟美颜误判换脸",
+        "scope": "原开发清单全量合成美颜对照",
+        "numerator": 0,
+        "denominator": 70,
+        "rate": 0.0,
+        "source": "M-pair-probe/dev_summary.json",
+        "source_sha256": "4d80bec663b0770d37376589f2d976fff0a15fbd93c2696a5b403f0bf3661190"
+      },
+      {
+        "metric": "negative_false_same_source",
+        "title": "非配对难负样本误判同源",
+        "scope": "原开发清单全量非配对对照",
+        "numerator": 2,
+        "denominator": 451,
+        "rate": 0.004434589800443459,
+        "source": "M-pair-probe/dev_summary.json",
+        "source_sha256": "4d80bec663b0770d37376589f2d976fff0a15fbd93c2696a5b403f0bf3661190"
+      }
+    ]
+  },
+  "cf384_largest": {
+    "status": "available",
+    "basis": "历史补充盲测，人物分组完整性有限",
+    "backend": "cf384",
+    "band_aggregation": "largest",
+    "face_auc": 0.6627,
+    "n_total": 300,
+    "face_available": {
+      "real": 146,
+      "fake": 149
+    },
+    "source": "文档/评测/换脸盲测-20261104/summary.json",
+    "source_sha256": "7362c77ef4c7a1cef5503f57435a1cf9d9074c1bba5b87e11a531fe6b0a7eb17"
+  }
+}

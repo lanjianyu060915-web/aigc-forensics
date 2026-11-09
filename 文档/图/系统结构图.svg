@@ -17,7 +17,7 @@
     </style>
   </defs>
   <rect width="1280" height="860" fill="#ffffff"/>
-  <text x="640" y="42" text-anchor="middle" class="title">AIGC 图像视频鉴伪与溯源系统原理结构图</text>
+  <text x="640" y="42" text-anchor="middle" class="title">面向涉案图像视频的 AIGC 鉴伪与来源线索研判系统原理结构图</text>
 
   <!-- input -->
   <rect x="330" y="66" width="620" height="82" class="accent"/>

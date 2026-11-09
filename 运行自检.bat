@@ -1,7 +1,6 @@
 @echo off
 setlocal EnableExtensions
 chcp 65001 >nul
-title AIGC 鉴伪溯源系统 - 一键自检
 set "PYTHONPATH="
 set "PYTHONHOME="
 set "PYTHONNOUSERSITE=1"

@@ -7,9 +7,11 @@ from typing import Any
 
 import streamlit as st
 
+from product_info import PRODUCT_NAME
+
 from components.live_progress import load_progress_events
 from components.path_security import PathContainmentError, ResourcePathPolicy
-from components.result_views import format_score, render_image
+from components.result_views import _render_identity_faces, format_score, render_image
 from components.task_history import status_label
 from components.theme import verdict_card
 from decision import (
@@ -281,7 +283,7 @@ def build_task_overview(
     if general_device and general_device.casefold() != str(device).casefold():
         device = f"{general_device} + {device}"
     return {
-        "system_name": report_product.get("name") or "AIGC 图像视频鉴伪与溯源系统",
+        "system_name": report_product.get("name") or PRODUCT_NAME,
         "product_version": report_product.get("version") or product_version,
         "task_id": status.get("task_id") or (task_dir.name if task_dir else "—"),
         "query_file": original_name or (Path(query).name if query else "—"),
@@ -429,19 +431,28 @@ def build_key_findings(
     overall_band = _mapping(deepfake.get("overall")).get("band")
     band = str(overall_band or _mapping(deepfake.get("details")).get("band") or "")
     if source_state == STATE_HIGH and _result_status(deepfake) == "success" and band != "low":
-        steps.append("到“原始素材溯源”页把查询图和第一候选并排看：人脸以外基本一致而人脸不同，是换脸的直接线索。")
+        steps.append("到‘原始素材溯源’页把查询图和第一候选并排看：人脸以外一致，只说明场景相近，也可能是同一地点的不同人；是否换脸需要结合原始来源人工判断。")
     if band == "medium":
         steps.append("鉴伪落在“需人工复核”，建议结合原始文件和传播链做人工判断。")
     if band == "low":
         steps.append("“证据不足”不代表图像真实，只说明模型没有发现足够的风险信号。")
     if identity_state == STATE_HIGH:
-        steps.append("身份候选只说明和库内该人员最相似，需要结合其他线索核实。")
+        steps.append("身份候选只说明和库内该参考分组最相似，需要结合其他线索核实。")
     if STATE_NONE in {identity_state, source_state}:
         steps.append("库中没有找到可靠候选时，可以扩充身份库或素材库后重新检索。")
     if STATE_INSUFFICIENT in {identity_state, source_state}:
         steps.append("证据不足的候选不要直接采信，建议换一张更清晰的图或帧再查。")
     if _integer(_mapping(identity.get("metrics")).get("query_face_count_original")):
-        steps.append("这张图有多张人脸：如果要查的不是面积最大的那张，请裁剪后重新分析。")
+        if identity.get("faces"):
+            steps.append("这张图有多张人脸：到身份页逐脸查看候选；系统不判断哪张脸被改动。")
+        else:
+            steps.append("这张图有多张人脸：如果要查的不是面积最大的那张，请裁剪后重新分析。")
+    faces = [item for item in _list(identity.get("faces")) if isinstance(item, Mapping)]
+    main = next((item for item in faces if item.get("is_main_face")), {})
+    if main and _mapping(main.get("open_set")).get("state") != STATE_HIGH and any(
+        not item.get("is_main_face") and _mapping(item.get("open_set")).get("state") == STATE_HIGH for item in faces
+    ):
+        steps.append("主脸本次未检出高可信身份候选，但其他脸有高可信候选；请到身份页分别复核，这不改变总体检测档位。")
     cards = [deepfake_card, identity_card, source_card]
     if provenance:
         cards.insert(1, provenance_finding(provenance))
@@ -619,7 +630,7 @@ def _render_overview_cards(
         with st.container(border=True):
             st.markdown("#### 人脸身份比对")
             st.metric("当前库内第一候选", _safe_text(top_identity.get("identity_name") or top_identity.get("identity_id")))
-            st.metric("人员级平均余弦相似度", _six(top_identity.get("mean_similarity") or top_identity.get("score")))
+            st.metric("参考组级平均余弦相似度", _six(top_identity.get("mean_similarity") or top_identity.get("score")))
             pair = st.columns(2)
             pair[0].metric("Top1-Top2", _six(identity_metrics.get("top1_top2_margin")))
             pair[1].metric("有效参考图", identity_metrics.get("valid_embedding_count") or "—")
@@ -631,7 +642,7 @@ def _render_overview_cards(
                 )
             st.caption(
                 f"第二候选 {_safe_text(top2.get('identity_name') or top2.get('identity_id'))} · "
-                f"身份库 {identity_metrics.get('library_identity_count') or '—'} 人{support_note}"
+                f"身份库 {identity_metrics.get('library_identity_count') or '—'} 个参考分组{support_note}"
             )
             _render_open_set_badge(decide_identity_open_set(identity))
             st.caption("库内候选；余弦相似度不是身份概率。")
@@ -1148,10 +1159,10 @@ def _render_identity_score_chart(candidates: Sequence[Any]) -> None:
                 "mark": {"type": "circle", "size": 100, "opacity": 0.82},
                 "encoding": {
                     "x": {"field": "similarity", "type": "quantitative", "title": "逐图余弦相似度", "scale": {"domain": [-1, 1]}},
-                    "y": {"field": "identity", "type": "nominal", "sort": None, "title": "人员候选"},
+                    "y": {"field": "identity", "type": "nominal", "sort": None, "title": "参考分组候选"},
                     "color": {"field": "is_best", "type": "nominal", "scale": {"domain": [True, False], "range": ["#b75d3e", "#315f86"]}, "title": "最佳单图"},
                     "tooltip": [
-                        {"field": "identity", "title": "人员"},
+                        {"field": "identity", "title": "参考分组"},
                         {"field": "reference", "title": "参考图"},
                         {"field": "similarity", "type": "quantitative", "format": ".6f", "title": "余弦相似度"},
                     ],
@@ -1163,14 +1174,14 @@ def _render_identity_score_chart(candidates: Sequence[Any]) -> None:
                 "encoding": {
                     "x": {"field": "mean", "type": "quantitative"},
                     "y": {"field": "identity", "type": "nominal", "sort": None},
-                    "tooltip": [{"field": "mean", "type": "quantitative", "format": ".6f", "title": "人员级平均"}],
+                    "tooltip": [{"field": "mean", "type": "quantitative", "format": ".6f", "title": "参考组级平均"}],
                 },
             },
         ],
         "height": max(260, 54 * min(5, len(candidates))),
     }
     st.vega_lite_chart(spec, width="stretch")
-    st.caption("蓝/橙圆点为逐张参考图余弦相似度，金色刻线为人员级平均值；排序依据是人员级平均，不是单张图或身份概率。")
+    st.caption("蓝/橙圆点为逐张参考图余弦相似度，金色刻线为参考组级平均值；排序依据是参考组级平均，不是单张图或身份概率。")
 
 
 def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, key_prefix: str) -> None:
@@ -1179,6 +1190,7 @@ def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
     if _result_status(data) != "success":
         st.error(_safe_text(data.get("error_message"), "身份模块未成功完成。"))
         return
+    _render_identity_faces(dict(data), policy)
     visual = _module_visual(data, "identity")
     metrics = _mapping(data.get("metrics"))
     candidates = _list(data.get("candidates"))
@@ -1236,7 +1248,7 @@ def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
                 else:
                     st.caption("参考图不可用")
                 mean = _number(candidate.get("mean_similarity") or candidate.get("score"))
-                st.metric("人员级平均", _six(mean))
+                st.metric("参考组级平均", _six(mean))
                 st.metric("最佳单图", _six(candidate.get("best_reference_score")))
                 valid_count = candidate.get("valid_reference_count")
                 if valid_count is None:
@@ -1245,7 +1257,7 @@ def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
                 st.caption(f"距第一候选 {_signed_six((mean - top_score) if mean is not None and top_score is not None else None)}")
                 st.caption(f"最佳文件：{_safe_text(candidate.get('best_reference_file_name'), _basename(candidate.get('best_reference_image') or candidate.get('reference_image')))}")
 
-    st.markdown("#### 3. 人员级分数形成过程")
+    st.markdown("#### 3. 参考组级分数形成过程")
     _render_identity_score_chart(candidates)
     skipped: list[Any] = []
     for candidate in candidates[:5]:
@@ -1283,7 +1295,7 @@ def _render_identity_page(data: Mapping[str, Any], policy: ResourcePathPolicy, k
             st.warning("第一候选最佳参考图不可用。")
     compare_stats = st.columns(3)
     compare_stats[0].metric("最佳单图余弦相似度", _six(top.get("best_reference_score")))
-    compare_stats[1].metric("人员级平均余弦相似度", _six(top.get("mean_similarity") or top.get("score")))
+    compare_stats[1].metric("参考组级平均余弦相似度", _six(top.get("mean_similarity") or top.get("score")))
     compare_stats[2].metric("Top1与Top2差值", _six(metrics.get("top1_top2_margin")))
     comparison_image = _find_value(visual, "best_reference_comparison_image")
     if comparison_image is not None:
@@ -1854,7 +1866,10 @@ def render_evidence_workspace(
     )
     st.divider()
     provenance = _read_task_json(task_dir, "file_provenance_result.json")
+    pair = _mapping(final_report).get("pair_compare")
     if selected == "研判总览":
+        from components.analysis_views import render_analysis_summary
+        render_analysis_summary(task_dir, final_report)
         overview = build_task_overview(
             deepfake,
             identity,
@@ -1866,6 +1881,11 @@ def render_evidence_workspace(
         )
         _render_key_findings(deepfake, identity, source, provenance)
         _render_task_header(overview, video=_read_task_json(task_dir, "video_summary.json"))
+        if isinstance(pair, Mapping):
+            st.markdown("#### 来源结论")
+            st.info("当前版本未给出伪造类型结论。请到原始素材溯源页人工查看前三候选的并排图和差异图。")
+            if pair.get("scope") == "frame":
+                st.caption(f"比对时间点：{pair.get('timestamp_seconds')} 秒；仅代表视频首要帧。")
         st.markdown("#### 各模块的证据")
         st.caption("各模块解决不同问题；本页并列呈现证据，不相加、不生成所谓综合可信概率。")
         _render_overview_cards(
@@ -1887,11 +1907,14 @@ def render_evidence_workspace(
     elif selected == "AIGC鉴伪证据":
         _render_deepfake_page(deepfake, policy, key_prefix)
     elif selected == "文件标识":
-        render_provenance_page(provenance)
+        render_provenance_page(provenance, _mapping(final_report).get("visible_label") or _read_task_json(task_dir, "visible_label_result.json"))
     elif selected == "人脸身份比对":
         _render_identity_page(identity, policy, key_prefix)
     elif selected == "原始素材溯源":
         _render_source_page(source, policy, key_prefix)
+        from components.pair_views import render_pair_comparison
+
+        render_pair_comparison(pair, policy, key_prefix)
     else:
         _render_evidence_chain_page(
             deepfake,

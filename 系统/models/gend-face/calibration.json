@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "version": null,
+  "status": "uncalibrated",
+  "aggregations": {},
+  "note": "尚无冻结校准边界，只报告模型分数，不据此产生人脸档位。"
+}

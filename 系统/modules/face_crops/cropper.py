@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""检测最大人脸并裁出带边距的方形区域。在界面环境里运行（insightface、opencv）。"""
+"""检测逐脸并裁出带边距的方形区域，保留旧最大脸接口。"""
 
 from __future__ import annotations
 
@@ -25,22 +25,27 @@ class FaceCropper:
         self.app.prepare(ctx_id=-1, det_size=(det_size, det_size))
 
     def largest_face_box(self, frame: np.ndarray) -> tuple[int, int, int, int] | None:
+        boxes = self.face_boxes(frame, max_faces=1)
+        return boxes[0] if boxes else None
+
+    def face_boxes(self, frame: np.ndarray, *, max_faces: int = 8) -> list[tuple[int, int, int, int]]:
+        """按原检测顺序稳定地排序；同面积时最大脸仍与旧实现一致。"""
+        if not isinstance(max_faces, int) or isinstance(max_faces, bool) or max_faces < 1:
+            raise ValueError("最多处理人脸数必须为正整数")
         faces = self.app.get(frame)
-        if not faces:
-            return None
-        best = max(faces, key=lambda item: float((item.bbox[2] - item.bbox[0]) * (item.bbox[3] - item.bbox[1])))
-        return tuple(int(value) for value in best.bbox)  # type: ignore[return-value]
+        faces = sorted(faces, key=lambda item: float((item.bbox[2] - item.bbox[0]) * (item.bbox[3] - item.bbox[1])), reverse=True)
+        return [tuple(int(value) for value in item.bbox) for item in faces[:max_faces]]
 
     def largest_face_crop(self, frame: np.ndarray) -> np.ndarray | None:
         box = self.largest_face_box(frame)
         return square_crop(frame, box) if box is not None else None
 
 
-def square_crop(frame: np.ndarray, box: tuple[int, int, int, int]) -> np.ndarray | None:
+def square_crop(frame: np.ndarray, box: tuple[int, int, int, int], *, min_pixels: int = MIN_FACE_PIXELS) -> np.ndarray | None:
     """以人脸框中心取边长为长边 1.3 倍的方块，超出画面的部分收缩，不补边。"""
     left, top, right, bottom = box
     width, height = right - left, bottom - top
-    if min(width, height) < MIN_FACE_PIXELS:
+    if min(width, height) < min_pixels:
         return None
     half = int(max(width, height) * CROP_MARGIN / 2)
     center_x, center_y = (left + right) // 2, (top + bottom) // 2

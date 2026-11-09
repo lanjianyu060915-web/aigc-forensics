@@ -124,6 +124,10 @@ if (Test-Path -LiteralPath $StatusChecker -PathType Leaf) {
 }
 
 $Config = Get-Content -LiteralPath $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($Config.product_short_name) {
+    # 后台启动没有控制台窗口时，不因窗口标题设置失败而中断。
+    try { $Host.UI.RawUI.WindowTitle = [string]$Config.product_short_name } catch { }
+}
 $Address = if ($Config.frontend.address) { [string]$Config.frontend.address } else { "127.0.0.1" }
 $PreferredPort = if ($Config.frontend.port) { [int]$Config.frontend.port } else { 8767 }
 $Port = Select-FreePort -Preferred $PreferredPort

@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "scenarios": [
+    {
+      "key": "image",
+      "label": "图片",
+      "source_file": "文档/评测/图片评测-20261104/summary.json",
+      "source_sha256": "b20acdf6ee6a7bc8ed1cd05e9c026beb8bc18fdb4e4553b2c724fb0b5c6136c4",
+      "bands": {
+        "low": {
+          "real_count": 552,
+          "real_total": 599,
+          "real_ratio": 0.9215358931552587,
+          "fake_count": 206,
+          "fake_total": 601,
+          "fake_ratio": 0.3427620632279534,
+          "ratio": 0.3719465142636668,
+          "small_sample": false
+        },
+        "medium": {
+          "real_count": 32,
+          "real_total": 599,
+          "real_ratio": 0.05342237061769616,
+          "fake_count": 75,
+          "fake_total": 601,
+          "fake_ratio": 0.12479201331114809,
+          "ratio": 2.335950499168053,
+          "small_sample": false
+        },
+        "high": {
+          "real_count": 15,
+          "real_total": 599,
+          "real_ratio": 0.025041736227045076,
+          "fake_count": 320,
+          "fake_total": 601,
+          "fake_ratio": 0.5324459234608985,
+          "ratio": 21.262340543538546,
+          "small_sample": false
+        }
+      }
+    },
+    {
+      "key": "image_degraded",
+      "label": "图片传播退化",
+      "source_file": "文档/评测/图片评测-20261104/summary.json",
+      "source_sha256": "b20acdf6ee6a7bc8ed1cd05e9c026beb8bc18fdb4e4553b2c724fb0b5c6136c4",
+      "bands": {
+        "low": {
+          "real_count": 363,
+          "real_total": 400,
+          "real_ratio": 0.9075,
+          "fake_count": 177,
+          "fake_total": 400,
+          "fake_ratio": 0.4425,
+          "ratio": 0.487603305785124,
+          "small_sample": false
+        },
+        "medium": {
+          "real_count": 27,
+          "real_total": 400,
+          "real_ratio": 0.0675,
+          "fake_count": 52,
+          "fake_total": 400,
+          "fake_ratio": 0.13,
+          "ratio": 1.9259259259259258,
+          "small_sample": false
+        },
+        "high": {
+          "real_count": 10,
+          "real_total": 400,
+          "real_ratio": 0.025,
+          "fake_count": 171,
+          "fake_total": 400,
+          "fake_ratio": 0.4275,
+          "ratio": 17.099999999999998,
+          "small_sample": false
+        }
+      }
+    },
+    {
+      "key": "video",
+      "label": "视频",
+      "source_file": "文档/评测/视频盲测-20261104/summary.json",
+      "source_sha256": "1ce38544554a433b89bb5733274be26d8f4f15957869adde34ea059a08b6118c",
+      "bands": {
+        "low": {
+          "real_count": 58,
+          "real_total": 69,
+          "real_ratio": 0.8405797101449275,
+          "fake_count": 18,
+          "fake_total": 77,
+          "fake_ratio": 0.23376623376623376,
+          "ratio": 0.2781012091356919,
+          "small_sample": false
+        },
+        "medium": {
+          "real_count": 7,
+          "real_total": 69,
+          "real_ratio": 0.10144927536231885,
+          "fake_count": 10,
+          "fake_total": 77,
+          "fake_ratio": 0.12987012987012986,
+          "ratio": 1.2801484230055657,
+          "small_sample": true
+        },
+        "high": {
+          "real_count": 4,
+          "real_total": 69,
+          "real_ratio": 0.057971014492753624,
+          "fake_count": 49,
+          "fake_total": 77,
+          "fake_ratio": 0.6363636363636364,
+          "ratio": 10.977272727272727,
+          "small_sample": true
+        }
+      }
+    },
+    {
+      "key": "video_degraded",
+      "label": "视频统一转码",
+      "source_file": "文档/评测/视频盲测-20261104/summary.json",
+      "source_sha256": "1ce38544554a433b89bb5733274be26d8f4f15957869adde34ea059a08b6118c",
+      "bands": {
+        "low": {
+          "real_count": 54,
+          "real_total": 60,
+          "real_ratio": 0.9,
+          "fake_count": 17,
+          "fake_total": 60,
+          "fake_ratio": 0.2833333333333333,
+          "ratio": 0.3148148148148148,
+          "small_sample": false
+        },
+        "medium": {
+          "real_count": 3,
+          "real_total": 60,
+          "real_ratio": 0.05,
+          "fake_count": 10,
+          "fake_total": 60,
+          "fake_ratio": 0.16666666666666666,
+          "ratio": 3.333333333333333,
+          "small_sample": true
+        },
+        "high": {
+          "real_count": 3,
+          "real_total": 60,
+          "real_ratio": 0.05,
+          "fake_count": 33,
+          "fake_total": 60,
+          "fake_ratio": 0.55,
+          "ratio": 11.0,
+          "small_sample": true
+        }
+      }
+    },
+    {
+      "key": "face",
+      "label": "换脸",
+      "source_file": "文档/评测/换脸盲测-20261104/summary.json",
+      "source_sha256": "7362c77ef4c7a1cef5503f57435a1cf9d9074c1bba5b87e11a531fe6b0a7eb17",
+      "bands": {
+        "low": {
+          "real_count": 129,
+          "real_total": 150,
+          "real_ratio": 0.86,
+          "fake_count": 96,
+          "fake_total": 150,
+          "fake_ratio": 0.64,
+          "ratio": 0.7441860465116279,
+          "small_sample": false
+        },
+        "medium": {
+          "real_count": 12,
+          "real_total": 150,
+          "real_ratio": 0.08,
+          "fake_count": 29,
+          "fake_total": 150,
+          "fake_ratio": 0.19333333333333333,
+          "ratio": 2.4166666666666665,
+          "small_sample": false
+        },
+        "high": {
+          "real_count": 9,
+          "real_total": 150,
+          "real_ratio": 0.06,
+          "fake_count": 25,
+          "fake_total": 150,
+          "fake_ratio": 0.16666666666666666,
+          "ratio": 2.7777777777777777,
+          "small_sample": true
+        }
+      }
+    }
+  ]
+}

@@ -32,6 +32,66 @@ from reporting.report_builder import (
 )
 
 
+def test_evidence_fields_survive_explanation_and_all_report_formats():
+    from decision.aigc_evidence import attach_evidence, DISCLAIMER
+    from decision.aigc_overall import attach_general_aigc
+
+    original = deepfake_result()
+    merged = attach_evidence(attach_general_aigc(original, {
+        "status": "success", "band": "low", "band_label": "证据不足", "logit": -3,
+        "media": {"width": 200, "height": 300},
+    }), {"status": "success", "verdict": "labelled_possible", "verdict_label": "疑似生成"})
+    explanation = build_deepfake_explanation(merged)
+    assert len(explanation["technical"]["overall"]["band_evidence"]["rows"]) == 5
+    assert DISCLAIMER in explanation["basis"]
+    report = build_final_report("升级检查", deepfake_result=merged)
+    for rendered in (render_text_report(report), html.unescape(render_html_report(report)), json.dumps(report, ensure_ascii=False)):
+        assert "档位证据强度" in rendered
+        assert "输入短边只有 200 像素" in rendered
+        assert "疑似生成" in rendered
+        assert DISCLAIMER in rendered
+    old = build_final_report("旧任务", deepfake_result=original)
+    assert "档位证据强度" not in render_text_report(old)
+
+
+def test_missing_pdf_font_shows_warning_and_preserves_other_downloads(tmp_path, monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from reporting import pdf_report
+
+    def missing():
+        raise FileNotFoundError("验收使用的字体替身不可用")
+
+    monkeypatch.setattr(pdf_report, "check_pdf_ready", missing)
+    artifacts = generate_task_reports(tmp_path, task_id="字体失败界面验收")
+    assert artifacts["pdf"]["status"] == "unavailable"
+    script = "from components.report_views import render_task_reports\nrender_task_reports(" + repr(str(tmp_path)) + ")"
+    app = AppTest.from_string(script).run(timeout=30)
+    assert not app.exception
+    assert any("PDF 报告暂不可用" in element.value for element in app.warning)
+    labels = {element.proto.label for element in app.get("download_button")}
+    assert {"导出TXT报告", "导出HTML报告", "导出JSON报告"} <= labels
+    assert "导出 PDF 报告" not in labels
+
+
+def test_on_demand_pdf_failure_is_shown_after_export_click(tmp_path, monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    from reporting import pdf_report
+
+    def failed_render(*args, **kwargs):
+        raise ValueError("验收使用的渲染失败替身")
+
+    monkeypatch.setattr(pdf_report, "render_pdf_report", failed_render)
+    generate_task_reports(tmp_path, task_id="按需导出失败验收")
+    original = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    script = "from components.report_views import render_task_reports\nrender_task_reports(" + repr(str(tmp_path)) + ")"
+    app = AppTest.from_string(script).run(timeout=30)
+    export = next(button for button in app.button if button.label == "导出 PDF 报告")
+    export.click().run(timeout=30)
+    assert not app.exception
+    assert any("PDF 报告暂不可用" in element.value for element in app.warning)
+    assert {path.name: path.read_bytes() for path in tmp_path.iterdir()} == original
+
+
 def deepfake_result(
     *,
     spatial: float = 0.8,
@@ -488,7 +548,7 @@ class ReportBuilderTests(unittest.TestCase):
                 source_result=source_result(),
                 generated_at="2026-08-26T00:00:01+08:00",
             )
-            for key in ("json_path", "txt_path", "html_path"):
+            for key in ("json_path", "txt_path", "html_path", "pdf_path"):
                 path = Path(artifacts[key])
                 self.assertTrue(path.is_file())
                 self.assertGreater(path.stat().st_size, 0)
@@ -500,6 +560,30 @@ class ReportBuilderTests(unittest.TestCase):
             self.assertEqual(bundle.report["schema_version"], "3.0")
             self.assertEqual(bundle.txt_path.name, names["txt"])
             self.assertEqual(bundle.html_path.name, names["html"])
+
+    def test_old_task_pdf_and_review_download_leave_originals_unchanged(self) -> None:
+        from components.report_views import prepare_pdf_download
+        from reporting.review_records import append_review_record, load_review_records
+
+        with tempfile.TemporaryDirectory() as temporary:
+            task = Path(temporary)
+            artifacts = generate_task_reports(task, task_id="历史任务", deepfake_result=deepfake_result())
+            pdf = task / artifacts["file_names"]["pdf"]
+            pdf.unlink()  # 模拟没有 PDF 的旧版任务，删除的仅是本用例创建的临时文件。
+            saved = {path.name: path.read_bytes() for path in task.iterdir()}
+            bundle = load_report_bundle(task)
+            name, raw = prepare_pdf_download(bundle)
+            self.assertEqual(name, "检测结果_历史任务.pdf")
+            self.assertTrue(raw.startswith(b"%PDF-"))
+            self.assertFalse(pdf.exists())
+            self.assertEqual({path.name: path.read_bytes() for path in task.iterdir()}, saved)
+            append_review_record(task, "复核员", "不同意", "<b>&补充意见")
+            name, raw = prepare_pdf_download(bundle, load_review_records(task))
+            self.assertEqual(name, "检测结果_历史任务_复核版.pdf")
+            self.assertTrue(raw.startswith(b"%PDF-"))
+            self.assertFalse((task / name).exists())
+            for file_name, content in saved.items():
+                self.assertEqual((task / file_name).read_bytes(), content)
 
     def test_partial_success_and_skipped_module_still_report(self) -> None:
         source = source_result(candidates=False)

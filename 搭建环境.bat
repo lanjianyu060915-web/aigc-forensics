@@ -1,7 +1,6 @@
 @echo off
 setlocal EnableExtensions
 chcp 65001 >nul
-title AIGC 鉴伪溯源系统 - 搭建运行环境
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0系统\tools\setup_runtime.ps1"
 if errorlevel 1 (
   echo.

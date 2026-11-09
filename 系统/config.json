@@ -1,6 +1,7 @@
 {
   "schema_version": "3.0",
-  "product_name": "AIGC 图像视频鉴伪与溯源系统",
+  "product_name": "面向涉案图像视频的 AIGC 鉴伪与来源线索研判系统",
+  "product_short_name": "AIGC 鉴伪与来源线索研判",
   "product_version": "0.4.0",
   "display_version": "3.0",
   "upgrade": {
@@ -17,6 +18,7 @@
     "note": "本工作副本以 v0.4.0 冻结版为基线，冻结原件只读保留；product_version 维持在 0.4.0 表示基线契约不变，升级标识与内核切换记录在本段。"
   },
   "runtime": {
+    "parallel_modules": true,
     "tasks_root": "{DATA_ROOT}/runtime/tasks",
     "inbox_root": "{DATA_ROOT}/runtime/inbox",
     "identity_cache": "{DATA_ROOT}/runtime/cache/identity",
@@ -137,6 +139,14 @@
     "device": "auto",
     "timeout_seconds": 300,
     "startup_timeout_seconds": 600,
+    "face_branch": {
+      "backend": "cf384",
+      "model_package": "{APP_ROOT}\\models\\gend-face",
+      "band_aggregation": "largest",
+      "max_faces": 8,
+      "min_face_side": 64,
+      "note": "逐脸打分始终展示；默认仍由每帧最大脸定档，视频沿用帧分数算术平均。原后端最大脸模式保留旧版40像素门槛以恢复旧结果；小于64像素始终标注不可靠，其他策略不参与定档。"
+    },
     "face_crops": {
       "enabled": true,
       "python": "{CURRENT_PYTHON}",
@@ -179,6 +189,19 @@
     "top_k": 5,
     "timeout_seconds": 600
   },
+  "pair_compare": {
+    "enabled": true,
+    "mode": "manual_review",
+    "expected_rule_sha256": "70e8f3fa187fadc03d9b12bfbcd88e30c2e56b2a0a218130f4049c6dbb3ed438",
+    "rule_path": "{APP_ROOT}/modules/pair_compare/rule.json",
+    "model_dir": "{APP_ROOT}/packaging_v0.3/resources/models/buffalo_l",
+    "cache_dir": "{DATA_ROOT}/runtime/cache/pair_compare",
+    "note": "仅比较素材前三候选并展示对齐、差异和逐脸数值；不输出伪造类型，不绑定被修改人脸的身份。视频仅代表首要帧。"
+  },
+  "case_libraries": {
+    "enabled": true,
+    "note": "记录本次库内容清单摘要，隔离不同案件的素材缓存；库文件只在本机保存。"
+  },
   "decision": {
     "open_set_thresholds": "{APP_ROOT}\\packaging_v0.4\\resources\\decision\\open_set_thresholds.json",
     "calibration_version": "m1-calibrated-20260920",
@@ -200,5 +223,27 @@
     "python": "{CURRENT_PYTHON}",
     "address": "127.0.0.1",
     "port": 8767
+  },
+  "llm": {
+    "decision_mode": "rule",
+    "band_labels": {
+      "none": "未见明显 AIGC 痕迹",
+      "review": "建议人工复核",
+      "obvious": "明显 AIGC 痕迹",
+      "undetermined": "无法完成判断"
+    },
+    "upload_scope": "full",
+    "upload_max_side": 1280,
+    "judge_send_images": false,
+    "judge_max_images": 12,
+    "writer_max_images": 24,
+    "timeout_seconds": 180,
+    "max_retries": 1,
+    "temperature": 0,
+    "judge_enable_thinking": true,
+    "writer_enable_thinking": false,
+    "thinking_budget": 4096,
+    "max_request_bytes": 62914560,
+    "max_image_base64_bytes": 7340032
   }
 }

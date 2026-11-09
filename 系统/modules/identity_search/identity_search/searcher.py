@@ -10,6 +10,7 @@ import shutil
 import sys
 import time
 from typing import Any, Iterable
+from types import SimpleNamespace
 
 from .errors import (
     EmptyLibraryError,
@@ -21,6 +22,7 @@ from .errors import (
 )
 from .extractor import FeatureExtractor, face_diagnostics
 from .model import MODEL_NAME
+from .reference_detection import extract_reference, reference_policy
 
 
 SUPPORTED_EXTENSIONS = frozenset(
@@ -83,6 +85,7 @@ class IdentitySearcher:
         det_size: tuple[int, int] = (1280, 1280),
         extractor=None,
         progress_reporter=None,
+        reference_scales=None,
     ) -> None:
         try:
             import numpy as np
@@ -109,7 +112,11 @@ class IdentitySearcher:
         self.device = device
         self.ctx_id = ctx_id
         self.det_size = (int(det_size[0]), int(det_size[1]))
+        self.reference_policy = (reference_policy(reference_scales)
+                                 if reference_scales is not None else None)
         self.progress_reporter = progress_reporter
+        # 仅在当前进程内复用未变化文件的摘要；首次扫描仍读取全部图片。
+        self._file_hash_cache: dict[tuple[str, int, int], str] = {}
         self.extractor = extractor or FeatureExtractor(
             model_root=model_root,
             device=device,
@@ -151,6 +158,7 @@ class IdentitySearcher:
 
     def _scan_library_manifest(self) -> list[dict[str, Any]]:
         manifest: list[dict[str, Any]] = []
+        current_hashes: dict[tuple[str, int, int], str] = {}
         person_dirs = sorted(
             (item for item in self.library_path.iterdir() if item.is_dir()),
             key=_sort_key,
@@ -166,10 +174,24 @@ class IdentitySearcher:
             )
             for image_path in image_paths:
                 stat = image_path.stat()
-                digest = hashlib.sha256()
-                with image_path.open("rb") as stream:
-                    while chunk := stream.read(1024 * 1024):
-                        digest.update(chunk)
+                cache_key = (
+                    os.path.normcase(str(image_path.resolve(strict=True))),
+                    stat.st_size,
+                    stat.st_mtime_ns,
+                )
+                digest_value = self._file_hash_cache.get(cache_key)
+                if digest_value is None:
+                    digest = hashlib.sha256()
+                    with image_path.open("rb") as stream:
+                        while chunk := stream.read(1024 * 1024):
+                            digest.update(chunk)
+                    checked_stat = image_path.stat()
+                    if (checked_stat.st_size, checked_stat.st_mtime_ns) != (
+                        stat.st_size, stat.st_mtime_ns
+                    ):
+                        raise InputValidationError("身份库图片在校验时发生变化，请重试。")
+                    digest_value = digest.hexdigest()
+                current_hashes[cache_key] = digest_value
                 manifest.append(
                     {
                         "identity_id": person_dir.name,
@@ -178,9 +200,11 @@ class IdentitySearcher:
                         ).as_posix(),
                         "size_bytes": stat.st_size,
                         "mtime_ns": stat.st_mtime_ns,
-                        "sha256": digest.hexdigest(),
+                        "sha256": digest_value,
                     }
                 )
+        # 删除已移除或已变更文件的旧条目，避免长期进程累积过期摘要。
+        self._file_hash_cache = current_hashes
         return manifest
 
     def _index_fingerprint(self, manifest: list[dict[str, Any]]) -> str:
@@ -191,6 +215,8 @@ class IdentitySearcher:
             "det_size": list(self.det_size),
             "embedding_policy": "l2-normalized/person-mean-v1",
         }
+        if self.reference_policy is not None:
+            payload["reference_detection"] = self.reference_policy
         encoded = json.dumps(
             payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
         ).encode("utf-8")
@@ -203,6 +229,11 @@ class IdentitySearcher:
             str(self.library_path).encode("utf-8")
         ).hexdigest()[:24]
         base = f"identity_index_{library_key}"
+        if self.reference_policy is not None:
+            # 新策略使用独立文件，保留旧单尺度缓存供历史复现。
+            policy_key = hashlib.sha256(json.dumps(
+                self.reference_policy, sort_keys=True).encode("utf-8")).hexdigest()[:12]
+            base += f"_{policy_key}"
         return self.cache_dir / f"{base}.json", self.cache_dir / f"{base}.npz"
 
     def _load_or_build_index(self) -> None:
@@ -309,6 +340,8 @@ class IdentitySearcher:
             return False
         if metadata.get("fingerprint") != self._fingerprint:
             return False
+        if metadata.get("reference_policy") != self.reference_policy:
+            return False
         if (
             metadata.get("diagnostics_schema_version")
             != CACHE_DIAGNOSTICS_SCHEMA_VERSION
@@ -403,16 +436,37 @@ class IdentitySearcher:
             raise ValueError("缓存没有有效身份")
         self.identities = identities
         self.diagnostics["skipped_images"] = [dict(item) for item in skipped_images]
+        if self.reference_policy is not None:
+            recorded = metadata.get("reference_detection")
+            if not isinstance(recorded, dict) or set(recorded) != set(manifest_identity):
+                return False
+            self.diagnostics["reference_detection"] = recorded
         return True
+
+    def _extract_reference(self, path):
+        if self.reference_policy is None:
+            return self.extractor.extract(path)
+        relative = Path(path).relative_to(self.library_path).as_posix()
+        records = self.diagnostics.setdefault("reference_detection", {})
+        try:
+            feature, face, diagnostic = extract_reference(
+                self.extractor, path, self.reference_policy["scale_chain"])
+        except (ImageDecodeError, NoFaceError, MultipleFacesError, InvalidEmbeddingError) as exc:
+            records[relative] = exc.diagnostics.get("reference_detection", {})
+            raise
+        records[relative] = diagnostic
+        return feature, face
 
     def _build_index(self) -> None:
         identities: dict[str, dict[str, Any]] = {}
         skipped: list[dict[str, str]] = []
+        if self.reference_policy is not None:
+            self.diagnostics["reference_detection"] = {}
         total = len(self._manifest)
         for current, item in enumerate(self._manifest, start=1):
             absolute_path = self.library_path / Path(item["relative_path"])
             try:
-                feature, _ = self.extractor.extract(absolute_path)
+                feature, _ = self._extract_reference(absolute_path)
             except (
                 ImageDecodeError,
                 NoFaceError,
@@ -518,6 +572,9 @@ class IdentitySearcher:
                 dict(item) for item in self.diagnostics.get("skipped_images", [])
             ],
         }
+        if self.reference_policy is not None:
+            metadata["reference_policy"] = self.reference_policy
+            metadata["reference_detection"] = self.diagnostics.get("reference_detection", {})
 
         temp_data = data_path.with_name(f".{data_path.name}.{os.getpid()}.tmp.npz")
         temp_metadata = metadata_path.with_name(
@@ -926,7 +983,7 @@ class IdentitySearcher:
                         query_face=query_face,
                         query_feature=query_feature,
                         candidates=candidates,
-                        extractor=self.extractor,
+                        extractor=SimpleNamespace(extract=self._extract_reference),
                         task_root=Path(artifact_root),
                         task_id=task_id,
                     )
@@ -1058,6 +1115,8 @@ class IdentitySearcher:
                 "name": "insightface_closed_set_person_mean_cosine",
                 "model_name": MODEL_NAME,
                 "face_detection_size": list(self.det_size),
+                **({"reference_detection": self.reference_policy}
+                   if self.reference_policy is not None else {}),
                 "embedding_dimension": embedding_dimension,
                 "embedding_normalization": "l2",
                 "similarity": "cosine_similarity",

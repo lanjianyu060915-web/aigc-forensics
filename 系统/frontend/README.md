@@ -1,6 +1,6 @@
 # 三模块 Streamlit 前端
 
-前端以双搜索 official Streamlit UI 为基线，正式接入 AIGC 鉴伪，产品标题为“AIGC 图像视频鉴伪与溯源系统”。
+前端以双搜索 official Streamlit UI 为基线，正式接入 AIGC 鉴伪，产品标题为“面向涉案图像视频的 AIGC 鉴伪与来源线索研判系统”。
 
 ## 交互与真实运行
 

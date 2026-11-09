@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """身份检索的检测尺度回退策略（CLI worker 与常驻 worker 共用）。
 
-证据见 docs/M2_人脸预处理_尺度回退实验.md：
-冻结 worker 固定 det_size=(1280,1280)，InsightFace 会把整幅图直接缩放到该尺寸，
-竖屏 720x1280 视频帧因此被横向拉伸 1.78 倍，人脸在检测网络里过大而漏检。
+沿用已存在的固定尺度链，不比较分数选择尺度。实际检测器按比例缩放并补边；
+未检出的原因不能仅由图像尺寸推断。
 
 本模块只做两件事：
 
@@ -13,7 +12,8 @@
 检索算法、库索引、特征口径、单脸约束都不在这里改动。
 
 可选的主脸选择（--multi-face-policy largest_face）：查询图有多张人脸时，把面积最大以外的
-人脸涂掉，再走同一条单脸检索。规则和被涂掉的区域都写进结果 JSON，不静默选择。
+人脸涂掉，再走同一条单脸检索。主脸完成后复用同一模型追加其余脸的候选，规则、
+原图坐标和处理上限写进结果 JSON；主脸候选和分数不变。
 """
 
 from __future__ import annotations
@@ -22,9 +22,12 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 from identity_search.errors import InputValidationError, MultipleFacesError, NoFaceError
+from identity_search.reference_detection import (
+    DEFAULT_REFERENCE_SCALES, apply_detection_scale, reference_policy,
+)
 
 
-DEFAULT_SCALE_CHAIN = (1280, 640, 320)
+DEFAULT_SCALE_CHAIN = DEFAULT_REFERENCE_SCALES
 FALLBACK_POLICY = "scale_fallback_on_no_face"
 MULTI_FACE_STRICT = "strict"
 MULTI_FACE_LARGEST = "largest_face"
@@ -103,18 +106,6 @@ def parse_scale_chain(text: str) -> tuple[int, ...]:
     return tuple(scales)
 
 
-def apply_detection_scale(extractor: Any, scale: int, ctx_id: int) -> Any:
-    """切换检测输入尺度；复用已有 FaceAnalysis 实例，不重新加载模型。"""
-
-    app = getattr(extractor, "app", None)
-    if app is None:
-        raise InputValidationError("特征提取器没有可切换的检测模型实例。")
-    app.prepare(ctx_id=ctx_id, det_size=(scale, scale))
-    if hasattr(extractor, "det_size"):
-        extractor.det_size = (scale, scale)
-    return extractor
-
-
 def attempt_scale_chain(
     searcher: Any,
     query: str,
@@ -126,6 +117,7 @@ def attempt_scale_chain(
     emit_progress: Callable[..., None] | None = None,
     multi_face_policy: str = MULTI_FACE_STRICT,
     main_face_dir: Path | None = None,
+    include_secondary_faces: bool = True,
     **search_kwargs: Any,
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     """按尺度链依次尝试；返回 (成功结果或 None, 逐档记录)。
@@ -142,7 +134,7 @@ def attempt_scale_chain(
     attempts: list[dict[str, Any]] = []
     for index, scale in enumerate(scales):
         entry: dict[str, Any] = {"scale": scale, "tier": index}
-        # 只替换查询侧检测尺度；库索引已按第一档建好，缓存键不受影响。
+        # 只切换查询侧尺度；参考索引已按自己的完整固定策略建立。
         searcher.extractor = extractor_factory(scale)
         _emit(
             "identity_detection_scale",
@@ -194,6 +186,17 @@ def attempt_scale_chain(
                 str(main_query), top_k=top_k, progress_reporter=progress_reporter, **search_kwargs
             )
             annotate_main_face(result, query, faces, selected, main_query)
+            if include_secondary_faces:
+                from per_face import append_face_candidates
+
+                append_face_candidates(result, query, faces, selected, Path(main_face_dir), searcher, search_kwargs)
+        else:
+            if include_secondary_faces and main_face_dir is not None:
+                faces = (result.get("diagnostics") or {}).get("detected_faces") or []
+                if len(faces) == 1:
+                    from per_face import append_face_candidates
+
+                    append_face_candidates(result, query, faces, 0, Path(main_face_dir), searcher, search_kwargs)
         entry.update({"status": "success", "face_count": 1})
         attempts.append(entry)
         return result, attempts
@@ -248,6 +251,7 @@ def annotate_result(
         "policy": FALLBACK_POLICY,
         "det_size_chain": list(scales),
         "library_det_size": scales[0],
+        "library_detection_policy": reference_policy(scales),
         "detection_scale_used": used,
         "fallback_applied": used != scales[0],
         "attempts": attempts,

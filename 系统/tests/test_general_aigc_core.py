@@ -127,7 +127,7 @@ def test_worker_survives_a_request_that_raises(monkeypatch) -> None:
     import io
     import json
 
-    import persistent_worker
+    from modules.general_aigc import persistent_worker
 
     class _Runtime:
         def health_details(self):

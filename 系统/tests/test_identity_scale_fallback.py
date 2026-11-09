@@ -25,6 +25,61 @@ from run_identity_search_v2 import (  # noqa: E402
     build_parser,
     parse_scale_chain,
 )
+from scale_fallback import apply_detection_scale  # noqa: E402
+
+
+class TestDetectionScaleSessionReuse:
+    @staticmethod
+    def make_extractor(*, static_size=None, fallback=False):
+        calls = {"prepare": 0, "set_providers": 0}
+
+        def prepare(*args, **kwargs):
+            calls["prepare"] += 1
+            detector.session.set_providers(["CPUExecutionProvider"])
+
+        def set_providers(*args, **kwargs):
+            calls["set_providers"] += 1
+
+        detector = SimpleNamespace(
+            static_input_size=static_size, input_size=(1280, 1280),
+            input_sizes=[(1280, 1280)],
+            session=SimpleNamespace(set_providers=set_providers),
+        )
+        app = SimpleNamespace(
+            prepare=prepare, det_size=(1280, 1280), models={"detection": detector}
+        )
+        if not fallback:
+            app.det_model = detector
+        return SimpleNamespace(app=app, det_size=(1280, 1280)), detector, calls
+
+    @pytest.mark.parametrize("fallback", [False, True])
+    def test_scale_chain_never_reinitializes_sessions(self, fallback):
+        extractor, detector, calls = self.make_extractor(fallback=fallback)
+        for scale in (1280, 640, 320, 1280):
+            assert apply_detection_scale(extractor, scale, -1) is extractor
+            assert detector.input_sizes == [(scale, scale)]
+            assert detector.input_size == (scale, scale)
+            assert extractor.app.det_size == extractor.det_size == (scale, scale)
+        assert calls == {"prepare": 0, "set_providers": 0}
+
+    def test_same_scale_preserves_original_input_list(self):
+        extractor, detector, calls = self.make_extractor()
+        original_sizes = detector.input_sizes
+        apply_detection_scale(extractor, 1280, -1)
+        assert detector.input_sizes is original_sizes
+        assert calls == {"prepare": 0, "set_providers": 0}
+
+    def test_static_input_model_is_unchanged(self):
+        extractor, detector, calls = self.make_extractor(static_size=(1280, 1280))
+        original_sizes = detector.input_sizes
+        apply_detection_scale(extractor, 640, -1)
+        assert detector.input_sizes is original_sizes
+        assert detector.input_size == extractor.app.det_size == extractor.det_size == (1280, 1280)
+        assert calls == {"prepare": 0, "set_providers": 0}
+
+    def test_missing_detector_is_rejected(self):
+        with pytest.raises(InputValidationError, match="检测模型"):
+            apply_detection_scale(SimpleNamespace(app=SimpleNamespace()), 640, -1)
 
 
 class _FakeSearcher:

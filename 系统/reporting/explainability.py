@@ -7,6 +7,8 @@ remain missing and are called out as limitations instead of being guessed.
 
 from __future__ import annotations
 
+from decision.aigc_evidence import evidence_lines
+
 from collections.abc import Iterable, Mapping
 import math
 from pathlib import PurePosixPath, PureWindowsPath
@@ -614,7 +616,7 @@ def build_deepfake_explanation(result: Mapping[str, Any] | None) -> dict[str, An
         basis.append(f"人脸分支分档依据：{face['band_reason']}")
     if branch_headline:
         basis.append(f"整图分支结论（只作提示）：{branch_headline}。")
-    output["basis"] = [*basis, *output["basis"]]
+    output["basis"] = [*basis, *evidence_lines(overall), *output["basis"]]
     output["warnings"] = [*_strings(general.get("warnings")), *output["warnings"]]
     output["limitations"] = [*_strings(general.get("limitations")), *output["limitations"]]
     technical = _mapping(output.get("technical"))

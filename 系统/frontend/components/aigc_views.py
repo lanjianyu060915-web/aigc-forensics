@@ -8,6 +8,7 @@ from typing import Any
 import streamlit as st
 
 from components.theme import key_values, verdict_card
+from decision.aigc_evidence import DISCLAIMER, LOW_NOTE, evidence_table
 
 
 BAND_TONES = {"high": "bad", "medium": "warn", "low": "muted"}
@@ -244,6 +245,18 @@ def render_overall_section(deepfake: Mapping[str, Any]) -> None:
                     "muted",
                 )
     st.caption("各路分数性质不同，不相加。通用 AIGC 分支定主结论，人脸分支最多抬一级，整图分支只作提示。")
+    for hint in _list(overall.get("hints")):
+        message = _mapping(hint).get("message")
+        if message:
+            st.warning(str(message))
+    evidence = _mapping(overall.get("band_evidence"))
+    rows = evidence_table(evidence)
+    if rows:
+        st.markdown("##### 档位证据强度")
+        st.dataframe(rows, hide_index=True, width="stretch")
+        st.caption(DISCLAIMER)
+        if evidence.get("low_note"):
+            st.info(LOW_NOTE)
 
 
 def render_general_aigc_section(deepfake: Mapping[str, Any]) -> None:
@@ -303,38 +316,69 @@ def render_face_branch_section(
     if not face:
         return
     st.markdown("#### 人脸分支")
-    if face.get("status") == "no_face":
+    per_face = _list(face.get("per_face"))
+    if face.get("status") == "no_face" and not per_face:
         st.caption("没有检出可用的人脸（人脸框短边不足 40 像素也算没有），这一路不参与总体结论。")
         return
-    if face.get("status") != "success":
+    if face.get("status") not in {"success", "no_face", "no_eligible_face"}:
         st.warning(f"这一路没有完成：{_text(face.get('error_message'))}")
         return
     logit = _number(face.get("logit"))
     thresholds = _mapping(face.get("band_thresholds"))
     crops = _list(face.get("crops"))
     columns = st.columns(3)
-    columns[0].metric("档位", _text(face.get("band_label"), "未标定"))
-    columns[1].metric("裁剪图均值分数", _logit_text(logit))
-    columns[2].metric("人脸裁剪图", f"{len(crops)} 张")
+    display_label = "无可参与定档人脸" if per_face and face.get("status") == "no_face" else _text(face.get("band_label"), "未标定")
+    columns[0].metric("档位", display_label)
+    columns[1].metric("参与定档的分数", _logit_text(logit))
+    columns[2].metric("已评分人脸", f"{len(per_face) if per_face else len(crops)} 张")
     if logit is not None and thresholds:
-        _render_logit_scale(logit, thresholds, "人脸裁剪图分数（logit，越高越倾向生成）")
+        score_caption = "人脸模型分数（非材料真伪概率）" if face.get("backend") == "gend" else "人脸裁剪图分数（logit，越高越倾向生成）"
+        _render_logit_scale(logit, thresholds, score_caption)
     if face.get("band_reason"):
         st.caption(f"分档依据：{face['band_reason']}")
-    if render_crop is not None and crops:
-        for column, item in zip(st.columns(max(len(crops), 3)), crops, strict=False):
-            crop = _mapping(item)
-            with column:
-                render_crop(f"face_crops/{_text(crop.get('file'))}", f"分数 {_logit_text(crop.get('logit'))}")
+    if per_face:
+        strategy = "每帧最大脸" if face.get("band_aggregation") == "largest" else "每帧可用人脸中的最高分"
+        st.caption(f"定档取值：{strategy}；视频对各帧所选分数取算术平均。小脸分数仅作不可靠线索。")
+        highest = _mapping(face.get("highest_score_face"))
+        if highest:
+            st.caption(f"最高分来自画面 {_text(highest.get('source'))} 的第 {highest.get('face_id')} 张脸。")
+        st.dataframe([
+            {"画面": row.get("source"), "人脸序号": row.get("face_id"),
+             "短边像素": row.get("short_edge_px"), "分数": row.get("score"),
+             "参与定档": "是" if row.get("used_for_band") else "否",
+             "可靠性": "人脸过小，结果不可靠" if row.get("too_small") else "未触发小脸限制"}
+            for value in per_face if (row := _mapping(value))
+        ], use_container_width=True, hide_index=True)
+        if face.get("compatibility_note"):
+            st.caption(_text(face["compatibility_note"]))
+    if render_crop is not None:
+        for figure in _list(face.get("annotated_frames")):
+            figure = _mapping(figure)
+            render_crop(f"face_crops/{_text(figure.get('file'))}", _text(figure.get("note")))
+        display = per_face or crops
+        for start in range(0, len(display), 3):
+            for column, item in zip(st.columns(3), display[start:start + 3], strict=False):
+                crop = _mapping(item)
+                with column:
+                    value = crop.get("score", crop.get("logit"))
+                    render_crop(f"face_crops/{_text(crop.get('file'))}", f"人脸 {crop.get('face_id', start + 1)}：分数 {_logit_text(value)}")
     st.caption(
-        "用 CommunityForensics 打人脸裁剪图，分数只和真实人脸的分布比较。"
+        ("用 GenD 打人脸裁剪图，模型分数不是鉴伪结论的概率。" if face.get("backend") == "gend"
+         else "用 CommunityForensics 打人脸裁剪图，分数只和真实人脸的分布比较。") +
         "换脸检测跨数据集不稳，高分是复核线索，低分不能排除换脸。"
     )
 
 
-def render_provenance_page(provenance: Mapping[str, Any]) -> None:
+def render_provenance_page(provenance: Mapping[str, Any], visible_label: Mapping[str, Any] | None = None) -> None:
     """文件标识页：只陈列文件里实际存在的内容，不下真假结论。"""
     st.subheader("文件标识")
-    st.info("这一页只读文件本身，不跑模型。有标识是线索，没有标识不说明任何事。")
+    st.info("文件元数据和画面文字分别展示。有标识是线索，没有标识不说明任何事；画面文字由离线文字识别读取。")
+    from modules.visible_label import visible_label_lines
+    for index, line in enumerate(visible_label_lines(_mapping(visible_label))):
+        if index == 0:
+            st.markdown("#### " + line)
+        else:
+            st.write(line)
     if not provenance:
         st.warning("这个任务没有文件标识解析结果。")
         return

@@ -1,5 +1,15 @@
 # 第三方资产与许可清单
 
+## 新增人脸分支：GenD
+
+GenD 的 CLIP-L/14 权重来自 [作者模型页](https://huggingface.co/yermandy/GenD_CLIP_L_14)，结构依据 [作者实现](https://github.com/yermandy/GenD)。已保存并核对模型卡的 MIT 许可声明及代码许可原文，原文随模型包保存于 `系统/models/gend-face/LICENSE.txt`。本地适配仅构造同一视觉编码器和归一化线性头，使用原始 CLIP 图像预处理配置；不在运行时下载模型。
+
+权重 SHA-256 为 `d76f0bdfd74a29fe1b1c1b84a80ac92486993e426878e8c7a3944281fbb96833`。模型包记录配置与预处理文件摘要，加载前逐项验证。基础 CLIP 参数的来源为 [OpenAI CLIP](https://github.com/openai/CLIP)，代码采用 MIT 许可。模型代码或权重许可不自动覆盖输入图像或训练媒体的权利。
+
+该后端默认关闭。未经当前产品流程校准时仅输出模型分数，不产生人脸档位；其 softmax 分数不是材料真伪的概率。
+
+2026-11-09 源码发布保留配置、适配代码、许可和校验清单，不在 GitHub 重复分发约 1.216 GB 的 GenD 权重。可选权重由使用者从上述作者模型页取得并验证 SHA-256，见 `系统/models/gend-face/DOWNLOAD.md`。默认人脸分支仍为 `cf384`；缺少可选 GenD 权重不应通过改阈值或切换模型规避校验。
+
 核对日期：**2026-11-04**。本项目的代码、模型权重和数据分别适用各自的上游条款；本仓库不把整包资产重新许可。权重和训练数据仅按上游条款用于研究，研究用途声明不代替所需授权。本文记录来源与条款，不作法律判断，也不表示所有资产的公开再分发条件均已核实。未取得原文或完整授权链的事项明确标为“未核实”。核对记录和实际访问地址见 `文档/第三方资产核对记录.md`。
 
 ## 一、随仓库分发的模型和权重
@@ -66,7 +76,18 @@
 
 **FFmpeg 构建特别说明：**本地输出包含 `--enable-gpl --enable-version3 --enable-static`，`-L` 明示 GPL 第 3 版或任何后续版本。`build-source.json` 记录的是滚动下载地址及压缩包哈希，不是对应源代码交付证明。GPLv3 的二进制传播条款涉及 Corresponding Source 的提供方式；应保留该构建的许可、版权信息、准确源码和构建信息。不能用主页链接或另一版本源码替代对应关系，也不在此推断整个 Python 项目自动适用 GPL。OpenCV wheel 内嵌 FFmpeg 的条款与这个独立 gyan.dev 构建分开处理。
 
-## 四、仓库内的图片
+## 四、PDF 报告依赖与字体
+
+| 组件 | 固定版本 | 许可 | 来源与保存位置 |
+| --- | --- | --- | --- |
+| ReportLab | 5.1.0 | BSD；原许可保留在安装包中 | [官方发行元数据](https://pypi.org/pypi/reportlab/5.1.0/json)；官方 wheel 的 SHA-256 为 `59fdbaec5efe437095ad1d7292ec9a271c8ca2d3ec75e889c6e61400929b90df`，下载来源和版本进入运行环境锁文件 |
+| 霞鹜文楷常规、粗体 | v1.330，固定提交 `5dea838d5202323f27de77cdc5436e9d214d8fb4` | SIL Open Font License 1.1 | [官方发布](https://github.com/lxgw/LxgwWenKai/releases/tag/v1.330)；静态 TrueType 字体和许可全文在 `系统/assets/fonts/`，字体通过 Git LFS 保存 |
+
+字体来源：[常规](https://raw.githubusercontent.com/lxgw/LxgwWenKai/5dea838d5202323f27de77cdc5436e9d214d8fb4/fonts/TTF/LXGWWenKai-Regular.ttf)、[粗体](https://raw.githubusercontent.com/lxgw/LxgwWenKai/5dea838d5202323f27de77cdc5436e9d214d8fb4/fonts/TTF/LXGWWenKai-Bold.ttf)、[许可](https://raw.githubusercontent.com/lxgw/LxgwWenKai/5dea838d5202323f27de77cdc5436e9d214d8fb4/OFL.txt)。本项目随软件提供原始字体及许可，生成 PDF 时嵌入所用字符子集，不依赖系统字体。
+
+常规字体 SHA-256：`0819604ad9357afbc6e7cc097328a16ed85143ee0848ffda09fda35a30da6506`；粗体字体 SHA-256：`7a356605eb36c92e29cc64090e2856e4675694572a2ae4da84adbadffecae907`。
+
+## 五、仓库内的图片
 
 | 位置 | 已核对数量 | 来源与授权记录 |
 | --- | --- | --- |
@@ -76,8 +97,21 @@
 
 以上说明如实披露现状，不是逐张图片的授权证明，也不将这些图片纳入项目代码许可证。图像来源不明的事实与后续移除承诺应同时保留。
 
-## 五、使用本仓库权重的提示
+## 六、使用本仓库权重的提示
 
 C38 和重训头的训练媒体含 HD-VILA 来源，R-UDA §5.5 把符合其定义的训练模型列入 Results，§2.1 限制其用于商业产品或服务，§3 要求下游同样受约束。InsightFace `buffalo_l` 限非商业研究。下载和使用这些权重，需要自行遵守对应条款。
 
 FFmpeg 不随仓库分发，`系统/tools/setup_runtime.ps1` 从上游下载固定版本。
+
+## 七、离线画面文字识别
+
+| 组件 | 固定版本 | 许可与来源 |
+| --- | --- | --- |
+| rapidocr-onnxruntime | 1.4.4 | Apache-2.0；[发行元数据](https://pypi.org/pypi/rapidocr-onnxruntime/1.4.4/json)。安装包未附许可正文，官方完整原文另存 `系统/assets/licenses/RapidOCR-Apache-2.0.txt`。 |
+| pyclipper | 1.4.0 | MIT；[发行元数据](https://pypi.org/pypi/pyclipper/1.4.0/json)，原文随安装包保留。 |
+| Shapely | 2.1.2 | BSD-3-Clause；内嵌 GEOS 另适用 LGPL-2.1，原文随安装包保留；[发行元数据](https://pypi.org/pypi/shapely/2.1.2/json)。 |
+| PyYAML | 6.0.3 | MIT；原文随安装包保留；[发行元数据](https://pypi.org/pypi/PyYAML/6.0.3/json)。 |
+
+随安装包提供三个本地模型：`ch_PP-OCRv4_det_infer.onnx`、`ch_PP-OCRv4_rec_infer.onnx`、`ch_ppocr_mobile_v2.0_cls_infer.onnx`。RapidOCR 官方说明模型版权归百度、转换脚本归 RapidOCR；已核对项目 Apache-2.0 原文。单个转换权重与百度原始权重的逐字节对应尚未核实，不把代码许可写成已完成该对应核验。四个新增安装包共 16,896,675 字节，展开共 22,085,958 字节，包含上述模型。版本、发行链接和 SHA-256 记入 `系统/requirements/`，其余传递依赖沿用已有哈希锁。运行时只读取安装包内模型，网络连接在文字识别子进程内禁用，不下载模型。
+
+识别词表属于开发起点，尚未在真实工具输出上核实。合成字样测试只检查文字识别流程，不构成生成检测或来源验证成绩。

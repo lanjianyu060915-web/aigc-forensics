@@ -16,6 +16,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-package", default=None)
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--face-crops-json", default=None, help="人脸裁剪图路径列表（JSON 文件）")
+    parser.add_argument("--face-context-json", default=None, help="逐脸记录和定档策略（JSON 文件）")
     return parser
 
 
@@ -47,7 +48,10 @@ def main() -> int:
     face_crops = None
     if args.face_crops_json:
         face_crops = json.loads(Path(args.face_crops_json).read_text(encoding="utf-8"))
-    payload = runtime.run(args.input, output, face_crops)
+    face_context = None
+    if args.face_context_json:
+        face_context = json.loads(Path(args.face_context_json).read_text(encoding="utf-8"))
+    payload = runtime.run(args.input, output, face_crops, face_context)
     return 0 if payload.get("status") == "success" else 1
 
 

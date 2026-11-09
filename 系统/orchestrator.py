@@ -12,13 +12,24 @@ import sys
 import threading
 import time
 from collections.abc import Collection, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
+from case_libraries import library_files
+from product_info import product_names
 from decision.aigc_overall import attach_general_aigc
+from decision.aigc_evidence import attach_evidence
+from modules.visible_label import analyze_visible_labels, unavailable as visible_label_unavailable
 from progress_events import AUTO_PERCENT, ProgressEventWriter
+from query_reference_guard import (
+    QueryReferenceGuardError,
+    check_query_reference_guard,
+    verify_guard_snapshot,
+)
 from reporting.report_builder import generate_task_reports
+from source_upgrade import prepare_case_context, run_source_pair
 from video_pipeline.aggregate import (
     aggregate_deepfake_frames,
     aggregate_identity_frames,
@@ -62,6 +73,7 @@ class RuntimeServices(Protocol):
         task_id: str | None = None,
         progress_events_path: str | Path | None = None,
         progress_latest_path: str | Path | None = None,
+        include_secondary_faces: bool = True,
     ) -> dict[str, Any]: ...
 
 
@@ -120,6 +132,7 @@ class _ProgressReporter:
             for module in (*MODULE_ORDER, "overall")
         }
         self.events: list[dict[str, Any]] = []
+        self._thread_lock = threading.RLock()
 
     def emit(
         self,
@@ -134,31 +147,33 @@ class _ProgressReporter:
         details: Mapping[str, Any] | None = None,
         force: bool = True,
     ) -> dict[str, Any] | None:
-        module_name = module or "overall"
-        writer = self._writers[module_name]
-        event = writer.emit(
-            stage,
-            status,
-            message,
-            progress_current=progress_current,
-            progress_total=progress_total,
-            progress_percent=progress_percent,
-            details=details,
-            force=force,
-        )
-        if event is None:
-            return None
-        self.events.append(event)
-        # Retain the v0.2 array for archived-task compatibility while the JSONL
-        # file is the authoritative append-only event stream.
-        _write_json(self._legacy_path, self.events)
-        try:
-            self._callback(dict(event))
-        except Exception as exc:
-            # A display callback is not allowed to terminate forensic work.
-            event["callback_error"] = f"{type(exc).__name__}: {exc}"
+        # 兼容事件数组、文件与界面回调也须按一次事件串行发布。
+        with self._thread_lock:
+            module_name = module or "overall"
+            writer = self._writers[module_name]
+            event = writer.emit(
+                stage,
+                status,
+                message,
+                progress_current=progress_current,
+                progress_total=progress_total,
+                progress_percent=progress_percent,
+                details=details,
+                force=force,
+            )
+            if event is None:
+                return None
+            self.events.append(event)
+            # Retain the v0.2 array for archived-task compatibility while the JSONL
+            # file is the authoritative append-only event stream.
             _write_json(self._legacy_path, self.events)
-        return event
+            try:
+                self._callback(dict(event))
+            except Exception as exc:
+                # A display callback is not allowed to terminate forensic work.
+                event["callback_error"] = f"{type(exc).__name__}: {exc}"
+                _write_json(self._legacy_path, self.events)
+            return event
 
 
 def load_config(config_path: str | Path | None = None) -> tuple[dict[str, Any], Path]:
@@ -174,6 +189,8 @@ def load_config(config_path: str | Path | None = None) -> tuple[dict[str, Any], 
     for section in ("runtime", "deepfake", "identity", "source", "frontend"):
         if not isinstance(config.get(section), dict):
             raise OrchestrationError(f"配置缺少对象：{section}")
+    if not isinstance(config["runtime"].get("parallel_modules", False), bool):
+        raise OrchestrationError("runtime.parallel_modules 必须为布尔值。")
     return config, path
 
 
@@ -1259,6 +1276,7 @@ def _extract_face_crops(
     query_path: Path,
     is_video: bool,
     logs_dir: Path,
+    face_branch: Mapping[str, Any] | None = None,
 ) -> tuple[list[str] | None, list[dict[str, Any]]]:
     """裁出人脸，返回（裁剪图绝对路径，裁剪记录）。没配置或失败时路径为 None，人脸分支不跑。"""
 
@@ -1273,6 +1291,9 @@ def _extract_face_crops(
             "--out-dir",
             str(out_dir),
         ]
+        if face_branch is not None:
+            command += ["--max-faces", str(face_branch.get("max_faces", 8)),
+                        "--min-face-side", str(face_branch.get("min_face_side", 64))]
         if is_video:
             command += [
                 "--frame-selection",
@@ -1306,6 +1327,28 @@ def _extract_face_crops(
     return [str(out_dir / str(item.get("file"))) for item in crops], [dict(item) for item in crops]
 
 
+def _face_context(task_dir: Path, options: Mapping[str, Any] | None, config_path: Path | None = None) -> dict[str, Any] | None:
+    """把新增逐脸记录传给引擎；旧裁剪路径列表仍作为独立兼容字段。"""
+    if not isinstance(options, Mapping):
+        return None
+    payload = json.loads((task_dir / "face_crops" / "crops.json").read_text(encoding="utf-8"))
+    faces = []
+    for record in payload.get("per_face") or []:
+        if not isinstance(record, dict):
+            raise ValueError("逐脸记录不是对象")
+        name = str(record.get("file") or "")
+        if not name or Path(name).name != name:
+            raise ValueError("逐脸裁剪文件名无效")
+        faces.append({**record, "path": str(task_dir / "face_crops" / name)})
+    context = {"backend": options.get("backend", "cf384"),
+            "band_aggregation": options.get("band_aggregation", "largest"),
+            "max_faces": options.get("max_faces", 8), "min_face_side": options.get("min_face_side", 64),
+            "faces": faces}
+    if options.get("model_package") and config_path is not None:
+        context["model_package"] = str(resolve_path(options["model_package"], config_path))
+    return context
+
+
 def _run_general_aigc(
     *,
     section: Mapping[str, Any],
@@ -1316,6 +1359,7 @@ def _run_general_aigc(
     progress: _ProgressReporter,
     services: Any,
     face_crops: Sequence[str] | None = None,
+    face_context: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """常驻服务优先，不可用时起隔离子进程；任何失败都收成结果，不打断鉴伪模块。"""
 
@@ -1369,6 +1413,7 @@ def _run_general_aigc(
                     "output_path": output_path.with_name(f".{output_path.name}.worker"),
                     "timeout": remaining,
                     "face_crops": None if face_crops is None else list(face_crops),
+                    **({"face_context": dict(face_context)} if face_context is not None else {}),
                 },
                 timeout=remaining,
             )
@@ -1412,6 +1457,10 @@ def _run_general_aigc(
             crops_list = output_path.with_name(".face_crops.json")
             _write_json(crops_list, list(face_crops))
             command += ["--face-crops-json", str(crops_list)]
+        if face_context is not None:
+            context_path = output_path.with_name(".face_context.json")
+            _write_json(context_path, dict(face_context))
+            command += ["--face-context-json", str(context_path)]
         completed = _run_subprocess(
             command,
             cwd=runner_path.parent,
@@ -1497,6 +1546,7 @@ def _run_search_module(
     identity_cache: Path,
     progress: _ProgressReporter,
     services: Any = None,
+    include_secondary_faces: bool = True,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     started_at = _now_iso()
     started = time.perf_counter()
@@ -1539,7 +1589,10 @@ def _run_search_module(
             execution_mode="disabled",
         )
     try:
-        library_path = resolve_path(library_override or section["library"], config_path)
+        library_value = library_override if library_override is not None else section["library"]
+        if not isinstance(library_value, (str, Path)) or not str(library_value).strip():
+            raise ValueError("本次比对库目录未配置或为空")
+        library_path = resolve_path(library_value, config_path)
         timeout = float(section.get("timeout_seconds", 600))
         top_k = int(section.get("top_k", 5))
     except (KeyError, TypeError, ValueError) as exc:
@@ -1565,7 +1618,12 @@ def _run_search_module(
     if not library_path.is_dir():
         preflight_errors.append(f"图库不存在或不是目录：{library_path}")
     else:
-        library_image_count = _library_image_count(library_path)
+        try:
+            # 在任何常驻服务或独立进程读取库内容前检查目录链接的边界。
+            # 身份库的格式范围含 TIFF，素材库沿用原有图片格式。
+            library_image_count = len(library_files(library_path, kind=name))
+        except Exception as exc:
+            preflight_errors.append(f"图库目录边界检查失败：{exc}")
     if library_path.is_dir() and library_image_count == 0:
         preflight_errors.append(f"图库为空或没有受支持图片：{library_path}")
     if top_k < 1:
@@ -1643,6 +1701,7 @@ def _run_search_module(
                     "task_id": progress.task_id,
                     "progress_events_path": progress.events_path,
                     "progress_latest_path": progress.latest_path,
+                    "include_secondary_faces": include_secondary_faces,
                 },
                 timeout=service_timeout,
             )
@@ -1748,6 +1807,8 @@ def _run_search_module(
                 )
             if section.get("multi_face_policy"):
                 command.extend(["--multi-face-policy", str(section["multi_face_policy"])])
+            if not include_secondary_faces:
+                command.append("--main-face-only")
         except OSError as exc:
             errors.append(f"无法创建身份缓存目录：{exc}")
         except ValueError as exc:
@@ -2184,6 +2245,7 @@ def _run_video_module(
                     identity_cache=identity_cache,
                     progress=progress,
                     services=services,
+                    include_secondary_faces=(order == 1),
                 )
         except Exception as exc:  # noqa: BLE001 - 单帧失败不得终止整个视频任务
             error = f"{type(exc).__name__}: {exc}"
@@ -2235,6 +2297,23 @@ def _run_video_module(
             query_image=str(primary_frame_path),
             extra_limitations=extra_limitations,
         )
+        # 逐脸结果只取首要帧；原有跨帧候选、分数和聚合规则保持不变。
+        primary = _mapping_or_empty(frame_results[0].get("payload")) if frame_results else {}
+        if primary.get("faces"):
+            aggregate["faces"] = primary["faces"]
+            aggregate["face_search"] = {
+                **_mapping_or_empty(primary.get("face_search")),
+                "scope": "video_primary_frame",
+                "frame_timestamp_seconds": frame_results[0]["frame"].get("timestamp_seconds"),
+                "limitations": [
+                    *_mapping_or_empty(primary.get("face_search")).get("limitations", []),
+                    "视频的逐脸身份候选只来自首要帧，不代表跨帧身份绑定；视频主结果仍按原有逐帧规则聚合。",
+                ],
+            }
+            manifest = aggregate.setdefault("artifact_manifest", [])
+            known = {item.get("path") for item in manifest if isinstance(item, Mapping)}
+            manifest.extend(item for item in primary.get("artifact_manifest", [])
+                            if item.get("kind") == "identity_face_thumbnail" and item.get("path") not in known)
     else:
         base_payload = next(
             (
@@ -2377,6 +2456,15 @@ def run_task(
         raise OrchestrationError(f"{label}不存在或不是文件：{query_source}")
     input_kind = "video" if query_source.suffix.casefold() in VIDEO_EXTENSIONS else "image"
 
+    guard_arguments = {
+        "config": config, "config_path": resolved_config, "selected_modules": selected,
+        "resolve_path": resolve_path, "source_library": source_library, "identity_library": identity_library,
+    }
+    try:
+        query_guard = check_query_reference_guard(query_path=query_source, **guard_arguments)
+    except QueryReferenceGuardError as exc:
+        raise OrchestrationError(f"test_only 防自检索检查未通过：{exc}") from exc
+
     try:
         tasks_root = resolve_path(config["runtime"]["tasks_root"], resolved_config)
         identity_cache = resolve_path(config["runtime"]["identity_cache"], resolved_config)
@@ -2393,6 +2481,17 @@ def run_task(
         shutil.copy2(query_source, video_path)
     else:
         shutil.copy2(query_source, query_path)
+
+    if query_guard is not None:
+        try:
+            copied_guard = check_query_reference_guard(query_path=video_path or query_path, **guard_arguments)
+            assert copied_guard is not None
+            verify_guard_snapshot(query_guard, copied_guard)
+            copied_guard["task_input"] = (video_path or query_path).name
+            copied_guard["copy_verified"] = True
+            _write_json(task_dir / "query_reference_guard.json", copied_guard)
+        except (QueryReferenceGuardError, OSError) as exc:
+            raise OrchestrationError(f"test_only 防自检索检查未通过：{exc}") from exc
 
     started_at = _now_iso()
     started = time.perf_counter()
@@ -2422,25 +2521,28 @@ def run_task(
         for name in MODULE_ORDER
     }
 
+    state_lock = threading.RLock()
+
     def write_running_status(current_module: str | None = None) -> None:
-        _write_json(
-            task_dir / "task_status.json",
-            {
-                "schema_version": "3.0",
-                "task_id": task_id,
-                "task_dir": str(task_dir),
-                "status": "running",
-                "started_at": started_at,
-                "query_source": str(query_source),
-                "query_image": str(query_path),
-                "input": dict(input_status),
-                "selected_modules": selected_order,
-                "current_module": current_module,
-                "modules": module_states,
-                "progress_events": str(progress.events_path),
-                "progress_latest": str(progress.latest_path),
-            },
-        )
+        with state_lock:
+            _write_json(
+                task_dir / "task_status.json",
+                {
+                    "schema_version": "3.0",
+                    "task_id": task_id,
+                    "task_dir": str(task_dir),
+                    "status": "running",
+                    "started_at": started_at,
+                    "query_source": str(query_source),
+                    "query_image": str(query_path),
+                    "input": dict(input_status),
+                    "selected_modules": selected_order,
+                    "current_module": current_module,
+                    "modules": module_states,
+                    "progress_events": str(progress.events_path),
+                    "progress_latest": str(progress.latest_path),
+                },
+            )
 
     write_running_status()
     progress.emit(
@@ -2592,21 +2694,63 @@ def run_task(
         )
         write_running_status(None)
 
-    for name in MODULE_ORDER:
+    visible_label = None
+    visible_label_output = task_dir / "visible_label_result.json"
+    if "deepfake" in selected:
+        visible_inputs = [{"path": str(query_path), "timestamp_seconds": (input_status.get("primary_frame") or {}).get("timestamp_seconds")}]
+        # 首要帧已固化为查询图，其余关键帧最多再取四帧。
+        for item in (input_status.get("key_frames") or [])[1:5]:
+            visible_inputs.append({"path": str(task_dir / item["path"]), "timestamp_seconds": item.get("timestamp_seconds")})
+        try:
+            visible_label = analyze_visible_labels(visible_inputs)
+        except Exception as exc:
+            visible_label = visible_label_unavailable(f"画面文字识别未完成（{type(exc).__name__}）。")
+        _write_json(visible_label_output, visible_label)
+        progress.emit("visible_label_finished", "画面文字识别已记录；结果不参与检测档位。", status="success" if visible_label.get("status") == "success" else "warning", progress_percent=None)
+
+    try:
+        case_context = prepare_case_context(
+            config=config, config_path=resolved_config, resolve_path=resolve_path,
+            source_library=source_library, identity_library=identity_library,
+            selected_modules=selected,
+        )
+        source_section = case_context["source_section"]
+        case_metadata = case_context["case_libraries"]
+    except Exception as exc:
+        # 快照留痕失败不能改变检测结论；实际检索仍须独立通过目录边界预检。
+        source_section = dict(config["source"])
+        if "source" in selected:
+            source_section["feature_cache"] = None
+        case_metadata = {
+            "status": "error", "name": "本次比对库", "built_at": None,
+            "libraries": {}, "error_message": f"案件库信息记录未完成：{exc}",
+        }
+    if isinstance(case_metadata, Mapping) and case_metadata.get("status") == "error":
+        progress.emit(
+            "case_library_snapshot_failed", "案件库信息记录未完成，检索仍将独立核验目录边界。",
+            status="warning", progress_percent=None,
+            details={"error": case_metadata.get("error_message")},
+        )
+
+    def execute_module(name: str) -> None:
+        nonlocal selected_completed
         if name not in selected:
-            results[name], metadata[name] = _skip_module(
+            module_result, module_metadata = _skip_module(
                 name=name,
                 query_path=query_path,
                 output_path=output_paths[name],
                 logs_dir=logs_dir,
                 reason="用户未选择此模块",
             )
-            module_states[name].update(
-                status="skipped",
-                stage="not_selected",
-                message="用户未选择此模块",
-                runtime_seconds=metadata[name]["runtime_seconds"],
-            )
+            with state_lock:
+                results[name] = module_result
+                metadata[name] = module_metadata
+                module_states[name].update(
+                    status="skipped",
+                    stage="not_selected",
+                    message="用户未选择此模块",
+                    runtime_seconds=module_metadata["runtime_seconds"],
+                )
             progress.emit(
                 f"{name}_skipped",
                 f"{name} 模块已跳过。",
@@ -2615,13 +2759,14 @@ def run_task(
                 progress_current=1,
                 progress_total=1,
             )
-            continue
-        module_states[name].update(
-            status="running",
-            stage="starting",
-            message="正在进入真实模块",
-        )
-        write_running_status(name)
+            return
+        with state_lock:
+            module_states[name].update(
+                status="running",
+                stage="starting",
+                message="正在进入真实模块",
+            )
+            write_running_status(name)
         progress.emit(
             f"{name}_started",
             f"开始执行 {name} 真实模块。",
@@ -2638,9 +2783,9 @@ def run_task(
                 else []
             )
             if frame_plan:
-                results[name], metadata[name] = _run_video_module(
+                module_result, module_metadata = _run_video_module(
                     name=name,
-                    section=config[name],
+                    section=source_section if name == "source" else config[name],
                     config_path=resolved_config,
                     task_dir=task_dir,
                     logs_dir=logs_dir,
@@ -2657,7 +2802,7 @@ def run_task(
                     band_labels=deepfake_band_labels,
                 )
             elif name == "deepfake":
-                results[name], metadata[name] = _run_deepfake_module(
+                module_result, module_metadata = _run_deepfake_module(
                     section=config[name],
                     config_path=resolved_config,
                     query_path=query_path,
@@ -2667,9 +2812,9 @@ def run_task(
                     services=services,
                 )
             else:
-                results[name], metadata[name] = _run_search_module(
+                module_result, module_metadata = _run_search_module(
                     name=name,
-                    section=config[name],
+                    section=source_section if name == "source" else config[name],
                     config_path=resolved_config,
                     query_path=query_path,
                     library_override=(identity_library if name == "identity" else source_library),
@@ -2679,64 +2824,78 @@ def run_task(
                     progress=progress,
                     services=services,
                 )
+            if name == "identity":
+                not_applicable = _identity_not_applicable(module_result)
+                if not_applicable is not None:
+                    module_result = not_applicable
+                    _write_json(output_paths[name], module_result)
+                    module_metadata["status"] = "skipped"
+                    module_metadata["error"] = None
+                    module_metadata["not_applicable"] = True
+            if (
+                name == "deepfake"
+                and isinstance(general_aigc_section, Mapping)
+                and general_aigc_section.get("enabled") is not False
+            ):
+                crop_started = time.perf_counter()
+                face_options = general_aigc_section.get("face_branch")
+                face_options = face_options if isinstance(face_options, Mapping) else None
+                face_crop_paths, face_crop_records = _extract_face_crops(
+                    section=general_aigc_section.get("face_crops"),
+                    config_path=resolved_config,
+                    task_dir=task_dir,
+                    query_path=query_path,
+                    is_video=video_path is not None,
+                    logs_dir=logs_dir,
+                    face_branch=face_options,
+                )
+                crop_seconds = time.perf_counter() - crop_started
+                context = _face_context(task_dir, face_options, resolved_config) if face_crop_paths is not None else None
+                general_payload = _run_general_aigc(
+                    section=general_aigc_section,
+                    config_path=resolved_config,
+                    input_path=video_path if video_path is not None else query_path,
+                    output_path=general_aigc_output,
+                    logs_dir=logs_dir,
+                    progress=progress,
+                    services=services,
+                    face_crops=face_crop_paths,
+                    face_context=context,
+                )
+                if isinstance(general_payload.get("face_branch"), dict):
+                    general_payload["face_branch"]["records"] = face_crop_records
+                    if context is not None:
+                        from modules.face_crops.annotations import write_face_annotations
+                        try:
+                            write_face_annotations(task_dir, query_path, general_payload["face_branch"])
+                        except (OSError, ValueError, RuntimeError) as exc:
+                            general_payload["face_branch"]["annotation_error"] = f"逐脸示意图未完成：{exc}"
+                        general_payload.setdefault("branch_timing", {}).update(
+                            crop_seconds=crop_seconds, whole_image_seconds=module_result.get("runtime_seconds"))
+                if isinstance(general_payload.get("runtime_seconds"), (int, float)):
+                    general_payload["runtime_seconds"] += crop_seconds
+                _write_json(general_aigc_output, general_payload)
+                module_result = attach_general_aigc(module_result, general_payload)
+                module_result = attach_evidence(module_result, file_provenance, visible_label=visible_label)
+                _write_json(output_paths[name], module_result)
+                module_metadata["status"] = module_result["status"]
+                module_metadata["error"] = module_result.get("error_message")
+                module_metadata["general_aigc"] = {
+                    "status": general_payload.get("status"),
+                    "runtime_seconds": general_payload.get("runtime_seconds"),
+                    "execution_mode": _mapping_get(general_payload.get("runtime"), "execution_mode"),
+                }
+                if isinstance(general_payload.get("runtime_seconds"), (int, float)):
+                    module_metadata["runtime_seconds"] += float(general_payload["runtime_seconds"])
         except Exception as exc:
-            results[name], metadata[name] = _unexpected_module_failure(
+            module_result, module_metadata = _unexpected_module_failure(
                 name=name,
                 query_path=query_path,
                 output_path=output_paths[name],
                 logs_dir=logs_dir,
                 exc=exc,
             )
-        if name == "identity":
-            not_applicable = _identity_not_applicable(results[name])
-            if not_applicable is not None:
-                results[name] = not_applicable
-                _write_json(output_paths[name], results[name])
-                metadata[name]["status"] = "skipped"
-                metadata[name]["error"] = None
-                metadata[name]["not_applicable"] = True
-        if (
-            name == "deepfake"
-            and isinstance(general_aigc_section, Mapping)
-            and general_aigc_section.get("enabled") is not False
-        ):
-            crop_started = time.perf_counter()
-            face_crop_paths, face_crop_records = _extract_face_crops(
-                section=general_aigc_section.get("face_crops"),
-                config_path=resolved_config,
-                task_dir=task_dir,
-                query_path=query_path,
-                is_video=video_path is not None,
-                logs_dir=logs_dir,
-            )
-            crop_seconds = time.perf_counter() - crop_started
-            general_payload = _run_general_aigc(
-                section=general_aigc_section,
-                config_path=resolved_config,
-                input_path=video_path if video_path is not None else query_path,
-                output_path=general_aigc_output,
-                logs_dir=logs_dir,
-                progress=progress,
-                services=services,
-                face_crops=face_crop_paths,
-            )
-            if isinstance(general_payload.get("face_branch"), dict):
-                general_payload["face_branch"]["records"] = face_crop_records
-            if isinstance(general_payload.get("runtime_seconds"), (int, float)):
-                general_payload["runtime_seconds"] += crop_seconds
-            _write_json(general_aigc_output, general_payload)
-            results[name] = attach_general_aigc(results[name], general_payload)
-            _write_json(output_paths[name], results[name])
-            metadata[name]["status"] = results[name]["status"]
-            metadata[name]["error"] = results[name].get("error_message")
-            metadata[name]["general_aigc"] = {
-                "status": general_payload.get("status"),
-                "runtime_seconds": general_payload.get("runtime_seconds"),
-                "execution_mode": _mapping_get(general_payload.get("runtime"), "execution_mode"),
-            }
-            if isinstance(general_payload.get("runtime_seconds"), (int, float)):
-                metadata[name]["runtime_seconds"] += float(general_payload["runtime_seconds"])
-        module_status = str(results[name].get("status") or "error")
+        module_status = str(module_result.get("status") or "error")
         progress.emit(
             f"{name}_finished",
             f"{name} 模块完成：{module_status}",
@@ -2744,24 +2903,75 @@ def run_task(
             status=module_status if module_status in {"success", "error", "skipped"} else "warning",
             progress_current=1,
             progress_total=1,
-            details={"runtime_seconds": metadata[name]["runtime_seconds"]},
+            details={"runtime_seconds": module_metadata["runtime_seconds"]},
         )
-        module_states[name].update(
-            status=module_status,
-            stage="finished",
-            message=f"模块完成：{module_status}",
-            runtime_seconds=metadata[name]["runtime_seconds"],
-            error=metadata[name].get("error"),
-        )
-        selected_completed += 1
-        write_running_status(None if selected_completed == len(selected_order) else name)
+        with state_lock:
+            results[name] = module_result
+            metadata[name] = module_metadata
+            module_states[name].update(
+                status=module_status,
+                stage="finished",
+                message=f"模块完成：{module_status}",
+                runtime_seconds=module_metadata["runtime_seconds"],
+                error=module_metadata.get("error"),
+            )
+            selected_completed += 1
+            write_running_status(None if selected_completed == len(selected_order) else name)
+            progress.emit(
+                "modules_completed",
+                f"已完成所选模块：{selected_completed} / {len(selected_order)}",
+                status="running",
+                progress_current=selected_completed,
+                progress_total=overall_work_total,
+                details={"last_completed_module": name},
+            )
+
+    if config["runtime"].get("parallel_modules", False):
+        for name in MODULE_ORDER:
+            if name not in selected:
+                execute_module(name)
+        # 仅调度已有隔离进程；全部结束后再生成配对与统一报告。
+        with ThreadPoolExecutor(max_workers=len(selected_order)) as executor:
+            list(executor.map(execute_module, selected_order))
+    else:
+        for name in MODULE_ORDER:
+            execute_module(name)
+
+    pair_result: dict[str, Any] | None = None
+    pair_section = config.get("pair_compare")
+    if ("source" in selected and isinstance(pair_section, Mapping)
+            and pair_section.get("enabled") is True):
         progress.emit(
-            "modules_completed",
-            f"已完成所选模块：{selected_completed} / {len(selected_order)}",
-            status="running",
-            progress_current=selected_completed,
-            progress_total=overall_work_total,
-            details={"last_completed_module": name},
+            "pair_compare_started", "正在生成前三个素材候选的人工配对证据。",
+            status="running", progress_percent=None,
+        )
+        try:
+            pair_result = run_source_pair(
+                config=config, config_path=resolved_config, resolve_path=resolve_path,
+                task_dir=task_dir, query_path=query_path, source_result=results["source"],
+                source_library=source_library, input_kind=input_kind,
+            )
+            if not isinstance(pair_result, dict):
+                raise ValueError("配对接入没有返回结构化结果。")
+        except Exception as exc:
+            # 即使可选接线本身异常，已完成的检测和检索状态也保持原样。
+            pair_result = {
+                "schema_version": "1.0", "status": "error",
+                "scope": "frame" if input_kind == "video" else "image",
+                "timestamp_seconds": (input_status.get("primary_frame") or {}).get("timestamp_seconds"),
+                "mode": "manual_review", "conclusion_enabled": False, "forgery_type": None,
+                "notice": "当前版本未给出伪造类型结论；配对未完成，其他模块结果不受影响。",
+                "candidates": [], "artifact_manifest": [],
+                "error_message": f"配对接入未完成：{type(exc).__name__}: {exc}",
+            }
+            try:
+                _write_json(task_dir / "pair_compare_result.json", pair_result)
+            except Exception as write_error:
+                pair_result["persistence_error"] = f"配对结果保存失败：{write_error}"
+        progress.emit(
+            "pair_compare_finished", "素材候选配对步骤完成，结果仅供人工对比。",
+            status="warning" if pair_result.get("status") == "error" else "running",
+            progress_percent=None, details={"pair_status": pair_result.get("status")},
         )
 
     # 没有人脸时身份比对是不适用，不是没完成，不能把任务拉成部分完成。
@@ -2813,6 +3023,9 @@ def run_task(
             "total": total_runtime,
         },
         "errors": errors,
+        "case_libraries": case_metadata,
+        "pair_compare": pair_result,
+        "forgery_type": None,
     }
     task_status = {
         "schema_version": "3.0",
@@ -2834,6 +3047,9 @@ def run_task(
         "progress_events": str(progress.events_path),
         "progress_latest": str(progress.latest_path),
         "errors": errors,
+        "case_libraries": case_metadata,
+        "pair_compare": pair_result,
+        "forgery_type": None,
     }
 
     if file_provenance is not None:
@@ -2845,6 +3061,10 @@ def run_task(
         }
         unified["file_provenance"] = provenance_reference
         task_status["file_provenance"] = provenance_reference
+
+    if visible_label is not None:
+        unified["visible_label"] = visible_label
+        task_status["visible_label"] = {"status": visible_label.get("status"), "verdict": visible_label.get("verdict"), "result_file": visible_label_output.name}
 
     video_summary: dict[str, Any] | None = None
     if video_selection is not None:
@@ -2868,17 +3088,38 @@ def run_task(
             ],
         }
     extra_artifacts: list[tuple[str, str, str, str]] = []
+    if query_guard is not None:
+        extra_artifacts.append((
+            "query_reference_guard.json", "overall", "query_reference_guard",
+            "test_only 查询与参考库隔离核验记录",
+        ))
+    if pair_result is not None:
+        extra_artifacts.append(
+            ("pair_compare_result.json", "source", "pair_compare_result", "素材候选人工配对结果")
+        )
+        pair_artifacts = pair_result.get("artifact_manifest")
+        for item in pair_artifacts if isinstance(pair_artifacts, list) else []:
+            if isinstance(item, Mapping):
+                extra_artifacts.append((
+                    item.get("path") or item.get("relative_path"), "source",
+                    str(item.get("kind") or "pair_compare"),
+                    str(item.get("description") or "素材候选配对证据"),
+                ))
     if file_provenance is not None:
         extra_artifacts.append(
             (file_provenance_output.name, "overall", "file_provenance", "文件标识与元数据解析结果")
         )
+    if visible_label is not None:
+        extra_artifacts.append((visible_label_output.name, "overall", "visible_label", "画面文字标识识别结果"))
     if general_aigc_output.is_file():
         extra_artifacts.append(
             (general_aigc_output.name, "deepfake", "general_aigc_result", "通用 AIGC 分支结果")
         )
     for crop_path in sorted((task_dir / "face_crops").glob("*.jpg")):
+        is_annotation = crop_path.name.startswith("faces_annotated_")
         extra_artifacts.append(
-            (f"face_crops/{crop_path.name}", "deepfake", "face_crop", "人脸分支使用的裁剪图")
+            (f"face_crops/{crop_path.name}", "deepfake", "face_annotation" if is_annotation else "face_crop",
+             "逐脸编号和最高分人脸示意图" if is_annotation else "人脸分支使用的裁剪图")
         )
     if video_path is not None:
         extra_artifacts.append(
@@ -2923,7 +3164,7 @@ def run_task(
         progress_current=selected_completed,
         progress_total=overall_work_total,
         details={
-            "report_formats": ["json", "txt", "html"],
+            "report_formats": ["json", "txt", "html", "pdf"],
             "module_statuses": {
                 name: results[name].get("status") for name in MODULE_ORDER
             },
@@ -2939,21 +3180,25 @@ def run_task(
             identity_result=results["identity"],
             source_result=results["source"],
             unified_result=unified,
-            product_name=str(
-                config.get("product_name")
-                or "AIGC 图像视频鉴伪与溯源系统"
-            ),
+            product_name=product_names(config)[0],
             product_version=str(
                 config.get("display_version") or config.get("product_version") or "0.3.0"
             ),
             generated_at=finished_at,
+            config=config,
         )
+        for artifact in generated_reports.get("analysis_artifacts", []):
+            if isinstance(artifact, Mapping) and isinstance(artifact.get("path"), str):
+                extra_artifacts.append((artifact["path"], "overall", "analysis_evidence", "研判过程、上传图件或调用记录"))
+        if generated_reports.get("analysis"):
+            extra_artifacts.append(("analysis_artifact_manifest.json", "overall", "analysis_manifest", "研判补充证据清单"))
         report_runtime = time.perf_counter() - report_started
         report_files = dict(generated_reports["file_names"])
         report_metadata = {
             "status": "success",
             "runtime_seconds": report_runtime,
             "files": report_files,
+            "pdf": generated_reports.get("pdf"),
         }
         task_status["reports"] = report_metadata
         unified["reports"] = report_metadata

@@ -222,7 +222,7 @@ class StreamlitSmokeTests(unittest.TestCase):
         self.assertFalse(app.exception)
         self.assertEqual(
             app.title[0].value,
-            "AIGC 图像视频鉴伪与溯源系统",
+            json.loads(config.read_text(encoding="utf-8"))["product_name"],
         )
         labels = {button.label for button in app.button}
         self.assertTrue(

@@ -59,9 +59,9 @@ def _serve(runtime: Any) -> int:
             _emit("response", request_id=request_id, ready=True, health="ok", ok=False, error=f"不支持的 action：{action!r}")
             continue
         try:
-            payload = runtime.run(
-                message.get("input_path"), message.get("output_path"), message.get("face_crops")
-            )
+            arguments = (message.get("input_path"), message.get("output_path"), message.get("face_crops"))
+            payload = (runtime.run(*arguments, message["face_context"])
+                       if "face_context" in message else runtime.run(*arguments))
         except Exception as exc:  # noqa: BLE001 - 单次请求出错不能带走常驻进程，由编排层回退
             _emit(
                 "response", request_id=request_id, ready=True, health="ok", ok=False,

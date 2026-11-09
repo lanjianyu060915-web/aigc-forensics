@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """身份检索 v2 worker：在冻结算法之上加「检测尺度回退」预处理层。
 
-背景（证据见 docs/M2_人脸预处理_尺度回退实验.md）：
-冻结 worker 固定 det_size=(1280,1280)，而 InsightFace 会把整幅图直接缩放到该尺寸，
-竖屏 720x1280 视频帧因此被横向拉伸 1.78 倍，人脸在检测网络里过大而漏检。
-SWAN-DF 20 例查询中 10 例报「未检出人脸」，注入 SWAN-DF 的人脸预处（本题即改检测尺度）后 20/20 检出。
+查询沿用已存在的固定无脸回退链；参考入库使用同一链，完整策略参与缓存指纹。
+实际检测器按比例缩放并补边，不将某次未检出归因为未经证实的拉伸问题。
 
 本 worker 不修改任何检索算法：
 
 - 特征、余弦相似度、人员均值、排序、单脸约束全部来自冻结的 identity_search 包；
-- 库索引固定按尺度链第一档（默认 1280，与冻结一致）构建，因此冻结缓存可直接复用；
+- 参考照片只在无人脸时回退；多脸立刻拒绝，新策略不复用旧单尺度缓存；
 - 只有「本次一个尺度都没检出人脸」时，才按尺度链重试查询侧检测；
 - 实际生效尺度与全部尝试逐条写入结果 JSON，供人工复核。
 
@@ -90,11 +88,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--task-id", default=None)
     parser.add_argument("--progress-events", default=None)
     parser.add_argument("--progress-latest", default=None)
+    parser.add_argument("--main-face-only", action="store_true", help="只运行原有主脸流程，不追加逐脸候选（视频非首要帧使用）。")
     parser.add_argument(
         "--det-size-chain",
         default=",".join(str(value) for value in DEFAULT_SCALE_CHAIN),
         help=(
-            "检测尺度回退链，逗号分隔；第一档用于构建库索引（默认 1280,640,320）。"
+            "查询与参考检测尺度回退链，逗号分隔（默认 1280,640,320）。"
             "仅在某一档一个人脸都检不到时才尝试下一档。"
         ),
     )
@@ -102,7 +101,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--multi-face-policy",
         choices=MULTI_FACE_POLICIES,
         default=MULTI_FACE_STRICT,
-        help="查询图有多张人脸时的处理：strict 报错（默认），largest_face 选面积最大的一张并记录。",
+        help="查询图有多张人脸时的处理：strict 报错（默认），largest_face 保留最大脸主结果并追加逐脸候选。",
     )
     return parser
 
@@ -179,9 +178,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             ctx_id=ctx_id,
             det_size=(scales[0], scales[0]),
             extractor=primary_extractor,
+            reference_scales=scales,
             progress_reporter=reporter,
         )
-        # 库索引固定用第一档尺度构建，查询侧才允许回退，冻结缓存因此可直接复用。
+        # 参考缓存按完整策略区分；查询侧仍沿用原固定回退流程。
         searcher._load_or_build_index()
         result, attempts = attempt_scale_chain(
             searcher,
@@ -193,6 +193,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             emit_progress=_emit_progress,
             multi_face_policy=args.multi_face_policy,
             main_face_dir=Path(args.output).expanduser().resolve(strict=False).parent,
+            include_secondary_faces=not args.main_face_only,
             artifact_root=Path(args.output).expanduser().resolve(strict=False).parent,
             task_id=args.task_id,
         )

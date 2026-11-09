@@ -248,13 +248,30 @@ def verify_task_artifacts(task_dir: str | Path) -> dict[str, Any]:
     root = Path(task_dir)
     manifest = _read_json(root / "artifact_manifest.json")
     artifacts = manifest.get("artifacts")
+    supplements = []
+    manifest_problems = []
+    for name in ("analysis_artifact_manifest.json", "analysis_review_artifact_manifest.json"):
+        if (root / name).exists():
+            safe_path = _inside(root, name)
+            extra = _read_json(safe_path) if safe_path is not None else {}
+            if not isinstance(extra.get("artifacts"), list) or not extra["artifacts"]:
+                manifest_problems.append({"文件": name, "问题": "补充证据清单无法读取或为空"})
+            else:
+                supplements.extend(extra["artifacts"])
+    if supplements:
+        artifacts = [*(artifacts if isinstance(artifacts, list) else []), *supplements]
+        unique = {}
+        for item in artifacts:
+            if isinstance(item, Mapping):
+                unique[(str(item.get("path")), str(item.get("sha256")))] = item
+        artifacts = list(unique.values())
     if not isinstance(artifacts, list):
         return {
             "available": False,
             "message": "任务目录没有可校验的证据清单（可能是早期版本生成的任务）。",
-            "checked": 0, "matched": 0, "problems": [],
+            "checked": 0, "matched": 0, "problems": manifest_problems,
         }
-    problems: list[dict[str, str]] = []
+    problems: list[dict[str, str]] = list(manifest_problems)
     checked = 0
     matched = 0
     for item in artifacts:
@@ -285,7 +302,7 @@ def verify_task_artifacts(task_dir: str | Path) -> dict[str, Any]:
         return {
             "available": False,
             "message": "证据清单里没有可校验的文件，这次没有完成完整性校验。",
-            "checked": 0, "matched": 0, "problems": [],
+            "checked": 0, "matched": 0, "problems": problems,
         }
     return {
         "available": True,
@@ -302,10 +319,13 @@ def build_evidence_bundle(task_dir: str | Path) -> bytes:
     """把任务目录打成 zip，运行时缓存不进包；超过上限时明确报错而不是截断。"""
 
     root = Path(task_dir)
-    files = [
-        path for path in sorted(root.rglob("*"))
-        if path.is_file() and "runtime" not in path.relative_to(root).parts[:1]
-    ]
+    files = []
+    for path in sorted(root.rglob("*")):
+        if "runtime" in path.relative_to(root).parts[:1] or not path.is_file():
+            continue
+        if _inside(root, path.relative_to(root).as_posix()) is None:
+            raise ValueError("证据包包含越出任务目录的文件链接，已拒绝导出。")
+        files.append(path)
     if not files:
         raise ValueError("任务目录为空，无法生成证据包。")
     total = sum(path.stat().st_size for path in files)

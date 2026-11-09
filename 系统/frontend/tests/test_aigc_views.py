@@ -173,3 +173,28 @@ def test_history_row_pairs_overall_band_with_general_score() -> None:
     assert label == "高风险提示"
     assert score == 2.9
 
+
+def test_evidence_and_hints_render_in_real_streamlit_elements() -> None:
+    from streamlit.testing.v1 import AppTest
+    from decision.aigc_evidence import attach_evidence, DISCLAIMER
+
+    general = {**GENERAL, "band": "low", "band_label": "证据不足", "media": {"width": 200, "height": 300}}
+    merged = attach_evidence(attach_general_aigc(LEGACY, general), LABELLED)
+    script = "from components.aigc_views import render_overall_section\nrender_overall_section(" + repr(merged) + ")"
+    app = AppTest.from_string(script).run(timeout=30)
+    assert not app.exception
+    assert len(app.warning) == 2
+    assert len(app.dataframe) == 1
+    assert len(app.dataframe[0].value) == 5
+    assert DISCLAIMER in [item.value for item in app.caption]
+    assert "证据不足不能排除伪造" in app.info[0].value
+
+
+def test_legacy_overall_still_renders_without_statistics() -> None:
+    from streamlit.testing.v1 import AppTest
+
+    app = AppTest.from_string("from components.aigc_views import render_overall_section\nrender_overall_section(" + repr(_merged()) + ")").run(timeout=30)
+    assert not app.exception
+    assert not app.dataframe
+    assert not app.info
+

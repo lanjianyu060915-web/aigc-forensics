@@ -89,6 +89,7 @@ class PersistentIdentityRuntime:
             model_fingerprint=self.model.fingerprint,
             device=self.device,
             ctx_id=self.ctx_id,
+            **self._reference_searcher_options(),
         )
         self._searchers: dict[str, Any] = {
             self._library_key(initial_library): initial_searcher
@@ -98,6 +99,10 @@ class PersistentIdentityRuntime:
     @staticmethod
     def _library_key(library: Path) -> str:
         return os.path.normcase(str(library.resolve(strict=False)))
+
+    def _reference_searcher_options(self) -> dict[str, Any]:
+        """旧入口保持单尺度；v2 在首库与切库共用此显式策略入口。"""
+        return {}
 
     def _searcher_for(self, library_value: Any, progress_reporter=None):
         library = Path(str(library_value)).expanduser().resolve(strict=False)
@@ -142,6 +147,7 @@ class PersistentIdentityRuntime:
             ctx_id=self.ctx_id,
             extractor=self._extractor,
             progress_reporter=progress_reporter,
+            **self._reference_searcher_options(),
         )
         self._searchers[key] = searcher
         return searcher
@@ -168,6 +174,7 @@ class PersistentIdentityRuntime:
         task_id: Any = None,
         progress_events_path: Any = None,
         progress_latest_path: Any = None,
+        include_secondary_faces: bool = True,
     ) -> dict[str, Any]:
         started = time.perf_counter()
         query = Path(str(query_value)).expanduser().resolve(strict=False)
@@ -341,6 +348,7 @@ def _serve(runtime: PersistentIdentityRuntime) -> int:
                 message.get("task_id"),
                 message.get("progress_events_path"),
                 message.get("progress_latest_path"),
+                include_secondary_faces=message.get("include_secondary_faces", True),
             )
             _emit(
                 "response",

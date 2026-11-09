@@ -5,9 +5,9 @@
 
 - 协议、握手、request/response 结构、错误 JSON、进度事件全部沿用冻结实现，
   直接复用其 `_serve`/`_emit`/`_safe_progress`，前端与 orchestrator 无需改动；
-- 模型仍然只加载一次，尺度切换通过重新调用 InsightFace 的 `prepare(det_size=...)`
-  完成（不重建会话、不重复加载权重）；
-- 唯一的行为差异：查询侧按尺度链回退，库索引固定用第一档尺度构建。
+- 模型只在工作进程启动时准备一次，尺度切换只修改检测器输入尺寸，
+  不重建执行会话、不重复加载权重；
+- 查询侧和参考入库复用固定无脸回退链；参考多脸立即拒绝，查询主脸策略不变。
 
 见 docs/M2_人脸预处理_尺度回退实验.md。
 """
@@ -63,7 +63,7 @@ def _parser() -> argparse.ArgumentParser:
         "--det-size-chain",
         default=",".join(str(value) for value in DEFAULT_SCALE_CHAIN),
         help=(
-            "检测尺度回退链，逗号分隔；第一档用于构建库索引（默认 1280,640,320）。"
+            "查询与参考检测尺度回退链，逗号分隔（默认 1280,640,320）。"
             "仅在某一档一个人脸都检不到时才尝试下一档。"
         ),
     )
@@ -71,7 +71,7 @@ def _parser() -> argparse.ArgumentParser:
         "--multi-face-policy",
         choices=MULTI_FACE_POLICIES,
         default=MULTI_FACE_STRICT,
-        help="查询图有多张人脸时的处理：strict 报错（默认），largest_face 选面积最大的一张并记录。",
+        help="查询图有多张人脸时的处理：strict 报错（默认），largest_face 保留最大脸主结果并追加逐脸候选。",
     )
     return parser
 
@@ -80,11 +80,15 @@ class ScaleFallbackIdentityRuntime(PersistentIdentityRuntime):
     """冻结常驻运行时 + 查询侧检测尺度回退。"""
 
     def __init__(self, args: argparse.Namespace, scales: tuple[int, ...]) -> None:
-        super().__init__(args)
         self.scales = tuple(scales)
+        super().__init__(args)
         self.multi_face_policy = getattr(args, "multi_face_policy", MULTI_FACE_STRICT)
-        # 常驻进程启动即回到主尺度，保证库索引与冻结口径一致。
+        # 参考提取会恢复尺度，查询仍从主尺度开始。
         apply_detection_scale(self._extractor, self.scales[0], self.ctx_id)
+
+    def _reference_searcher_options(self) -> dict[str, Any]:
+        return {"det_size": (self.scales[0], self.scales[0]),
+                "reference_scales": self.scales}
 
     def health_details(self) -> dict[str, Any]:
         details = super().health_details()
@@ -107,6 +111,7 @@ class ScaleFallbackIdentityRuntime(PersistentIdentityRuntime):
         task_id: Any = None,
         progress_events_path: Any = None,
         progress_latest_path: Any = None,
+        include_secondary_faces: bool = True,
     ) -> dict[str, Any]:
         started = time.perf_counter()
         query = Path(str(query_value)).expanduser().resolve(strict=False)
@@ -141,7 +146,7 @@ class ScaleFallbackIdentityRuntime(PersistentIdentityRuntime):
             top_k = int(top_k_value)
             if top_k <= 0:
                 raise InputValidationError(f"top-k 必须为正整数，实际值: {top_k_value}")
-            # 先切回主尺度，再取库：新库的索引因此始终按冻结口径构建。
+            # 查询仍从主尺度开始；新库与首库使用相同参考回退策略。
             apply_detection_scale(self._extractor, self.scales[0], self.ctx_id)
             searcher = self._searcher_for(library_value, reporter)
             result, attempts = attempt_scale_chain(
@@ -154,6 +159,7 @@ class ScaleFallbackIdentityRuntime(PersistentIdentityRuntime):
                 emit_progress=_safe_progress,
                 multi_face_policy=self.multi_face_policy,
                 main_face_dir=output.parent,
+                include_secondary_faces=include_secondary_faces,
                 artifact_root=output.parent,
                 task_id=(str(task_id) if task_id is not None else None),
             )

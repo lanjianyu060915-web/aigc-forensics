@@ -152,6 +152,8 @@ class FeatureExtractor:
                     name=MODEL_NAME,
                     root=str(Path(model_root).expanduser()),
                     providers=providers,
+                    # 结果及证据只使用检测框、五点关键点与身份特征。
+                    allowed_modules=["detection", "recognition"],
                 )
                 self.app.prepare(ctx_id=actual_ctx, det_size=self.det_size)
             except Exception as exc:

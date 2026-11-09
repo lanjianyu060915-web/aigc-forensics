@@ -2,24 +2,30 @@
 
 from __future__ import annotations
 
+from decision.aigc_evidence import evidence_lines
+from product_info import PRODUCT_NAME as DEFAULT_PRODUCT_NAME
+
 from collections.abc import Mapping
 from copy import deepcopy
 from datetime import datetime
 import hashlib
 import html
 import json
+import logging
 import math
 import os
 from pathlib import Path
 import re
+import time
 from typing import Any
 import uuid
 
 from .explainability import build_explanations, display_name, redact_text
 from decision.evidence_matrix import build_evidence_matrix
+from pair_integration import pair_report_lines
+from source_upgrade import case_report_lines
 
 
-DEFAULT_PRODUCT_NAME = "AIGC 图像视频鉴伪与溯源系统"
 DEFAULT_DISCLAIMER = (
     "本系统用于深度伪造风险筛查、身份候选检索和素材候选检索，仅提供侦查线索和辅助研判信息，"
     "不替代原始介质固定、哈希校验、人工复核或司法鉴定。"
@@ -108,6 +114,7 @@ def report_file_names(task_id: Any) -> dict[str, str]:
         "json": "final_report.json",
         "txt": f"检测结果_{safe_id}.txt",
         "html": f"检测结果_{safe_id}.html",
+        "pdf": f"检测结果_{safe_id}.pdf",
     }
 
 
@@ -305,6 +312,7 @@ def build_final_report(
     generated_at: str | None = None,
     input_metadata: Mapping[str, Any] | None = None,
     file_provenance: Mapping[str, Any] | None = None,
+    visible_label: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create the single structured source used by every report renderer."""
 
@@ -376,6 +384,7 @@ def build_final_report(
         },
         "disclaimer": DEFAULT_DISCLAIMER,
         "file_provenance": deepcopy(_json_value(_mapping(file_provenance))),
+        "visible_label": deepcopy(_json_value(_mapping(visible_label) or _mapping(unified.get("visible_label")))),
         "provenance": {
             "task_status": deepcopy(_json_value(status_data)),
             "unified_result": deepcopy(_json_value(unified)),
@@ -383,6 +392,11 @@ def build_final_report(
             "external_language_model_used": False,
         },
     }
+    for name in ("pair_compare", "case_libraries"):
+        if isinstance(unified.get(name), Mapping):
+            report[name] = deepcopy(_json_value(unified[name]))
+    if "pair_compare" in report:
+        report["forgery_type"] = None
     return _json_value(report)
 
 
@@ -545,6 +559,8 @@ def render_text_report(report: Mapping[str, Any]) -> str:
         )
 
     lines.extend(_file_provenance_lines(_mapping(report.get("file_provenance"))))
+    from modules.visible_label import visible_label_lines
+    lines.extend(visible_label_lines(_mapping(report.get("visible_label"))))
 
     deepfake_raw, deepfake = _module(report, "deepfake")
     dt = _mapping(deepfake.get("technical"))
@@ -675,6 +691,13 @@ def render_text_report(report: Mapping[str, Any]) -> str:
             )
     else:
         lines.append("无候选")
+    from reporting.identity_faces import face_notes, face_table_rows
+    per_face_rows = face_table_rows(identity_raw)
+    if per_face_rows:
+        lines.extend(["逐脸身份候选（每脸前三名）：", "查询脸 | 排序 | 身份候选 | 余弦相似度 | 判定"])
+        for label, rank, name, score, decision in per_face_rows:
+            lines.append(f"{_text(label)} | {_text(rank)} | {_text(name)} | {_fmt(score)} | {_text(decision)}")
+        lines.extend(face_notes(identity_raw))
     lines.append("为什么第一候选排在第一：")
     _append_list(lines, identity.get("basis"))
     lines.append("说明：这是当前身份库中的闭集候选排序，不能单独据此确认人物身份。")
@@ -733,6 +756,9 @@ def render_text_report(report: Mapping[str, Any]) -> str:
     lines.append("警告与限制：")
     _append_list(lines, [*(source.get("warnings") or []), *(source.get("limitations") or [])])
 
+    source_lines = pair_report_lines(report.get("pair_compare")) + case_report_lines(report.get("case_libraries"))
+    if source_lines:
+        lines.extend(["", "来源结论与本次比对库", *(redact_text(line) for line in source_lines)])
     summary = _mapping(report.get("summary"))
     lines.extend(
         _evidence_matrix_lines(deepfake_raw, identity_raw, source_raw)
@@ -825,6 +851,7 @@ def generate_task_reports(
     product_name: str = DEFAULT_PRODUCT_NAME,
     product_version: str = "0.3",
     generated_at: str | None = None,
+    config: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build and atomically write all required reports inside one task root.
 
@@ -853,11 +880,29 @@ def generate_task_reports(
         product_version=product_version,
         generated_at=generated_at,
         file_provenance=file_provenance,
+        visible_label=_read_optional_json(root / "visible_label_result.json"),
         input_metadata=_task_input_metadata(root, _query_value(
             {"deepfake": deepfake, "identity": identity, "source": source}, status_data
         )),
     )
     names = report_file_names(resolved_task_id)
+    analysis_result = None
+    if isinstance(config, Mapping) and isinstance(config.get("llm"), Mapping):
+        try:
+            from reporting.analysis_pipeline import generate_analysis_report
+            analysis_result = generate_analysis_report(root, report, config=config)
+            report["evidence_package"] = analysis_result["evidence_package"]
+            report["analysis"] = {
+                key: analysis_result.get(key) for key in (
+                    "status", "final_decision", "pdf_file", "runtime_seconds", "external_language_model_used", "artifact_manifest_file")
+            }
+            report["analysis"]["summary"] = analysis_result.get("content", {}).get("summary", "")
+            names["pdf"] = f"技术明细报告_{_safe_component(resolved_task_id)}.pdf"
+            report["analysis"]["technical_pdf_file"] = names["pdf"]
+        except Exception as error:
+            # 附加研判失败不能抹去已完成的检测或旧格式报告。
+            report["analysis"] = {"status": "error", "reason": f"研判报告暂不可用（{type(error).__name__}）"}
+            logging.getLogger(__name__).exception("研判报告生成未完成，原技术报告继续生成")
     json_path = root / names["json"]
     txt_path = root / names["txt"]
     html_path = root / names["html"]
@@ -867,16 +912,33 @@ def generate_task_reports(
     _atomic_write(json_path, json_bytes)
     _atomic_write(txt_path, text_bytes)
     _atomic_write(html_path, html_bytes)
+    files = {"json": json_path.name, "txt": txt_path.name, "html": html_path.name}
+    if analysis_result is not None:
+        files.update(analysis_pdf=analysis_result["pdf_file"], analysis_json="analysis_report.json")
+    pdf_path = root / names["pdf"]
+    pdf_metadata = {"status": "unavailable", "warning": None}
+    pdf_started = time.perf_counter()
+    try:
+        from reporting.pdf_report import render_pdf_report
+
+        pdf_bytes = render_pdf_report(report, root)
+        _atomic_write(pdf_path, pdf_bytes)
+        files["pdf"] = pdf_path.name
+        pdf_metadata["status"] = "success"
+    except Exception as error:  # PDF 是附加格式，不让它改变检测任务状态。
+        pdf_metadata["warning"] = f"PDF 报告暂不可用（{type(error).__name__}），其他报告已保存。"
+        logging.getLogger(__name__).warning(pdf_metadata["warning"])
+    pdf_metadata["runtime_seconds"] = round(time.perf_counter() - pdf_started, 6)
     return {
         "report": report,
         "json_path": str(json_path),
         "txt_path": str(txt_path),
         "html_path": str(html_path),
-        "file_names": {
-            "json": json_path.name,
-            "txt": txt_path.name,
-            "html": html_path.name,
-        },
+        "pdf_path": str(pdf_path) if "pdf" in files else None,
+        "pdf": pdf_metadata,
+        "file_names": files,
+        "analysis_artifacts": analysis_result.get("artifact_manifest", []) if analysis_result else [],
+        "analysis": report.get("analysis"),
     }
 
 

@@ -299,6 +299,38 @@ def _resolve_deepfake_images(
     return query_path, keyframes
 
 
+def _render_identity_faces(data: dict[str, Any], path_policy: ResourcePathPolicy) -> None:
+    from reporting.identity_faces import face_notes, face_rows
+
+    rows = face_rows(data)
+    if not rows:
+        return
+    st.markdown("### 逐脸身份候选")
+    for note in face_notes(data):
+        st.caption(note)
+    for face in rows:
+        with st.container(border=True):
+            left, right = st.columns([1, 3])
+            label = f"脸 {face.get('face_index')}" + ("（主脸）" if face.get("is_main_face") else "")
+            with left:
+                relative = face.get("face_thumbnail")
+                try:
+                    path = path_policy.resolve(relative, "visualization", label="逐脸缩略图") if relative else None
+                except PathContainmentError:
+                    path = None
+                if path is not None:
+                    render_image(path, label, f"identity_face_{face.get('face_index')}")
+                else:
+                    st.caption(label + "：缩略图不可用")
+            with right:
+                st.write(label)
+                st.write((face.get("open_set") or {}).get("state_label") or "比对未完成")
+                if face.get("status") != "success":
+                    st.caption(redact_text(face.get("error_message") or "该脸比对未完成"))
+                for candidate in (face.get("candidates") or [])[:3]:
+                    st.text(f"第 {candidate.get('rank')} 候选：{candidate.get('identity_name') or candidate.get('identity_id')}；余弦相似度 {format_score(candidate.get('score'))}")
+
+
 def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolicy) -> None:
     st.subheader("人脸身份比对依据")
     render_result_header(data)
@@ -313,6 +345,7 @@ def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolic
             st.json(explanation["technical"])
         return
     if not data["candidates"]:
+        _render_identity_faces(data, path_policy)
         st.warning(explanation["headline"])
         st.caption(explanation["summary"])
         _render_limitations(explanation)
@@ -320,6 +353,7 @@ def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolic
 
     st.success(explanation["headline"])
     st.info("这是当前身份库中的候选排序，不是最终身份确认。余弦相似度不表示身份概率。")
+    _render_identity_faces(data, path_policy)
     items = identity_view_items(data, path_policy)
     technical = explanation["technical"]
     candidates = technical.get("candidates") if isinstance(technical.get("candidates"), list) else []
@@ -330,15 +364,15 @@ def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolic
         render_image(top["resolved_best_reference_image"], "第一候选最佳参考照片", "identity_top1")
     with detail_column:
         first, second = st.columns(2)
-        first.metric("人员级平均余弦相似度", _optional_score(top_metrics.get("mean_similarity")))
+        first.metric("参考组级平均余弦相似度", _optional_score(top_metrics.get("mean_similarity")))
         second.metric("最佳单张参考图相似度", _optional_score(top_metrics.get("best_reference_score")))
-        st.write(f"**人员：** `{top.get('identity_name') or top.get('identity_id')}`")
+        st.write(f"**参考分组：** `{top.get('identity_name') or top.get('identity_id')}`")
         st.write(f"**有效参考图数量：** `{top_metrics.get('reference_count') if top_metrics.get('reference_count') is not None else '未记录'}`")
         st.write(f"**最佳参考照片：** `{display_name(top_metrics.get('best_reference_image') or top.get('reference_image'))}`")
     top2_score = candidates[1].get("mean_similarity") if len(candidates) > 1 else None
     cards = st.columns(5)
     cards[0].metric("查询图人脸数", technical.get("query_face_count") if technical.get("query_face_count") is not None else "—")
-    cards[1].metric("身份库人数", technical.get("library_identity_count") if technical.get("library_identity_count") is not None else "—")
+    cards[1].metric("身份库参考组数", technical.get("library_identity_count") if technical.get("library_identity_count") is not None else "—")
     cards[2].metric("有效参考图总数", technical.get("valid_embedding_count") if technical.get("valid_embedding_count") is not None else "—")
     cards[3].metric("第二名相似度", _optional_score(top2_score))
     cards[4].metric("Top1与Top2差值", _optional_score(technical.get("top1_top2_margin")))
@@ -353,7 +387,7 @@ def render_identity_results(data: dict[str, Any], path_policy: ResourcePathPolic
                     render_image(item["resolved_best_reference_image"], f"第{item['rank']}名参考照片", f"identity_{item['rank']}")
                 with columns[1]:
                     st.markdown(f"### 第{item['rank']}名：{item.get('identity_name') or item.get('identity_id')}")
-                    st.metric("人员级平均余弦相似度", _optional_score(candidate_metrics.get("mean_similarity")))
+                    st.metric("参考组级平均余弦相似度", _optional_score(candidate_metrics.get("mean_similarity")))
                     st.write(f"有效参考图：{candidate_metrics.get('reference_count') if candidate_metrics.get('reference_count') is not None else '未记录'} 张")
                     st.write(f"最佳参考图：`{display_name(candidate_metrics.get('best_reference_image'))}`")
         st.json(technical)

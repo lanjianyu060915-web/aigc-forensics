@@ -1022,6 +1022,7 @@ class RuntimeServiceManager:
         output_path: str | Path,
         timeout: float,
         face_crops: Sequence[str] | None = None,
+        face_context: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         deadline = time.monotonic() + float(timeout)
         self._wait_until_started("general_aigc", deadline)
@@ -1032,6 +1033,7 @@ class RuntimeServiceManager:
                 "input_path": str(Path(input_path).expanduser().resolve(strict=False)),
                 "output_path": str(Path(output_path).expanduser().resolve(strict=False)),
                 "face_crops": None if face_crops is None else [str(item) for item in face_crops],
+                **({"face_context": dict(face_context)} if face_context is not None else {}),
             },
             max(deadline - time.monotonic(), 0.001),
         )
@@ -1047,6 +1049,7 @@ class RuntimeServiceManager:
         task_id: str | None = None,
         progress_events_path: str | Path | None = None,
         progress_latest_path: str | Path | None = None,
+        include_secondary_faces: bool = True,
     ) -> dict[str, Any]:
         channel = self._channel_for("identity")
         response = channel.request(
@@ -1058,6 +1061,7 @@ class RuntimeServiceManager:
                     Path(library_path).expanduser().resolve(strict=False)
                 ),
                 "top_k": int(top_k),
+                "include_secondary_faces": include_secondary_faces,
                 "task_id": task_id,
                 "progress_events_path": (
                     str(Path(progress_events_path).expanduser().resolve(strict=False))

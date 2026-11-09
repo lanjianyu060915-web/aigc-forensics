@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Collection, Mapping
 from concurrent.futures import ThreadPoolExecutor
 import json
+from html import escape
 import os
 from pathlib import Path
 import secrets
@@ -20,6 +21,8 @@ for import_root in (FRONTEND_ROOT, PRODUCT_ROOT):
         sys.path.insert(0, str(import_root))
 
 import streamlit as st
+
+from product_info import product_names
 
 from orchestrator import (
     OrchestrationError,
@@ -42,8 +45,10 @@ from components.input_preview import (
     routing_edge_from_config,
 )
 from components.path_security import ResourcePathPolicy
+from components.case_library_views import render_case_library_settings
 from components.live_progress import render_live_progress
 from components.report_views import render_task_reports
+from components.llm_views import llm_context, upload_notice, render_llm_settings, render_llm_status
 from components.evidence_dashboard import render_evidence_workspace
 from components.status_adapter import (
     ModuleAvailability,
@@ -91,6 +96,7 @@ PAGE_LABELS = {
     "Batch Analysis": "批量研判",
     "Task Result": "历史任务",
     "System Status": "系统状态",
+    "LLM Settings": "大模型设置",
     "Guide": "使用说明",
     "Mock Demo": "开发模拟数据",
 }
@@ -888,6 +894,7 @@ def _render_system_page(
 ) -> None:
     st.subheader("系统状态")
     st.caption("这里列出每个模块实际用到的模型、数据库和运行环境。")
+    render_llm_status(APP_CONFIG)
     columns = st.columns(5)
     for column, key in zip(columns[:4], ("deepfake", "general_aigc", "identity", "source"), strict=True):
         item = modules[key]
@@ -1205,21 +1212,11 @@ def _render_query_panel(query: Any, routing_edge: int) -> InputPreview | None:
 def _render_library_settings(
     live_config_error: str, default_identity: str, default_source: str
 ) -> tuple[str, str]:
-    with st.expander("高级设置：使用其他身份库或素材库"):
-        identity_root_text = st.text_input(
-            "本次任务身份库",
-            value=default_identity,
-            key="live_identity_root",
-        )
-        source_root_text = st.text_input(
-            "本次任务素材库",
-            value=default_source,
-            key="live_source_root",
-        )
-        st.caption("默认指向系统自带的库；身份库按“人员目录/参考图”组织，素材库是一个图片目录。")
     if live_config_error:
         st.error(f"配置读取失败：{live_config_error}")
-    return identity_root_text, source_root_text
+        return default_identity, default_source
+    config, config_path = load_config(APP_CONFIG)
+    return render_case_library_settings(default_identity, default_source, config, config_path)
 
 
 def _render_live_mode(
@@ -1263,6 +1260,10 @@ def _render_live_mode(
         return
 
     st.subheader("新建研判")
+    try:
+        st.info(upload_notice(llm_context(APP_CONFIG)[2]))
+    except (OSError, ValueError):
+        st.warning("无法读取大模型配置，请先在设置页检查。")
     left, right = st.columns([1, 1.25], gap="large")
     with left:
         with st.container(border=True):
@@ -1278,7 +1279,7 @@ def _render_live_mode(
                 ),
                 key="live_query",
             )
-            st.caption("图片最大 20 MiB（JPG/PNG/WEBP），视频最大 200 MiB（MP4/MOV/AVI/MKV/WEBM）。文件不会离开本机。")
+            st.caption("图片最大 20 MiB（JPG/PNG/WEBP），视频最大 200 MiB（MP4/MOV/AVI/MKV/WEBM）。大模型上传范围见上方提示。")
             examples = discover_examples()
             example_names = {EXAMPLE_LABELS[path.name]: path for path in examples}
             example_label = st.selectbox(
@@ -1432,6 +1433,10 @@ def _render_batch_mode(
     service_bundle: Mapping[str, Any],
 ) -> None:
     st.subheader("批量研判")
+    try:
+        st.info(upload_notice(llm_context(APP_CONFIG)[2]))
+    except (OSError, ValueError):
+        st.warning("无法读取大模型配置，请先在设置页检查。")
     st.caption(f"一次上传多张图片（最多 {MAX_BATCH_FILES} 张），系统逐张分析并汇总成一张结果表。")
     try:
         default_identity, default_source, _ = _live_defaults()
@@ -1601,8 +1606,9 @@ def _render_guide_page() -> None:
 
 
 def main() -> None:
+    full_name, short_name = product_names()
     st.set_page_config(
-        page_title="AIGC 鉴伪溯源系统",
+        page_title=short_name,
         page_icon="🔍",
         layout="wide",
     )
@@ -1618,10 +1624,10 @@ def main() -> None:
 
     with st.sidebar:
         render_html(
-            '<div class="fsts-brand"><div class="fsts-brand-name">AIGC 鉴伪溯源系统</div>'
+            f'<div class="fsts-brand"><div class="fsts-brand-name">{escape(short_name)}</div>'
             '<div class="fsts-brand-sub">图片和视频的 AIGC 检测与溯源</div></div>'
         )
-        mode_options = ["Live Analysis", "Batch Analysis", "Task Result", "System Status", "Guide"]
+        mode_options = ["Live Analysis", "Batch Analysis", "Task Result", "System Status", "LLM Settings", "Guide"]
         if os.environ.get("FSTS_ENABLE_DEV_MOCK") == "1":
             mode_options.append("Mock Demo")
         mode = st.radio(
@@ -1659,11 +1665,11 @@ def main() -> None:
             load_button = False
         _render_shutdown(service_bundle)
 
-    st.title("AIGC 图像视频鉴伪与溯源系统")
+    st.title(full_name)
     render_html(
         '<div class="fsts-header">'
         + pill(f"版本 {_product_version()}")
-        + pill("离线运行，数据不出本机", "muted")
+        + pill("本地检测 · 大模型按配置调用", "muted")
         + '<span class="fsts-header-note">结果仅作侦查线索和辅助研判，不替代司法鉴定。</span>'
         + "</div>"
     )
@@ -1711,6 +1717,8 @@ def main() -> None:
             service_bundle=service_bundle,
             inspection_error=status_result.get("error"),
         )
+    elif mode == "LLM Settings":
+        render_llm_settings(APP_CONFIG)
     elif mode == "Guide":
         _render_guide_page()
     else:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -16,6 +17,10 @@ if str(PRODUCT_ROOT) not in sys.path:
     sys.path.insert(0, str(PRODUCT_ROOT))
 
 from reporting.report_builder import report_file_names  # noqa: E402
+from reporting.review_records import (  # noqa: E402
+    REVIEW_CONCLUSIONS, REVIEW_NOTICE, MANUAL_JUDGMENTS, ReviewRecordError,
+    append_review_record, load_review_records, review_report_mismatch, review_context,
+)
 
 
 MAX_REPORT_BYTES = 20 * 1024 * 1024
@@ -103,6 +108,30 @@ def load_report_bundle(task_dir: str | Path, task_id: str | None = None) -> Repo
     )
 
 
+def prepare_pdf_download(bundle: ReportBundle, review_records: list[dict] | None = None) -> tuple[str, bytes]:
+    """旧任务和复核版在内存生成，不重写任务的任何原始报告。"""
+    task = bundle.report.get("task") or {}
+    name = report_file_names(task.get("task_id"))["pdf"]
+    analysis = bundle.report.get("analysis") or {}
+    if isinstance(analysis, dict) and isinstance(analysis.get("technical_pdf_file"), str):
+        name = analysis["technical_pdf_file"]
+    if not review_records:
+        try:
+            path = _safe_fixed_file(bundle.task_dir, name)
+        except ReportViewError:
+            path = None
+        if path is not None:
+            raw = path.read_bytes()
+            if not raw.startswith(b"%PDF-"):
+                raise ReportViewError("已保存的 PDF 格式异常。")
+            return name, raw
+    else:
+        name = name.removesuffix(".pdf") + "_复核版.pdf"
+    from reporting.pdf_report import render_pdf_report
+
+    return name, render_pdf_report(bundle.report, bundle.task_dir, review_records=review_records)
+
+
 def render_report_view(bundle: ReportBundle, *, key_prefix: str = "task_report") -> None:
     """Render an ordinary-user report preview without exposing raw provenance."""
 
@@ -138,6 +167,83 @@ def render_report_view(bundle: ReportBundle, *, key_prefix: str = "task_report")
         key=f"{key_prefix}_html",
         width="stretch",
     )
+    st.markdown("#### PDF 研判报告和人工复核")
+    records = []
+    records_ok = True
+    try:
+        records = load_review_records(bundle.task_dir)
+    except (OSError, ReviewRecordError) as error:
+        st.warning(str(error))
+        records_ok = False
+    st.caption(REVIEW_NOTICE)
+    try:
+        pair, identity = review_context(bundle.task_dir, report)
+    except (OSError, ValueError) as error:
+        pair, identity = {}, {}
+        st.warning("复核依据读取失败，请核对任务文件。")
+        records_ok = False
+    candidates = {row.get("rank"): row for row in pair.get("candidates", []) if row.get("rank") in (1, 2, 3)}
+    faces = {row.get("face_index"): row for row in identity.get("faces", []) if type(row.get("face_index")) is int}
+    if st.session_state.pop(f"{key_prefix}_review_saved", False):
+        st.session_state[f"{key_prefix}_reviewer"] = ""
+        st.session_state[f"{key_prefix}_opinion"] = ""
+        st.success("复核意见已追加保存，原检测结果和原 PDF 保持不变。")
+    with st.form(f"{key_prefix}_review_form", clear_on_submit=False):
+        reviewer = st.text_input("复核人（必填）", key=f"{key_prefix}_reviewer")
+        conclusion = st.selectbox("对检测档位的意见", REVIEW_CONCLUSIONS)
+        manual_judgment = st.selectbox("人工判断", MANUAL_JUDGMENTS)
+        candidate_rank = st.selectbox("依据候选", [None, *sorted(candidates)], format_func=lambda rank: "未指定" if rank is None else f"第{rank}候选：{candidates[rank].get('candidate_name') or '未记录名称'}") if candidates else None
+        target_face_index = st.selectbox("人工选定的目标脸", [None, *sorted(faces)], format_func=lambda index: "未指定" if index is None else f"人脸{index}") if len(faces) > 1 else None
+        opinion = st.text_area("复核意见（必填）", key=f"{key_prefix}_opinion")
+        submitted = st.form_submit_button("追加保存复核意见", disabled=not records_ok)
+    if submitted:
+        try:
+            append_review_record(bundle.task_dir, reviewer, conclusion, opinion,
+                                 manual_judgment=manual_judgment, basis_candidate_rank=candidate_rank,
+                                 target_face_index=target_face_index)
+            records = load_review_records(bundle.task_dir)
+            st.session_state[f"{key_prefix}_review_saved"] = True
+            st.rerun()
+        except (OSError, ReviewRecordError) as error:
+            st.warning(str(error))
+    if records:
+        st.caption(f"已保存 {len(records)} 条复核记录。导出时生成复核版，原报告保持不变。")
+        with st.expander("查看复核记录"):
+            for index, record in enumerate(records, start=1):
+                if review_report_mismatch(bundle.task_dir, record):
+                    st.warning("该条复核所依据的报告与当前报告不一致")
+                st.text(f"{index}. {record['reviewer']} · {record['reviewed_at']} · {record['conclusion']}\n{record['opinion']}")
+                if record.get("manual_judgment"):
+                    st.text("人工判断，非系统结论：" + record["manual_judgment"])
+    if not records_ok:
+        st.caption("复核记录不可读，已禁用复核版和追加；原版报告仍可导出。")
+    from components.analysis_views import render_analysis_downloads
+    render_analysis_downloads(bundle, reviews=records, reviews_ok=records_ok, key_prefix=key_prefix)
+    try:
+        pdf_name = (report.get("analysis") or {}).get("technical_pdf_file") or report_file_names(task.get("task_id"))["pdf"]
+        if records or not (bundle.task_dir / pdf_name).is_file():
+            from reporting.pdf_report import check_pdf_ready
+
+            check_pdf_ready()
+            signature = hashlib.sha256(bundle.json_bytes + json.dumps(records, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+            cache_key = f"{key_prefix}_pdf_memory"
+            cached = st.session_state.get(cache_key)
+            if not cached or cached[0] != signature:
+                st.session_state.pop(cache_key, None)
+                if st.button("生成技术明细报告（PDF）", key=f"{key_prefix}_prepare_pdf", width="stretch"):
+                    with st.spinner("正在生成技术明细报告"):
+                        name, raw = prepare_pdf_download(bundle, records)
+                    cached = (signature, name, raw)
+                    st.session_state[cache_key] = cached
+                else:
+                    cached = None
+            if cached:
+                st.download_button("导出技术明细报告（PDF）", data=cached[2], file_name=cached[1], mime="application/pdf", key=f"{key_prefix}_pdf", width="stretch")
+        else:
+            name, raw = prepare_pdf_download(bundle)
+            st.download_button("导出技术明细报告（PDF）", data=raw, file_name=name, mime="application/pdf", key=f"{key_prefix}_pdf", width="stretch")
+    except Exception as error:
+        st.warning(f"PDF 报告暂不可用（{type(error).__name__}），仍可导出 TXT、HTML 和 JSON。")
     with st.expander("报告技术详情"):
         st.caption("JSON报告保留结构化来源信息；普通TXT/HTML仅展示文件名。")
         st.download_button(

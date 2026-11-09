@@ -128,6 +128,9 @@ def main() -> int:
     provenance_path = task_dir / "file_provenance_result.json"
     provenance = json.loads(provenance_path.read_text(encoding="utf-8")) if provenance_path.is_file() else {}
     report(results, "文件标识解析", provenance.get("status") == "success", str(provenance.get("verdict_label")))
+    visible_path = task_dir / "visible_label_result.json"
+    visible = json.loads(visible_path.read_text(encoding="utf-8")) if visible_path.is_file() else {}
+    report(results, "画面文字识别", visible.get("status") == "success" and visible.get("verdict") != "unavailable", str(visible.get("verdict_label")))
     evidence_warnings = identity_evidence_warnings(task_dir)
     report(
         results, "身份证据图", not evidence_warnings,
@@ -137,6 +140,19 @@ def main() -> int:
     report(results, "证据文件完整性", bool(verification.get("available")) and not verification.get("problems"), str(verification.get("message")))
     reports = [task_dir / "final_report.json", *task_dir.glob("检测结果_*.html"), *task_dir.glob("检测结果_*.txt")]
     report(results, "报告生成", len(reports) >= 3 and all(path.is_file() for path in reports), f"{len(reports)} 份")
+    final_report = json.loads((task_dir / "final_report.json").read_text(encoding="utf-8"))
+    analysis = final_report.get("analysis") or {}
+    technical_name = analysis.get("technical_pdf_file")
+    pdfs = [task_dir / technical_name] if technical_name else list(task_dir.glob("检测结果_*.pdf"))
+    pdf_ok = len(pdfs) == 1 and pdfs[0].is_file() and pdfs[0].read_bytes().startswith(b"%PDF-")
+    report(results, "PDF 能生成", pdf_ok, f"{len(pdfs)} 份")
+    if isinstance(config.get("llm"), dict):
+        from reporting.analysis_pipeline import verify_analysis_artifacts
+        analysis_path = task_dir / "研判分析报告.pdf"
+        analysis_ok = analysis.get("status") == "success" and analysis_path.is_file()
+        analysis_problems = verify_analysis_artifacts(task_dir) if analysis_ok else ["研判报告未生成"]
+        report(results, "研判分析报告", analysis_ok and not analysis_problems,
+               "；".join(analysis_problems) if analysis_problems else "报告与补充证据清单一致")
     print(f"\n任务目录：{task_dir}", flush=True)
     return finish(results)
 

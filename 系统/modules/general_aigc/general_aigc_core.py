@@ -6,8 +6,10 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
@@ -80,6 +82,71 @@ def face_branch_payload(
             for name, value in zip(crop_files, logits, strict=True)
         ],
     }
+
+
+def enrich_face_branch(
+    original: dict[str, Any],
+    faces: list[dict[str, Any]],
+    scores: list[float],
+    calibration: dict[str, Any],
+    *,
+    backend: str = "cf384",
+    band_aggregation: str = "largest",
+    min_face_side: int = 64,
+) -> dict[str, Any]:
+    """扩充逐脸信息；默认旧后端最大脸路径保留所有已有字段。"""
+    if backend not in {"cf384", "gend"} or band_aggregation not in {"largest", "max_all"}:
+        raise ValueError("人脸后端或定档口径无效")
+    if len(faces) != len(scores) or not all(math.isfinite(float(value)) for value in scores):
+        raise ValueError("逐脸记录与有效分数不一致")
+    if not isinstance(min_face_side, int) or isinstance(min_face_side, bool) or min_face_side < 1:
+        raise ValueError("人脸最小短边必须为正整数")
+    legacy = backend == "cf384" and band_aggregation == "largest"
+    result = dict(original)
+    per_face = []
+    grouped: dict[str, list[dict[str, Any]]] = OrderedDict()
+    for record, value in zip(faces, scores, strict=True):
+        row = {key: value for key, value in record.items() if key != "path"}
+        short_side = int(row.get("short_edge_px", 0))
+        too_small = short_side < min_face_side
+        eligible = bool(row.get("legacy_selected")) if legacy else not too_small
+        row.update(score=float(value), score_kind="logit" if backend == "cf384" else "model_probability",
+                   too_small=too_small, eligible_for_band=eligible, used_for_band=False,
+                   reliability_note="人脸过小，结果不可靠" if too_small else "未触发小脸限制")
+        per_face.append(row)
+        grouped.setdefault(str(row.get("source") or "image"), []).append(row)
+    frame_scores = []
+    for source, rows in grouped.items():
+        eligible = [row for row in rows if row["eligible_for_band"]]
+        if band_aggregation == "largest":
+            eligible = [row for row in eligible if row.get("legacy_selected") or row.get("face_id") == 1]
+        chosen = max(eligible, key=lambda row: row["score"]) if eligible else None
+        if chosen is not None:
+            chosen["used_for_band"] = True
+        frame_scores.append({"source": source, "timestamp_seconds": rows[0].get("timestamp_seconds"),
+                             "score": chosen["score"] if chosen is not None else None,
+                             "selected_face_id": chosen["face_id"] if chosen is not None else None})
+    if not legacy:
+        chosen_scores = [row["score"] for row in frame_scores if row["score"] is not None]
+        score = sum(chosen_scores) / len(chosen_scores) if chosen_scores else None
+        thresholds = calibration.get("face_crop") if backend == "cf384" else (
+            (calibration.get("aggregations") or {}).get(band_aggregation))
+        thresholds = thresholds if isinstance(thresholds, dict) else None
+        band, label, reason = band_of(score, thresholds) if score is not None else (
+            None, "无可参与定档人脸", "没有满足可靠性条件的人脸，本分支不参与总体档位。")
+        result.update(status="success" if score is not None else ("no_eligible_face" if per_face else "no_face"),
+                      logit=score, band=band, band_label=label, band_reason=reason,
+                      band_thresholds={"low_max": thresholds["low_max"], "medium_max": thresholds["medium_max"],
+                                       "calibration_set": thresholds.get("calibration_set", {})}
+                      if band is not None and thresholds is not None else None)
+        if backend == "gend":
+            result["score"] = score
+    result.update(backend=backend, band_aggregation=band_aggregation, video_aggregation="mean_of_frame_scores",
+                  min_face_side=min_face_side, per_face=per_face, frame_scores=frame_scores,
+                  highest_score_face=dict(max(per_face, key=lambda row: row["score"])) if per_face else None,
+                  compatibility_note=("原后端最大脸模式保留旧版40像素门槛以恢复旧结果；40–63像素人脸仍标为不可靠。"
+                                      if legacy else None))
+    return result
 
 
 def error_payload(query: Path, message: str, *, started: float, error_type: str) -> dict[str, Any]:
