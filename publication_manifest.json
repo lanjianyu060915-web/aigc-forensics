@@ -1,0 +1,1474 @@
+{
+  "schema_version": "source.publication.v1",
+  "name": "第四版",
+  "version": "0.4.0-v4-engineering",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "ef075011ac2251a8f177e862bae7ad912fd18db33c861cbf62e2d9f59a29607f",
+      "size_bytes": 105,
+      "frozen_source_sha256": "5c229204c617a9ded1b5244226c357ebe7b53e1b9a7f47b1fda4f2321ad5b667",
+      "projection": "Publication metadata only: preserve exact code bytes and avoid unresolved LFS pointers."
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "eec94fb8c0fda0489cdbc57833c62cde5df41b0d3e05c91d790e464085eec256",
+      "size_bytes": 784,
+      "frozen_source_sha256": "eec94fb8c0fda0489cdbc57833c62cde5df41b0d3e05c91d790e464085eec256",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "CHANGELOG_V4.md",
+      "sha256": "29dcde84424a76b97c141b5631d971ab37a5b6c3ad492775aa6bedd2a782ccc2",
+      "size_bytes": 2274,
+      "frozen_source_sha256": "29dcde84424a76b97c141b5631d971ab37a5b6c3ad492775aa6bedd2a782ccc2",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "README.md",
+      "sha256": "4858b4d971572a4ab1f94d58357e270ca987d579a7f9c8be75a62e703b01cb57",
+      "size_bytes": 1174,
+      "projection": "New public source-backup instructions; no private results."
+    },
+    {
+      "path": "README_V4.md",
+      "sha256": "58e23615ecdeeba475a6fc9414c44f431fe7c96d34990f8a9edee6be30273bf3",
+      "size_bytes": 4171,
+      "frozen_source_sha256": "58e23615ecdeeba475a6fc9414c44f431fe7c96d34990f8a9edee6be30273bf3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "aa8d5e96c67a6e8d383f8f1430e8b3a4a4f4dc9c5913570f15d03b5540d0a127",
+      "size_bytes": 24775,
+      "frozen_source_sha256": "aa8d5e96c67a6e8d383f8f1430e8b3a4a4f4dc9c5913570f15d03b5540d0a127",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "启动系统.bat",
+      "sha256": "bfcfe708938cb8a80facd7b6513d87ae3f2ee72f08a3b6d027980342de7ef2de",
+      "size_bytes": 278,
+      "frozen_source_sha256": "bfcfe708938cb8a80facd7b6513d87ae3f2ee72f08a3b6d027980342de7ef2de",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "搭建环境.bat",
+      "sha256": "6afd5c5d871aa0415606534f06911fce6955ed56f78a6b8fe2dc2e4b013a2797",
+      "size_bytes": 438,
+      "frozen_source_sha256": "6afd5c5d871aa0415606534f06911fce6955ed56f78a6b8fe2dc2e4b013a2797",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/.streamlit/config.toml",
+      "sha256": "fe30f805854673929002e9c2ed524f76dded1d1f17cb173665ba82ca5e5e42e5",
+      "size_bytes": 281,
+      "frozen_source_sha256": "fe30f805854673929002e9c2ed524f76dded1d1f17cb173665ba82ca5e5e42e5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/artifact_io.py",
+      "sha256": "d31405e36a7252e3e62a414bf05cfbbc8c1057a1b43065dd78c97c24af782397",
+      "size_bytes": 10858,
+      "frozen_source_sha256": "d31405e36a7252e3e62a414bf05cfbbc8c1057a1b43065dd78c97c24af782397",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/assets/fonts/LXGWWenKai-Bold.ttf",
+      "sha256": "7a356605eb36c92e29cc64090e2856e4675694572a2ae4da84adbadffecae907",
+      "size_bytes": 18546748,
+      "frozen_source_sha256": "7a356605eb36c92e29cc64090e2856e4675694572a2ae4da84adbadffecae907",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/assets/fonts/LXGWWenKai-Regular.ttf",
+      "sha256": "0819604ad9357afbc6e7cc097328a16ed85143ee0848ffda09fda35a30da6506",
+      "size_bytes": 19073964,
+      "frozen_source_sha256": "0819604ad9357afbc6e7cc097328a16ed85143ee0848ffda09fda35a30da6506",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/assets/fonts/OFL.txt",
+      "sha256": "04b0fffb7719757b4452067d0e2de7da444988f6b9a7951cfc8c9ff95696aec5",
+      "size_bytes": 4447,
+      "frozen_source_sha256": "04b0fffb7719757b4452067d0e2de7da444988f6b9a7951cfc8c9ff95696aec5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/case_libraries.py",
+      "sha256": "42f8f5fc8c90bdf85918a7d9c82a85f2e58866b90bd39974037fa06283be7f40",
+      "size_bytes": 16154,
+      "frozen_source_sha256": "42f8f5fc8c90bdf85918a7d9c82a85f2e58866b90bd39974037fa06283be7f40",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/check_environment.py",
+      "sha256": "f55dcd945264b90f99dc15d5c735be35e1e845018c3098bd395f524a2847123f",
+      "size_bytes": 10679,
+      "frozen_source_sha256": "f55dcd945264b90f99dc15d5c735be35e1e845018c3098bd395f524a2847123f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/contracts/__init__.py",
+      "sha256": "eedcf763b7910a74500efcc46b366ab9673463f86c4bf40a80c7e1408863d9ed",
+      "size_bytes": 76,
+      "frozen_source_sha256": "eedcf763b7910a74500efcc46b366ab9673463f86c4bf40a80c7e1408863d9ed",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/contracts/execution_profile_v4.py",
+      "sha256": "e08da2e613f02a98b0a0e8b24c8f3892fda3a8a7ca656be30c3ddeb2c73f83db",
+      "size_bytes": 39074,
+      "frozen_source_sha256": "e08da2e613f02a98b0a0e8b24c8f3892fda3a8a7ca656be30c3ddeb2c73f83db",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/contracts/task_contract_v4.py",
+      "sha256": "f719421428f6e62f3fe28e63f59ab689ecd365f85a1be1ff9308697ca008760b",
+      "size_bytes": 8917,
+      "frozen_source_sha256": "f719421428f6e62f3fe28e63f59ab689ecd365f85a1be1ff9308697ca008760b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/__init__.py",
+      "sha256": "ef760c8ef7b2728ac37f9acf6e6395f80d8fb62e607c3b06337d3d21b509fdff",
+      "size_bytes": 672,
+      "frozen_source_sha256": "ef760c8ef7b2728ac37f9acf6e6395f80d8fb62e607c3b06337d3d21b509fdff",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/aigc_evidence.py",
+      "sha256": "a668b5a86f3195a3a6946d9c48565c518f8d471408e63687ac3ec2a3c8116b69",
+      "size_bytes": 9764,
+      "frozen_source_sha256": "a668b5a86f3195a3a6946d9c48565c518f8d471408e63687ac3ec2a3c8116b69",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/aigc_overall.py",
+      "sha256": "7618c8185c7bfbe33c1a7a05a524bf2584e8149af7e944c607dba013a0c2ef96",
+      "size_bytes": 7250,
+      "frozen_source_sha256": "7618c8185c7bfbe33c1a7a05a524bf2584e8149af7e944c607dba013a0c2ef96",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/candidate_evaluation_v4.py",
+      "sha256": "d78f1bcb83cd51acf10d47d95271ba63cc43cac36d4e1985658dc2f2b884c13f",
+      "size_bytes": 27650,
+      "frozen_source_sha256": "d78f1bcb83cd51acf10d47d95271ba63cc43cac36d4e1985658dc2f2b884c13f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/evidence_matrix.py",
+      "sha256": "979a55cad792fff098cb0d7c4556aadbb17a78bba77526b0ea5801e513ba9a89",
+      "size_bytes": 11458,
+      "frozen_source_sha256": "979a55cad792fff098cb0d7c4556aadbb17a78bba77526b0ea5801e513ba9a89",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/open_set.py",
+      "sha256": "b5f7180148040d05101615e89b6749c96a22d6b23910e97c25a53b1cc7dec4de",
+      "size_bytes": 18285,
+      "frozen_source_sha256": "b5f7180148040d05101615e89b6749c96a22d6b23910e97c25a53b1cc7dec4de",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/decision/rule_candidate_v4.py",
+      "sha256": "d7f8d19af34b318f4e162c7b9560aed78186a2311d19b11fec97ed78d5578de6",
+      "size_bytes": 8543,
+      "frozen_source_sha256": "d7f8d19af34b318f4e162c7b9560aed78186a2311d19b11fec97ed78d5578de6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/__init__.py",
+      "sha256": "281e2f51ec1a5e73770c9502279fb5f460691a9c26f632d297d30652fc15bf4e",
+      "size_bytes": 245,
+      "frozen_source_sha256": "281e2f51ec1a5e73770c9502279fb5f460691a9c26f632d297d30652fc15bf4e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/gend_face.py",
+      "sha256": "1f110ca3e21da6e8fcddd26b492dd7f8e93afbb72f3d198a327d1609fca4eab9",
+      "size_bytes": 5715,
+      "frozen_source_sha256": "1f110ca3e21da6e8fcddd26b492dd7f8e93afbb72f3d198a327d1609fca4eab9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/media.py",
+      "sha256": "0be70471c1ee73a6714b382d8fcc44ed4313a5705d2e54c423eff5e456945cad",
+      "size_bytes": 23585,
+      "frozen_source_sha256": "0be70471c1ee73a6714b382d8fcc44ed4313a5705d2e54c423eff5e456945cad",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/media_tools.py",
+      "sha256": "862480e9440aee8c5fc1729d0b3292555f53e8098cf198667ae1247fa1329822",
+      "size_bytes": 1424,
+      "frozen_source_sha256": "862480e9440aee8c5fc1729d0b3292555f53e8098cf198667ae1247fa1329822",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/metrics.py",
+      "sha256": "17591413d362da328151c5c1ce40bdce7b15d3dc2ea37c6bddc6ddd028b306e0",
+      "size_bytes": 5027,
+      "frozen_source_sha256": "17591413d362da328151c5c1ce40bdce7b15d3dc2ea37c6bddc6ddd028b306e0",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/__init__.py",
+      "sha256": "0c0c40339281d17f235fa8800be241a0393fd9eee9d35a5183eec0da766edd94",
+      "size_bytes": 869,
+      "frozen_source_sha256": "0c0c40339281d17f235fa8800be241a0393fd9eee9d35a5183eec0da766edd94",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/checkpoint.py",
+      "sha256": "7e4507d68b243749e9dc8df09e939ef946d7907ceaf7bc3293a0110edbefb4cf",
+      "size_bytes": 3627,
+      "frozen_source_sha256": "7e4507d68b243749e9dc8df09e939ef946d7907ceaf7bc3293a0110edbefb4cf",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/clip_adapt.py",
+      "sha256": "34a22b647980524bb7e8ee30c1cc9d5b0a34e4abf1d392608ce33a1f43ce8b82",
+      "size_bytes": 6096,
+      "frozen_source_sha256": "34a22b647980524bb7e8ee30c1cc9d5b0a34e4abf1d392608ce33a1f43ce8b82",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/clip_community_fusion.py",
+      "sha256": "c6173b25066bb2981dcb2bf0f06fcc91fdcd8fb4fb0fb8566b4141d1aa1b509e",
+      "size_bytes": 3822,
+      "frozen_source_sha256": "c6173b25066bb2981dcb2bf0f06fcc91fdcd8fb4fb0fb8566b4141d1aa1b509e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/community_forensics.py",
+      "sha256": "c2f6d7f88b13a15be0c020afb62cf753a6a70ea38105b26c557882dc70792120",
+      "size_bytes": 2066,
+      "frozen_source_sha256": "c2f6d7f88b13a15be0c020afb62cf753a6a70ea38105b26c557882dc70792120",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/core.py",
+      "sha256": "9bc450438b88366c6d805960e89c18620935610d4cb0a1c101568b227af3cea5",
+      "size_bytes": 1519,
+      "frozen_source_sha256": "9bc450438b88366c6d805960e89c18620935610d4cb0a1c101568b227af3cea5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/models/ufd.py",
+      "sha256": "01a450c5b8efaddb5c68f38d42c9f58bf821020f080aa1d39e92dc936ae04b3c",
+      "size_bytes": 2840,
+      "frozen_source_sha256": "01a450c5b8efaddb5c68f38d42c9f58bf821020f080aa1d39e92dc936ae04b3c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/engine/aigc_engine/scorer.py",
+      "sha256": "67add76546a0babc520dad06fe4736dab1e86ba1ec69234f673fbd4ac63f0b74",
+      "size_bytes": 17736,
+      "frozen_source_sha256": "67add76546a0babc520dad06fe4736dab1e86ba1ec69234f673fbd4ac63f0b74",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/app.py",
+      "sha256": "d5b80ae01f26856528adf3a218384bc3bbcbfceba2d71e53c16ed51deb46c332",
+      "size_bytes": 74712,
+      "frozen_source_sha256": "d5b80ae01f26856528adf3a218384bc3bbcbfceba2d71e53c16ed51deb46c332",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/__init__.py",
+      "sha256": "24631feb59fee58632cc7752f7a4e96282c926a42dba088b5b3dd7d9145ced10",
+      "size_bytes": 47,
+      "frozen_source_sha256": "24631feb59fee58632cc7752f7a4e96282c926a42dba088b5b3dd7d9145ced10",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/aigc_views.py",
+      "sha256": "216e6e83e7a9876021e23731c602797da7982a6902d9aa46824b134dbae84238",
+      "size_bytes": 23986,
+      "frozen_source_sha256": "216e6e83e7a9876021e23731c602797da7982a6902d9aa46824b134dbae84238",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/analysis_views.py",
+      "sha256": "7b512992e63e56fc11952dae83385581aed80c10c896fab82081edbe12c05d09",
+      "size_bytes": 9137,
+      "frozen_source_sha256": "7b512992e63e56fc11952dae83385581aed80c10c896fab82081edbe12c05d09",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/case_library_views.py",
+      "sha256": "68662de281642f1493468ed15cec3a22483da6b95e4951ebfd3652b8275478a8",
+      "size_bytes": 10703,
+      "frozen_source_sha256": "68662de281642f1493468ed15cec3a22483da6b95e4951ebfd3652b8275478a8",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/data_loader.py",
+      "sha256": "7d3adbf819e3303db883b26a205638b6b98b77921c8564e6f24a39053e52275c",
+      "size_bytes": 23281,
+      "frozen_source_sha256": "7d3adbf819e3303db883b26a205638b6b98b77921c8564e6f24a39053e52275c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/evidence_dashboard.py",
+      "sha256": "df7ed96f4390095dc4514f4a698e71c3ba145d5bec2894dc042e82a2b75ef67c",
+      "size_bytes": 89967,
+      "frozen_source_sha256": "df7ed96f4390095dc4514f4a698e71c3ba145d5bec2894dc042e82a2b75ef67c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/explainability.py",
+      "sha256": "a7f0e456b27c2a5e802e0e362e6c301711467a13f5167596a34684d2d87e2d0b",
+      "size_bytes": 803,
+      "frozen_source_sha256": "a7f0e456b27c2a5e802e0e362e6c301711467a13f5167596a34684d2d87e2d0b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/input_preview.py",
+      "sha256": "a4db512309a2b9dca3cacbfec06ad7a804e73c1e7074d5923bc92a935eee8575",
+      "size_bytes": 3732,
+      "frozen_source_sha256": "a4db512309a2b9dca3cacbfec06ad7a804e73c1e7074d5923bc92a935eee8575",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/live_progress.py",
+      "sha256": "1a5f481d7ab40f641a44f16dcb185f1aa6f85facb7a6a28fdeab89afdec13284",
+      "size_bytes": 9614,
+      "frozen_source_sha256": "1a5f481d7ab40f641a44f16dcb185f1aa6f85facb7a6a28fdeab89afdec13284",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/llm_views.py",
+      "sha256": "6190b161ab379de43cb0f760b799f0d2dba2991c3bf6be6f738e4cc24d14accf",
+      "size_bytes": 8334,
+      "frozen_source_sha256": "6190b161ab379de43cb0f760b799f0d2dba2991c3bf6be6f738e4cc24d14accf",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/pair_views.py",
+      "sha256": "3d8db43554f399774454e900337c33548ad363a7da10eafef7adfc33a0acc0ab",
+      "size_bytes": 5534,
+      "frozen_source_sha256": "3d8db43554f399774454e900337c33548ad363a7da10eafef7adfc33a0acc0ab",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/path_security.py",
+      "sha256": "2a85ffede475867f8193325fe75d08911c92d20063d58f0606a3f71e962c11a8",
+      "size_bytes": 6085,
+      "frozen_source_sha256": "2a85ffede475867f8193325fe75d08911c92d20063d58f0606a3f71e962c11a8",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/report_views.py",
+      "sha256": "48f366cbbf846629830c36cf250383055ea4f4cc2d8f6643177db35b5eadd421",
+      "size_bytes": 12838,
+      "frozen_source_sha256": "48f366cbbf846629830c36cf250383055ea4f4cc2d8f6643177db35b5eadd421",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/result_views.py",
+      "sha256": "80063548d0d587270890bfbb972628921a71b089f864818174e252c90757c1fc",
+      "size_bytes": 23650,
+      "frozen_source_sha256": "80063548d0d587270890bfbb972628921a71b089f864818174e252c90757c1fc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/runtime_status.py",
+      "sha256": "2103d8a3446e8e177ad93d90763b13065a4280c147afdef30876ba2c259538e6",
+      "size_bytes": 4646,
+      "frozen_source_sha256": "2103d8a3446e8e177ad93d90763b13065a4280c147afdef30876ba2c259538e6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/status_adapter.py",
+      "sha256": "6ab887dbcdcc21c1c10eb0cd70dc34949deb3431fdd2e3f647955196ea6342ac",
+      "size_bytes": 7497,
+      "frozen_source_sha256": "6ab887dbcdcc21c1c10eb0cd70dc34949deb3431fdd2e3f647955196ea6342ac",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/task_history.py",
+      "sha256": "9ae4ba57dc6087f6940fcc448a0c0ee723e051b2a67dfe19ec9e24705358d807",
+      "size_bytes": 14103,
+      "frozen_source_sha256": "9ae4ba57dc6087f6940fcc448a0c0ee723e051b2a67dfe19ec9e24705358d807",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/components/theme.py",
+      "sha256": "a7a7c168145870b5b6d99a1079a2c31b2a5819a8d7341e76398fa68e15c1f212",
+      "size_bytes": 8703,
+      "frozen_source_sha256": "a7a7c168145870b5b6d99a1079a2c31b2a5819a8d7341e76398fa68e15c1f212",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/frontend/requirements.txt",
+      "sha256": "a870db31f7a87e8c70d50b8d3abaed5cefff6212a42840670de090553fba305b",
+      "size_bytes": 22,
+      "frozen_source_sha256": "a870db31f7a87e8c70d50b8d3abaed5cefff6212a42840670de090553fba305b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/launcher.py",
+      "sha256": "007948ac70b7b7cc7a97a0dc1f8bc418380987f216307f363e3b0d8504896e81",
+      "size_bytes": 2448,
+      "frozen_source_sha256": "007948ac70b7b7cc7a97a0dc1f8bc418380987f216307f363e3b0d8504896e81",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/data_admission/__init__.py",
+      "sha256": "54b32a8c09077eaa30acdbd77ea475693b37f78ea8556153ad0092305f9ca548",
+      "size_bytes": 286,
+      "frozen_source_sha256": "54b32a8c09077eaa30acdbd77ea475693b37f78ea8556153ad0092305f9ca548",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/data_admission/admission.py",
+      "sha256": "19f0540c9ff5c9f4897603df4da1fc62ab20068f7951a6e7f1f72abad1d20fdd",
+      "size_bytes": 18447,
+      "frozen_source_sha256": "19f0540c9ff5c9f4897603df4da1fc62ab20068f7951a6e7f1f72abad1d20fdd",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection/inspect_installed_archive.py",
+      "sha256": "f2b46b0102afcca041f8a173ac9e9279548483632ba4932f25a4086eede03dba",
+      "size_bytes": 880,
+      "frozen_source_sha256": "f2b46b0102afcca041f8a173ac9e9279548483632ba4932f25a4086eede03dba",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection/persistent_worker.py",
+      "sha256": "709de6d5dc9c8b501da61e66a7b1f47b7820b0cf76583d56a8e81a61a426b2a2",
+      "size_bytes": 10016,
+      "frozen_source_sha256": "709de6d5dc9c8b501da61e66a7b1f47b7820b0cf76583d56a8e81a61a426b2a2",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection/pyinstaller_pyz_runtime.py",
+      "sha256": "e117ef6aeef718c4ddbc5eb92e0a615f0239bebe85f7bd830a0963c245e9ef54",
+      "size_bytes": 10548,
+      "frozen_source_sha256": "e117ef6aeef718c4ddbc5eb92e0a615f0239bebe85f7bd830a0963c245e9ef54",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection/run_deepfake_detection.py",
+      "sha256": "373ce764a5b05c03c56b204414218df6ef7d4d8173ecba696f4b189b587f0f3b",
+      "size_bytes": 29158,
+      "frozen_source_sha256": "373ce764a5b05c03c56b204414218df6ef7d4d8173ecba696f4b189b587f0f3b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection_v2/frozen_branch.py",
+      "sha256": "00cbea012fa9a1993d455aeb2680278638e585b24bc6b6e0c52c00cffbe3b83e",
+      "size_bytes": 5045,
+      "frozen_source_sha256": "00cbea012fa9a1993d455aeb2680278638e585b24bc6b6e0c52c00cffbe3b83e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection_v2/persistent_worker_v2.py",
+      "sha256": "d359c9a644efe40d6080ce3be5811a7e5fbbffe8f482f99c421fc09b3adfddc4",
+      "size_bytes": 14059,
+      "frozen_source_sha256": "d359c9a644efe40d6080ce3be5811a7e5fbbffe8f482f99c421fc09b3adfddc4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection_v2/run_deepfake_detection_v2.py",
+      "sha256": "18020114d85dc00f75fca2da756e54f5bf72accf971448a09d60885afd33b0cc",
+      "size_bytes": 2454,
+      "frozen_source_sha256": "18020114d85dc00f75fca2da756e54f5bf72accf971448a09d60885afd33b0cc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/deepfake_detection_v2/vit_detector.py",
+      "sha256": "aa1a4c00e2e9e10c5cbb4a47aefb45e9b6fd843cd265b68b3f98728f4a2f70fa",
+      "size_bytes": 7239,
+      "frozen_source_sha256": "aa1a4c00e2e9e10c5cbb4a47aefb45e9b6fd843cd265b68b3f98728f4a2f70fa",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0,
+      "frozen_source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/annotations.py",
+      "sha256": "7f293ea9c96f7fc5d29c25c417408b95b3dfdd43c20492b8d75b5fdb545ed814",
+      "size_bytes": 2622,
+      "frozen_source_sha256": "7f293ea9c96f7fc5d29c25c417408b95b3dfdd43c20492b8d75b5fdb545ed814",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/audit.py",
+      "sha256": "55bf4f768b15bb6098e09424edd8bffe9ef83e0e4e204bf3bd41bb7b4afb06b1",
+      "size_bytes": 3301,
+      "frozen_source_sha256": "55bf4f768b15bb6098e09424edd8bffe9ef83e0e4e204bf3bd41bb7b4afb06b1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/cropper.py",
+      "sha256": "1ae5aa3d088e9c3fdec17d5cc8c5b29d22fba86bd9bebf9cbcdf513cf8c4c076",
+      "size_bytes": 4665,
+      "frozen_source_sha256": "1ae5aa3d088e9c3fdec17d5cc8c5b29d22fba86bd9bebf9cbcdf513cf8c4c076",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/multiface.py",
+      "sha256": "10c4dd45ecca5dae5042456a37b6f139435b5623c086130ad775880afdf8b6d3",
+      "size_bytes": 5383,
+      "frozen_source_sha256": "10c4dd45ecca5dae5042456a37b6f139435b5623c086130ad775880afdf8b6d3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/face_crops/run_face_crops.py",
+      "sha256": "eb1948e4e1bfd18424168cdb1c2dd0825d596f77db5f0c1f40c99fa97df8917d",
+      "size_bytes": 11125,
+      "frozen_source_sha256": "eb1948e4e1bfd18424168cdb1c2dd0825d596f77db5f0c1f40c99fa97df8917d",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/general_aigc/general_aigc_core.py",
+      "sha256": "4e57f8180adaafde60f6ae1bb3add25919709a4e1b97a4de8793fdfbbb6cf5fc",
+      "size_bytes": 16540,
+      "frozen_source_sha256": "4e57f8180adaafde60f6ae1bb3add25919709a4e1b97a4de8793fdfbbb6cf5fc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/general_aigc/persistent_worker.py",
+      "sha256": "86c302d1743164f6ba97f96415e4fbc80a2508218b7601377cb691faee0d64d6",
+      "size_bytes": 4225,
+      "frozen_source_sha256": "86c302d1743164f6ba97f96415e4fbc80a2508218b7601377cb691faee0d64d6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/general_aigc/run_general_aigc.py",
+      "sha256": "be29d907bf76515860e24383176338ad67f340f77c4d7849ce05a5a8059c400d",
+      "size_bytes": 2183,
+      "frozen_source_sha256": "be29d907bf76515860e24383176338ad67f340f77c4d7849ce05a5a8059c400d",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/general_aigc/runtime.py",
+      "sha256": "653ade9cc449cd082ce2846fad4f22e5bc293cc65e05f93d33f990e570582264",
+      "size_bytes": 8673,
+      "frozen_source_sha256": "653ade9cc449cd082ce2846fad4f22e5bc293cc65e05f93d33f990e570582264",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/__init__.py",
+      "sha256": "c37a9ae85f56f9ab9a626bea407cb4ba639d4459886fe1049424c8e108aea91f",
+      "size_bytes": 112,
+      "frozen_source_sha256": "c37a9ae85f56f9ab9a626bea407cb4ba639d4459886fe1049424c8e108aea91f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/cli.py",
+      "sha256": "0dd5a780f7b4905f033b0e622c8fdcd31e5f9093ae8bb0ed0ba21809af5fba79",
+      "size_bytes": 14992,
+      "frozen_source_sha256": "0dd5a780f7b4905f033b0e622c8fdcd31e5f9093ae8bb0ed0ba21809af5fba79",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/errors.py",
+      "sha256": "9d01abd1bf96a17d14bf81d6d9a278a863b1cf7969510978dba38516224c71e7",
+      "size_bytes": 1544,
+      "frozen_source_sha256": "9d01abd1bf96a17d14bf81d6d9a278a863b1cf7969510978dba38516224c71e7",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/evidence.py",
+      "sha256": "831ec3979c9db89d00d65b86d8f1f92349ed19d6c7f028e96b1fad7b0378c0c9",
+      "size_bytes": 20177,
+      "frozen_source_sha256": "831ec3979c9db89d00d65b86d8f1f92349ed19d6c7f028e96b1fad7b0378c0c9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/extractor.py",
+      "sha256": "07bf3f70029787b457e7206d9927d544e7256e20a8022269f0bbaae048021e88",
+      "size_bytes": 11722,
+      "frozen_source_sha256": "07bf3f70029787b457e7206d9927d544e7256e20a8022269f0bbaae048021e88",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/model.py",
+      "sha256": "e03a0ada176204dfc589b28911a98b3091d08dc3b6039ac522acaf6b5a092f18",
+      "size_bytes": 4889,
+      "frozen_source_sha256": "e03a0ada176204dfc589b28911a98b3091d08dc3b6039ac522acaf6b5a092f18",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/reference_detection.py",
+      "sha256": "14f2dab44734bc69f01599d727550065d731bb522cda541a62ae539114dc4c49",
+      "size_bytes": 4809,
+      "frozen_source_sha256": "14f2dab44734bc69f01599d727550065d731bb522cda541a62ae539114dc4c49",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/searcher.py",
+      "sha256": "551b60a8192d9e76c62e508b33f92902cebeac8cae058b732ce9eba130a4f1b6",
+      "size_bytes": 53518,
+      "frozen_source_sha256": "551b60a8192d9e76c62e508b33f92902cebeac8cae058b732ce9eba130a4f1b6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/identity_search/selected_face.py",
+      "sha256": "665eb27565ba9210fb58ac7804df344a2393a0fa490849d1a56c448ecab2b7bf",
+      "size_bytes": 4896,
+      "frozen_source_sha256": "665eb27565ba9210fb58ac7804df344a2393a0fa490849d1a56c448ecab2b7bf",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/persistent_worker.py",
+      "sha256": "6e567fd442a621de2ecdc690c7de0113c4c49d14335ab067a41e974707352a48",
+      "size_bytes": 14716,
+      "frozen_source_sha256": "6e567fd442a621de2ecdc690c7de0113c4c49d14335ab067a41e974707352a48",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/requirements.txt",
+      "sha256": "5799e8f759ca5c6dfab9854f3a062c9cbd0f3eb80a2ac56e62a87ff1eb752a68",
+      "size_bytes": 269,
+      "frozen_source_sha256": "5799e8f759ca5c6dfab9854f3a062c9cbd0f3eb80a2ac56e62a87ff1eb752a68",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search/run_identity_search.py",
+      "sha256": "f59b8c41e5612f45e512ca304c4ada697663a455a2fe5fe0f1fbcc73d08db1ef",
+      "size_bytes": 325,
+      "frozen_source_sha256": "f59b8c41e5612f45e512ca304c4ada697663a455a2fe5fe0f1fbcc73d08db1ef",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search_v2/per_face.py",
+      "sha256": "f1d8c41454fa1a44da1c7122cb663b2d28e03f9b54b8fb451243d48b068cc7be",
+      "size_bytes": 6814,
+      "frozen_source_sha256": "f1d8c41454fa1a44da1c7122cb663b2d28e03f9b54b8fb451243d48b068cc7be",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search_v2/persistent_worker_v2.py",
+      "sha256": "eff6ab773d248d815e2b23f2f4238e1538fef4433486a756019197e25be9c7cc",
+      "size_bytes": 10938,
+      "frozen_source_sha256": "eff6ab773d248d815e2b23f2f4238e1538fef4433486a756019197e25be9c7cc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search_v2/run_identity_search_v2.py",
+      "sha256": "bc7e1ed0cc386d8a0188073c7dd5b0d057bb6590489f87f786f01a11d96d0292",
+      "size_bytes": 10771,
+      "frozen_source_sha256": "bc7e1ed0cc386d8a0188073c7dd5b0d057bb6590489f87f786f01a11d96d0292",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/identity_search_v2/scale_fallback.py",
+      "sha256": "ee210420a305262b799dd77104fced031a078391e5cffc8dc14be08cbdf7ebea",
+      "size_bytes": 16001,
+      "frozen_source_sha256": "ee210420a305262b799dd77104fced031a078391e5cffc8dc14be08cbdf7ebea",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/pair_compare/__init__.py",
+      "sha256": "d9e054a70d3c200a8efb96d5edc20422132717b4835581a9fa729f7b04c58438",
+      "size_bytes": 85,
+      "frozen_source_sha256": "d9e054a70d3c200a8efb96d5edc20422132717b4835581a9fa729f7b04c58438",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/pair_compare/pair_compare.py",
+      "sha256": "aca4ca44c38f34b32f3e9403de498be2ccc7af095701311f80383bb77e8e3cb1",
+      "size_bytes": 25021,
+      "frozen_source_sha256": "aca4ca44c38f34b32f3e9403de498be2ccc7af095701311f80383bb77e8e3cb1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/pair_compare/rule.json",
+      "sha256": "70e8f3fa187fadc03d9b12bfbcd88e30c2e56b2a0a218130f4049c6dbb3ed438",
+      "size_bytes": 1539,
+      "frozen_source_sha256": "70e8f3fa187fadc03d9b12bfbcd88e30c2e56b2a0a218130f4049c6dbb3ed438",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/provenance/__init__.py",
+      "sha256": "051060c11828e050772e57f06e8f8d48c466686c40602fac71776a2485eec91c",
+      "size_bytes": 128,
+      "frozen_source_sha256": "051060c11828e050772e57f06e8f8d48c466686c40602fac71776a2485eec91c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/provenance/parser.py",
+      "sha256": "ae8c0efc18b1d7c879a55a2c1cfe877e95017a99f051629de8dfdff1cff0702a",
+      "size_bytes": 38897,
+      "frozen_source_sha256": "ae8c0efc18b1d7c879a55a2c1cfe877e95017a99f051629de8dfdff1cff0702a",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/provenance/run_provenance.py",
+      "sha256": "90fe6e5e069c13aacccc25259d85d0124c2f0da9fc0e32e7887841ef0bd5a9a6",
+      "size_bytes": 1879,
+      "frozen_source_sha256": "90fe6e5e069c13aacccc25259d85d0124c2f0da9fc0e32e7887841ef0bd5a9a6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/requirements.lock.txt",
+      "sha256": "e9b211bfb4f0cd665b0ae79e320d2c85130b7194a67761760bd1c15dfb0b2105",
+      "size_bytes": 287,
+      "frozen_source_sha256": "e9b211bfb4f0cd665b0ae79e320d2c85130b7194a67761760bd1c15dfb0b2105",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/requirements.txt",
+      "sha256": "5e799c0067cef822c340be1dcc1c4ab2b00a03a1f04c95735a6217ad93066e18",
+      "size_bytes": 67,
+      "frozen_source_sha256": "5e799c0067cef822c340be1dcc1c4ab2b00a03a1f04c95735a6217ad93066e18",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/run_source_search.py",
+      "sha256": "3e7bb457c96d8da9bfc5a0bed65905a65ba27549dfef6680fcf962e4960ea06c",
+      "size_bytes": 9824,
+      "frozen_source_sha256": "3e7bb457c96d8da9bfc5a0bed65905a65ba27549dfef6680fcf962e4960ea06c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/__init__.py",
+      "sha256": "3cf878ff3d7be34c34a06a7a0c4f16a045c8d2524d0b46d52c68304b4ccd5fca",
+      "size_bytes": 124,
+      "frozen_source_sha256": "3cf878ff3d7be34c34a06a7a0c4f16a045c8d2524d0b46d52c68304b4ccd5fca",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/face_mask.py",
+      "sha256": "6ca0def032fd2adae210e802e6ad4b417df3d9484665f1bc1e56bc35b0aa4ee4",
+      "size_bytes": 1709,
+      "frozen_source_sha256": "6ca0def032fd2adae210e802e6ad4b417df3d9484665f1bc1e56bc35b0aa4ee4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/feature_cache.py",
+      "sha256": "f8c4a68582f44848cedf3c6a2cb63bb213988028171ee26e66fb0758ba706230",
+      "size_bytes": 10777,
+      "frozen_source_sha256": "f8c4a68582f44848cedf3c6a2cb63bb213988028171ee26e66fb0758ba706230",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/global_features.py",
+      "sha256": "f8496c502ecbe399586da102de9349fc1e12ddb6b5a5ac17ea264bdb2f13933c",
+      "size_bytes": 4837,
+      "frozen_source_sha256": "f8496c502ecbe399586da102de9349fc1e12ddb6b5a5ac17ea264bdb2f13933c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/image_io.py",
+      "sha256": "b6a3aa0d5114a5feb985060cc66d3e047267993d360ade8579c87120ff161cdb",
+      "size_bytes": 2066,
+      "frozen_source_sha256": "b6a3aa0d5114a5feb985060cc66d3e047267993d360ade8579c87120ff161cdb",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/local_matcher.py",
+      "sha256": "c0291c7ab7e5ce679ebaf951af75d369462b2a30dc87eb2d1b3a047d23a33cbc",
+      "size_bytes": 8159,
+      "frozen_source_sha256": "c0291c7ab7e5ce679ebaf951af75d369462b2a30dc87eb2d1b3a047d23a33cbc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/pipeline.py",
+      "sha256": "2f9d53f1e89c8bc0ad552fa5ed32b44283fa735274310ec9cb58a0acfc14fce9",
+      "size_bytes": 38964,
+      "frozen_source_sha256": "2f9d53f1e89c8bc0ad552fa5ed32b44283fa735274310ec9cb58a0acfc14fce9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/source_search/source_search/visualizer.py",
+      "sha256": "ea33e779022a235f3723dc2548eb5f5935c81435c530be5fed35153f09ffb69e",
+      "size_bytes": 5762,
+      "frozen_source_sha256": "ea33e779022a235f3723dc2548eb5f5935c81435c530be5fed35153f09ffb69e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/video_frames_v2/run_video_frames_v2.py",
+      "sha256": "728a691d983f96a1cb0764812a93f43946223efe1637dba7dd36e0e54d835308",
+      "size_bytes": 27212,
+      "frozen_source_sha256": "728a691d983f96a1cb0764812a93f43946223efe1637dba7dd36e0e54d835308",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/visible_label/__init__.py",
+      "sha256": "8747b778d1433a7a97e6fe0aecdbc5b1e8509b6f0278b31b3c6ad9f72831448f",
+      "size_bytes": 4187,
+      "frozen_source_sha256": "8747b778d1433a7a97e6fe0aecdbc5b1e8509b6f0278b31b3c6ad9f72831448f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/visible_label/core.py",
+      "sha256": "f1a580a4b9e5d02a8ab4be0468f95e3096ad25997dbce7ccb7ef832ea19d0422",
+      "size_bytes": 4745,
+      "frozen_source_sha256": "f1a580a4b9e5d02a8ab4be0468f95e3096ad25997dbce7ccb7ef832ea19d0422",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/visible_label/keywords.json",
+      "sha256": "bee6c036c06abfaf2f06104f1661b4bb02091d540afcdbb860617b1baff01ab8",
+      "size_bytes": 374,
+      "frozen_source_sha256": "bee6c036c06abfaf2f06104f1661b4bb02091d540afcdbb860617b1baff01ab8",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/modules/visible_label/worker.py",
+      "sha256": "945694bbb2a35bd99abd3475c558ab2c3710c56b539aebb7d9ce7d956eede919",
+      "size_bytes": 3147,
+      "frozen_source_sha256": "945694bbb2a35bd99abd3475c558ab2c3710c56b539aebb7d9ce7d956eede919",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/orchestrator.py",
+      "sha256": "7bb7439c14ebd6f99d393de5d7055bbfb02f4badbc9730acee27d6a59db16a63",
+      "size_bytes": 147582,
+      "frozen_source_sha256": "7bb7439c14ebd6f99d393de5d7055bbfb02f4badbc9730acee27d6a59db16a63",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/pair_integration.py",
+      "sha256": "141be7fa60f3266c5683165280591c578d612eb6ce341a731ae46a7f6a0046cc",
+      "size_bytes": 11927,
+      "frozen_source_sha256": "141be7fa60f3266c5683165280591c578d612eb6ce341a731ae46a7f6a0046cc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/product_info.py",
+      "sha256": "9ba961b65c6feb11d954f239b8f01ecfc3534696a931e9fee4ab378406732f1b",
+      "size_bytes": 1359,
+      "frozen_source_sha256": "9ba961b65c6feb11d954f239b8f01ecfc3534696a931e9fee4ab378406732f1b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/progress_events.py",
+      "sha256": "0136ffc27d275a824993ac789024be9644af258ee73805cd3be86c8288c887d4",
+      "size_bytes": 15467,
+      "frozen_source_sha256": "0136ffc27d275a824993ac789024be9644af258ee73805cd3be86c8288c887d4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/pytest.ini",
+      "sha256": "ae694bbab18afe546dc8b2a8dbac180495b29a5ca332950ec532a510543ba881",
+      "size_bytes": 165,
+      "frozen_source_sha256": "ae694bbab18afe546dc8b2a8dbac180495b29a5ca332950ec532a510543ba881",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/query_reference_guard.py",
+      "sha256": "75cafdc4856cd7fecd8c008a6e2931faa9e9473c133a0d1c51d11fc7764ee6af",
+      "size_bytes": 6740,
+      "frozen_source_sha256": "75cafdc4856cd7fecd8c008a6e2931faa9e9473c133a0d1c51d11fc7764ee6af",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/__init__.py",
+      "sha256": "074a3a401c1866cb244b1de7f40966a212dcfee743a3b6b6acb8863f26c2b3b0",
+      "size_bytes": 833,
+      "frozen_source_sha256": "074a3a401c1866cb244b1de7f40966a212dcfee743a3b6b6acb8863f26c2b3b0",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/analysis_pdf.py",
+      "sha256": "1613bb2565504f0d240e54bf358ad875ffeafbb8a9dc0e84b487f9f97b1acecd",
+      "size_bytes": 42388,
+      "frozen_source_sha256": "1613bb2565504f0d240e54bf358ad875ffeafbb8a9dc0e84b487f9f97b1acecd",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/analysis_pipeline.py",
+      "sha256": "88a4ec607131b51c4213e09ea3ac979694aa14858e505f85e7f3075ca53dd24d",
+      "size_bytes": 16740,
+      "frozen_source_sha256": "88a4ec607131b51c4213e09ea3ac979694aa14858e505f85e7f3075ca53dd24d",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/analysis_recovery.py",
+      "sha256": "f596f5eefa5a3e066e9f01c6491821594491e0469f67797f173fdbd439a9d5a6",
+      "size_bytes": 10734,
+      "frozen_source_sha256": "f596f5eefa5a3e066e9f01c6491821594491e0469f67797f173fdbd439a9d5a6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/analysis_templates.py",
+      "sha256": "fee4c40ce637c02733f210eacf4acb3fff52824fe0e74bf3dc75d249cdcdadd3",
+      "size_bytes": 15255,
+      "frozen_source_sha256": "fee4c40ce637c02733f210eacf4acb3fff52824fe0e74bf3dc75d249cdcdadd3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/coverage_summary_v4.py",
+      "sha256": "405b51215eb13b39d81afe792fbe96dbae4a7e932834db75eaa0a1e687e1b3a9",
+      "size_bytes": 6913,
+      "frozen_source_sha256": "405b51215eb13b39d81afe792fbe96dbae4a7e932834db75eaa0a1e687e1b3a9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/evidence_figures.py",
+      "sha256": "7f2f249d901fb794874b6027c76dcb3dfc2f493b0a67c443f9d36d49410e5335",
+      "size_bytes": 16214,
+      "frozen_source_sha256": "7f2f249d901fb794874b6027c76dcb3dfc2f493b0a67c443f9d36d49410e5335",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/evidence_package.py",
+      "sha256": "c8492bb86fb7a9a0ccaf13af50e6cdb0d70c6fc83374de02937f52be2aeb8275",
+      "size_bytes": 31611,
+      "frozen_source_sha256": "c8492bb86fb7a9a0ccaf13af50e6cdb0d70c6fc83374de02937f52be2aeb8275",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/explainability.py",
+      "sha256": "3ea67bf98069eddaff7553d74e5e3e409e1eef4a48d355e390634c77f086b855",
+      "size_bytes": 58556,
+      "frozen_source_sha256": "3ea67bf98069eddaff7553d74e5e3e409e1eef4a48d355e390634c77f086b855",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/face_bindings.py",
+      "sha256": "74c9805aae57b175a39440d9cf660b90074c69d961e372874d127cb7dd3b86f1",
+      "size_bytes": 5295,
+      "frozen_source_sha256": "74c9805aae57b175a39440d9cf660b90074c69d961e372874d127cb7dd3b86f1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/face_evidence_v4.py",
+      "sha256": "bb7ad4ca1b3d9f32a7c2f5d18e2be83198012dc5990e03d9c7bba9b89817138b",
+      "size_bytes": 10958,
+      "frozen_source_sha256": "bb7ad4ca1b3d9f32a7c2f5d18e2be83198012dc5990e03d9c7bba9b89817138b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/final_decision_view.py",
+      "sha256": "6968beeeb0b107136eabca7fd64a85f6b83e6851fb761145e440bd22c31ea526",
+      "size_bytes": 1120,
+      "frozen_source_sha256": "6968beeeb0b107136eabca7fd64a85f6b83e6851fb761145e440bd22c31ea526",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/identity_faces.py",
+      "sha256": "187951b7216dbdaff50a2f88db8da46baf61e58c54b63849c38053126039b8f3",
+      "size_bytes": 1599,
+      "frozen_source_sha256": "187951b7216dbdaff50a2f88db8da46baf61e58c54b63849c38053126039b8f3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/llm_client.py",
+      "sha256": "2a98656fea5a2b2321e08439dc8043931c7011e32940050e56f71318ad0f8351",
+      "size_bytes": 17275,
+      "frozen_source_sha256": "2a98656fea5a2b2321e08439dc8043931c7011e32940050e56f71318ad0f8351",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/llm_service.py",
+      "sha256": "20ade5492ed6a881ac79341ad0665f4a66175704c5af5388121fc4d5e622ef86",
+      "size_bytes": 14079,
+      "frozen_source_sha256": "20ade5492ed6a881ac79341ad0665f4a66175704c5af5388121fc4d5e622ef86",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/llm_validation.py",
+      "sha256": "3607d31902814956b3eaa29fa2e54b947cd48d7f2830406cecacbdcf578a2101",
+      "size_bytes": 53777,
+      "frozen_source_sha256": "3607d31902814956b3eaa29fa2e54b947cd48d7f2830406cecacbdcf578a2101",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/pdf_report.py",
+      "sha256": "d6c141a893add019a364802925618c61ee7e6b92d6caecbf6800560cc3ac89cb",
+      "size_bytes": 36386,
+      "frozen_source_sha256": "d6c141a893add019a364802925618c61ee7e6b92d6caecbf6800560cc3ac89cb",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/prompts/judge_v1.md",
+      "sha256": "724edc4b6581b9cb5cae236e1d4b5e403735daef06c1dcf7616623c81d1b90c8",
+      "size_bytes": 4770,
+      "frozen_source_sha256": "724edc4b6581b9cb5cae236e1d4b5e403735daef06c1dcf7616623c81d1b90c8",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/prompts/writer_v1.md",
+      "sha256": "fcf3165f97ce148b1ca3459efc394fcc082a4252b2e94dcca577d6b734995bc9",
+      "size_bytes": 4100,
+      "frozen_source_sha256": "fcf3165f97ce148b1ca3459efc394fcc082a4252b2e94dcca577d6b734995bc9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/recovery_actions_v4.py",
+      "sha256": "64fc4ac348223c4d41794ca251112e177a34f8dd8eb0e9b049fcd7871e9471dc",
+      "size_bytes": 23081,
+      "frozen_source_sha256": "64fc4ac348223c4d41794ca251112e177a34f8dd8eb0e9b049fcd7871e9471dc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/report_builder.py",
+      "sha256": "088fa93a2ff75314b0846131a5f8e0dd555513d420e159e21013763a0a1f89e1",
+      "size_bytes": 44050,
+      "frozen_source_sha256": "088fa93a2ff75314b0846131a5f8e0dd555513d420e159e21013763a0a1f89e1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/review_records.py",
+      "sha256": "e82f3267b4ae93c8fe8a9fab42632a5388afe3ca349d8a0e13befe248cfd7a5e",
+      "size_bytes": 7244,
+      "frozen_source_sha256": "e82f3267b4ae93c8fe8a9fab42632a5388afe3ca349d8a0e13befe248cfd7a5e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/reporting/text_safety.py",
+      "sha256": "2748fcd960285eaa870c2c15e9c7b2549edccbb444408da4e12426d6dbd0c684",
+      "size_bytes": 564,
+      "frozen_source_sha256": "2748fcd960285eaa870c2c15e9c7b2549edccbb444408da4e12426d6dbd0c684",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/requirements/app.lock.txt",
+      "sha256": "9b06493c80b0ef6a986c9f7bf2d673cce852034b04eb6dcb59896f99585dea8c",
+      "size_bytes": 6426,
+      "frozen_source_sha256": "9b06493c80b0ef6a986c9f7bf2d673cce852034b04eb6dcb59896f99585dea8c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/requirements/engine-cpu.lock.txt",
+      "sha256": "fbd4114db4fd7eed3098743cbd94b38a0d7bcb908c3761f2fdb63ffc065dbded",
+      "size_bytes": 3708,
+      "frozen_source_sha256": "fbd4114db4fd7eed3098743cbd94b38a0d7bcb908c3761f2fdb63ffc065dbded",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/requirements/engine-cu128.lock.txt",
+      "sha256": "6355ea2c596f4d12acc7750de7e889d9a9cc6daa6b3df7317d76f9217d8b6239",
+      "size_bytes": 3712,
+      "frozen_source_sha256": "6355ea2c596f4d12acc7750de7e889d9a9cc6daa6b3df7317d76f9217d8b6239",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/requirements/runtime-sources.json",
+      "sha256": "e64fe416ba67ad6ab68661edd27d5966884635693cb6a339f121334f78c18c0a",
+      "size_bytes": 60200,
+      "frozen_source_sha256": "e64fe416ba67ad6ab68661edd27d5966884635693cb6a339f121334f78c18c0a",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/requirements/vit.lock.txt",
+      "sha256": "62f5ad152f115ee3013176aadce7cf18b4800c0bd656c47fbeed16fa1e862a0b",
+      "size_bytes": 655,
+      "frozen_source_sha256": "62f5ad152f115ee3013176aadce7cf18b4800c0bd656c47fbeed16fa1e862a0b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/resource_monitor.py",
+      "sha256": "ab930e91be581c92fbba5ac6dd529121f846b50a2dad30033d2edba785931fb9",
+      "size_bytes": 27022,
+      "frozen_source_sha256": "ab930e91be581c92fbba5ac6dd529121f846b50a2dad30033d2edba785931fb9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/run_app.bat",
+      "sha256": "8f41b7782422654abb04f472edbab7495fed63a3b891ca9ecd3bf9d8b35229c0",
+      "size_bytes": 83,
+      "frozen_source_sha256": "8f41b7782422654abb04f472edbab7495fed63a3b891ca9ecd3bf9d8b35229c0",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/run_case.bat",
+      "sha256": "efb0ba12945823a2113a9155e40361a65bec1e6b0829f9db7142d818f512fbf3",
+      "size_bytes": 735,
+      "frozen_source_sha256": "efb0ba12945823a2113a9155e40361a65bec1e6b0829f9db7142d818f512fbf3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/runtime_progress.py",
+      "sha256": "d9c44f68da608fd2359fd8210bf2851545780ef0aa8ab84bffa5439a455c38a1",
+      "size_bytes": 2708,
+      "frozen_source_sha256": "d9c44f68da608fd2359fd8210bf2851545780ef0aa8ab84bffa5439a455c38a1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/runtime_services.py",
+      "sha256": "9928120e71179fb800a956f9c431be21dd8ea3a968a642f71ded1e143fd0ec86",
+      "size_bytes": 59662,
+      "frozen_source_sha256": "9928120e71179fb800a956f9c431be21dd8ea3a968a642f71ded1e143fd0ec86",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/source_upgrade.py",
+      "sha256": "b62614304ed38b64ddca19baf436890e49f983608c06d85c5c0146d50f300290",
+      "size_bytes": 10239,
+      "frozen_source_sha256": "b62614304ed38b64ddca19baf436890e49f983608c06d85c5c0146d50f300290",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/start.bat",
+      "sha256": "38a1cdc2bb79c9794b2932ff22becc764041123538a3032e35e8a85a9e855575",
+      "size_bytes": 194,
+      "frozen_source_sha256": "38a1cdc2bb79c9794b2932ff22becc764041123538a3032e35e8a85a9e855575",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/start.ps1",
+      "sha256": "3be7ac6714fba1323b497f5b4288b9f74d221dc673776f7b40546e16fab0af4e",
+      "size_bytes": 7338,
+      "frozen_source_sha256": "3be7ac6714fba1323b497f5b4288b9f74d221dc673776f7b40546e16fab0af4e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/subprocess_resources_v4.py",
+      "sha256": "7f9e4cb95da20085754c6e149f7b7bcc01de3dc7bf712abc2c2bd0b8eda1c636",
+      "size_bytes": 13330,
+      "frozen_source_sha256": "7f9e4cb95da20085754c6e149f7b7bcc01de3dc7bf712abc2c2bd0b8eda1c636",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/system_status.py",
+      "sha256": "c4e385b563c942baaefd2e14861c2fd006a443b4f19d5ddf58bf971ce9d764f4",
+      "size_bytes": 40499,
+      "frozen_source_sha256": "c4e385b563c942baaefd2e14861c2fd006a443b4f19d5ddf58bf971ce9d764f4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_analysis_recovery_v4.py",
+      "sha256": "01307107e3a33f5d7ec9819914509023956578f13266197ee71d2b4197131ad5",
+      "size_bytes": 5454,
+      "frozen_source_sha256": "01307107e3a33f5d7ec9819914509023956578f13266197ee71d2b4197131ad5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_candidate_evaluation_v4.py",
+      "sha256": "21a384a68d80d11fbbce0c8fddbf13b528815df79d8a0fa9f90e71c4ed4f8aad",
+      "size_bytes": 18684,
+      "frozen_source_sha256": "21a384a68d80d11fbbce0c8fddbf13b528815df79d8a0fa9f90e71c4ed4f8aad",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_data_admission_v4.py",
+      "sha256": "746bd6b339a443b39f864c9665d85b1d8c4b5e7cc190c89edac26e2288685c22",
+      "size_bytes": 12730,
+      "frozen_source_sha256": "746bd6b339a443b39f864c9665d85b1d8c4b5e7cc190c89edac26e2288685c22",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_face_bindings_v4.py",
+      "sha256": "8c9cb9cbe5888a4465578096b4c2edb64e6cd918f5148c1e5647ed16a152a32c",
+      "size_bytes": 2847,
+      "frozen_source_sha256": "8c9cb9cbe5888a4465578096b4c2edb64e6cd918f5148c1e5647ed16a152a32c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_face_coverage_modules_v4.py",
+      "sha256": "f2f8d4d30db05ec0c0544a3139e6531d5219cf8269b775a7ca809d585b36e2a9",
+      "size_bytes": 12852,
+      "frozen_source_sha256": "f2f8d4d30db05ec0c0544a3139e6531d5219cf8269b775a7ca809d585b36e2a9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_face_coverage_v4.py",
+      "sha256": "66342442c4231453fdd65e929d24d439c34e36c2c18aeb84d14c63122879e59e",
+      "size_bytes": 11743,
+      "frozen_source_sha256": "66342442c4231453fdd65e929d24d439c34e36c2c18aeb84d14c63122879e59e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_identity_selected_face_v4.py",
+      "sha256": "99bf2ce17ebb77d25e15ea3e1d03ca075b8e18d5965d27863f77099bf3375105",
+      "size_bytes": 12006,
+      "frozen_source_sha256": "99bf2ce17ebb77d25e15ea3e1d03ca075b8e18d5965d27863f77099bf3375105",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_query_reference_guard.py",
+      "sha256": "aadbc9efabb4ae0cc9cc9a120b76674b551781f2aad1a75e639e3280777006e0",
+      "size_bytes": 8510,
+      "frozen_source_sha256": "aadbc9efabb4ae0cc9cc9a120b76674b551781f2aad1a75e639e3280777006e0",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_recovery_actions_v4.py",
+      "sha256": "d6ea22e0e61f4d23e0c0aeeeebd11fec633ca6a878b5e2b1b00ffb7ac6a7c310",
+      "size_bytes": 18800,
+      "frozen_source_sha256": "d6ea22e0e61f4d23e0c0aeeeebd11fec633ca6a878b5e2b1b00ffb7ac6a7c310",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_rule_candidate_v4.py",
+      "sha256": "9ba893aee096465c17c2384a656248d2b6484c06bafd8296237a9bb2133ef3fb",
+      "size_bytes": 6030,
+      "frozen_source_sha256": "9ba893aee096465c17c2384a656248d2b6484c06bafd8296237a9bb2133ef3fb",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_source_cache_progress_v4.py",
+      "sha256": "1c1c54f8160a125c666c44ddc37896a7169bf9e2b100589b60a738da03940c00",
+      "size_bytes": 2418,
+      "frozen_source_sha256": "1c1c54f8160a125c666c44ddc37896a7169bf9e2b100589b60a738da03940c00",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_task_contract_v4.py",
+      "sha256": "c52445d3a03c542ca42a8f20f95b5bdc30c1b3c9396fdf6d20702ab61f271ce9",
+      "size_bytes": 6740,
+      "frozen_source_sha256": "c52445d3a03c542ca42a8f20f95b5bdc30c1b3c9396fdf6d20702ab61f271ce9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_artifact_io.py",
+      "sha256": "7449df5c4067ffca714ded33bbeda1c11d93057c41b028204504cb5bc9485ffd",
+      "size_bytes": 6553,
+      "frozen_source_sha256": "7449df5c4067ffca714ded33bbeda1c11d93057c41b028204504cb5bc9485ffd",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_batch_evaluation_adapter.py",
+      "sha256": "072dc4b7d101f6f4db8cfe9e951757fcd161985310cb24ae63ad81907e976658",
+      "size_bytes": 2239,
+      "frozen_source_sha256": "072dc4b7d101f6f4db8cfe9e951757fcd161985310cb24ae63ad81907e976658",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_dev_batch.py",
+      "sha256": "5581483364a321188b37e4c8b333cd803751b02287606fd7f1a11a94a255c7c9",
+      "size_bytes": 7101,
+      "frozen_source_sha256": "5581483364a321188b37e4c8b333cd803751b02287606fd7f1a11a94a255c7c9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_end_to_end_synthetic.py",
+      "sha256": "ea0b6cdb6626f8ae795eed2ac82a5266466c3bb162533aa171273689fa8d25dc",
+      "size_bytes": 13796,
+      "frozen_source_sha256": "ea0b6cdb6626f8ae795eed2ac82a5266466c3bb162533aa171273689fa8d25dc",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_frontend_polling.py",
+      "sha256": "9b35e04d596d4a0406368c99f018a378ad9b296c570c1d4181ea936efb5e5778",
+      "size_bytes": 8255,
+      "frozen_source_sha256": "9b35e04d596d4a0406368c99f018a378ad9b296c570c1d4181ea936efb5e5778",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_integration_contracts.py",
+      "sha256": "959cbf17f163cfc25e995276978408a613c1cbf6b1bfb8dafab7fd66fcbe9e2f",
+      "size_bytes": 8890,
+      "frozen_source_sha256": "959cbf17f163cfc25e995276978408a613c1cbf6b1bfb8dafab7fd66fcbe9e2f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_resource_monitor.py",
+      "sha256": "d07f9c12f33cf388d248293577ac8bb77b4ccc02d5e4c02b980e9ea5e14d95ff",
+      "size_bytes": 15657,
+      "frozen_source_sha256": "d07f9c12f33cf388d248293577ac8bb77b4ccc02d5e4c02b980e9ea5e14d95ff",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_runtime_startup.py",
+      "sha256": "4650dffa72706c8458265420a072fc2c6ee92aadbe7688cc28729b3aafa7dae4",
+      "size_bytes": 10875,
+      "frozen_source_sha256": "4650dffa72706c8458265420a072fc2c6ee92aadbe7688cc28729b3aafa7dae4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_sampling_comparison.py",
+      "sha256": "83243650015f3ef55382ff28999667e6f80b7ba04391b727b423ed776d6c042c",
+      "size_bytes": 14472,
+      "frozen_source_sha256": "83243650015f3ef55382ff28999667e6f80b7ba04391b727b423ed776d6c042c",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_source_freeze.py",
+      "sha256": "5b0d20d036d825e59037bdaeeed339e940ec45acf8a5d92d23318783f841156a",
+      "size_bytes": 13364,
+      "frozen_source_sha256": "5b0d20d036d825e59037bdaeeed339e940ec45acf8a5d92d23318783f841156a",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_subprocess_resources.py",
+      "sha256": "1a2c82d04093cce616697edfbb846569048523dc565830ddfa68b8c358c80ef5",
+      "size_bytes": 13564,
+      "frozen_source_sha256": "1a2c82d04093cce616697edfbb846569048523dc565830ddfa68b8c358c80ef5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_task_continuation.py",
+      "sha256": "35444e6be0552ccc3ead5e5f29a3b6f21aaae7a647f879d2dc25d8c221099fb1",
+      "size_bytes": 3371,
+      "frozen_source_sha256": "35444e6be0552ccc3ead5e5f29a3b6f21aaae7a647f879d2dc25d8c221099fb1",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_video_encoded.py",
+      "sha256": "027df0cb013142a4ca2270d4c10fc8c9bf61f5385d944184284b0b6d32d9ca64",
+      "size_bytes": 12366,
+      "frozen_source_sha256": "027df0cb013142a4ca2270d4c10fc8c9bf61f5385d944184284b0b6d32d9ca64",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_v4_video_strategy_integration.py",
+      "sha256": "94b77e8ff350267982c3e0601d044f55a016442867c5cd2f41e35d19708aaac2",
+      "size_bytes": 9756,
+      "frozen_source_sha256": "94b77e8ff350267982c3e0601d044f55a016442867c5cd2f41e35d19708aaac2",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/test_video_coverage_v4.py",
+      "sha256": "712541034f9f577c7cc2da80db32b09f8d70cebbf35b91d78024ed9ce62f53ca",
+      "size_bytes": 11125,
+      "frozen_source_sha256": "712541034f9f577c7cc2da80db32b09f8d70cebbf35b91d78024ed9ce62f53ca",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tests/v4_fake_startup_worker.py",
+      "sha256": "0185382b6c117b09c7142d0cc8335d6911be5cc89d90deb73fc1e9fe7b6c064e",
+      "size_bytes": 1748,
+      "frozen_source_sha256": "0185382b6c117b09c7142d0cc8335d6911be5cc89d90deb73fc1e9fe7b6c064e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/build_source_cache.py",
+      "sha256": "4f83770a18180e85a8071a7a032c8b6a9df89a8ed098ea441e2b25b0773d5dc6",
+      "size_bytes": 2734,
+      "frozen_source_sha256": "4f83770a18180e85a8071a7a032c8b6a9df89a8ed098ea441e2b25b0773d5dc6",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/check_runtime.py",
+      "sha256": "6cd7f4a4896119ab37bc85a19862d0cfd0c5233382c3c5b5b2167c4d49dc2d7b",
+      "size_bytes": 7288,
+      "frozen_source_sha256": "6cd7f4a4896119ab37bc85a19862d0cfd0c5233382c3c5b5b2167c4d49dc2d7b",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/evaluate_v4_batch.py",
+      "sha256": "9fdd4407f999eeefbcb0e7815bde87d9bdc273875f7b69964ac6af97a50f354f",
+      "size_bytes": 16518,
+      "frozen_source_sha256": "9fdd4407f999eeefbcb0e7815bde87d9bdc273875f7b69964ac6af97a50f354f",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/freeze_source_v4.py",
+      "sha256": "0f23faa444517c3aebfb3fa7e507f2ae618e1cc3f3fb0264e85ecab57d6172d3",
+      "size_bytes": 28637,
+      "frozen_source_sha256": "0f23faa444517c3aebfb3fa7e507f2ae618e1cc3f3fb0264e85ecab57d6172d3",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/package_checksums.py",
+      "sha256": "9d60c55398b843f4304b9f623d696ef49f5bd33946c386b6497c53639f82294e",
+      "size_bytes": 2587,
+      "frozen_source_sha256": "9d60c55398b843f4304b9f623d696ef49f5bd33946c386b6497c53639f82294e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/prepare_v4_inference_profile.py",
+      "sha256": "014cfff5933eb1ff1d761dbda9f8307b40a1c4a013cf931f95f9f4b030852b11",
+      "size_bytes": 5177,
+      "frozen_source_sha256": "014cfff5933eb1ff1d761dbda9f8307b40a1c4a013cf931f95f9f4b030852b11",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/prepare_v4_profile.py",
+      "sha256": "41a78010b1298005f73f9bd385bbd6addd2bf11f796fd0d9ac41b0392a9db35e",
+      "size_bytes": 5147,
+      "frozen_source_sha256": "41a78010b1298005f73f9bd385bbd6addd2bf11f796fd0d9ac41b0392a9db35e",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/recover_task_v4.py",
+      "sha256": "93a4626c56e2ae8a99911536d4ab0967916d4bba523c7bb309fe7cc93c290cf9",
+      "size_bytes": 3895,
+      "frozen_source_sha256": "93a4626c56e2ae8a99911536d4ab0967916d4bba523c7bb309fe7cc93c290cf9",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/run_v4_acceptance_batch.py",
+      "sha256": "1185aa09bff37f58be24e89c81c9b9f17e284d97097f51ba7478646908e2f903",
+      "size_bytes": 1148,
+      "frozen_source_sha256": "1185aa09bff37f58be24e89c81c9b9f17e284d97097f51ba7478646908e2f903",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/run_v4_dev_batch.py",
+      "sha256": "df493370a38c8f4f5ed713491093d31431df199244c3850e6988241fd9002e98",
+      "size_bytes": 18462,
+      "frozen_source_sha256": "df493370a38c8f4f5ed713491093d31431df199244c3850e6988241fd9002e98",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/run_v4_sampling_comparison.py",
+      "sha256": "54b09881a45a6a0f5c311aa7b624f4059aa71baffdf99f3083db2e2691d334f5",
+      "size_bytes": 21542,
+      "frozen_source_sha256": "54b09881a45a6a0f5c311aa7b624f4059aa71baffdf99f3083db2e2691d334f5",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/runtime_builder.py",
+      "sha256": "d65961b81ec8c753d19e22b529cc5ac122f468ca26447a70f065461545e86283",
+      "size_bytes": 25162,
+      "frozen_source_sha256": "d65961b81ec8c753d19e22b529cc5ac122f468ca26447a70f065461545e86283",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/self_check.py",
+      "sha256": "2fd43be60a0d97128f54a15ae10e893fa45b1136c9ba59ac9f4b654c533fb1d4",
+      "size_bytes": 8356,
+      "frozen_source_sha256": "2fd43be60a0d97128f54a15ae10e893fa45b1136c9ba59ac9f4b654c533fb1d4",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/setup_runtime.ps1",
+      "sha256": "e3e66c507584fde7dfa90db1192323daad1ed3f3b74e9ed9559f35be9ecfce69",
+      "size_bytes": 5573,
+      "frozen_source_sha256": "e3e66c507584fde7dfa90db1192323daad1ed3f3b74e9ed9559f35be9ecfce69",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/tools/verify_source_cache.py",
+      "sha256": "35bb88edd278eea6b5554b09d7e472005c3cebae0de1ce8917779e4f59d01110",
+      "size_bytes": 5594,
+      "frozen_source_sha256": "35bb88edd278eea6b5554b09d7e472005c3cebae0de1ce8917779e4f59d01110",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/v4_test_isolation.py",
+      "sha256": "e685257bacf830aadaee35d655f88537367d626b1e758dfd83af09b091206555",
+      "size_bytes": 604,
+      "frozen_source_sha256": "e685257bacf830aadaee35d655f88537367d626b1e758dfd83af09b091206555",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/video_pipeline/__init__.py",
+      "sha256": "34f7d9fb21507816fb042c38030b8d1d128f051c54049287f8fcc062d744fa27",
+      "size_bytes": 1089,
+      "frozen_source_sha256": "34f7d9fb21507816fb042c38030b8d1d128f051c54049287f8fcc062d744fa27",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/video_pipeline/aggregate.py",
+      "sha256": "656cf157e429c7ecf15e3c185527dab6a3cf1a9d0c02793b478e37c7bae431f0",
+      "size_bytes": 47888,
+      "frozen_source_sha256": "656cf157e429c7ecf15e3c185527dab6a3cf1a9d0c02793b478e37c7bae431f0",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "系统/video_pipeline/selection.py",
+      "sha256": "4962e40b06cd6d6a172fb578edf808375d623b84e80f58045f57a559684fc6f8",
+      "size_bytes": 19129,
+      "frozen_source_sha256": "4962e40b06cd6d6a172fb578edf808375d623b84e80f58045f57a559684fc6f8",
+      "projection": "Exact reviewed source bytes."
+    },
+    {
+      "path": "运行自检.bat",
+      "sha256": "f690dfcf0fd4cb8129519c75436b543e9c364bed4bf2dadaa67f2b460a77ec39",
+      "size_bytes": 376,
+      "frozen_source_sha256": "f690dfcf0fd4cb8129519c75436b543e9c364bed4bf2dadaa67f2b460a77ec39",
+      "projection": "Exact reviewed source bytes."
+    }
+  ],
+  "includes_git_history": false,
+  "includes_models_private_data_or_results": false,
+  "accuracy_improvement_claimed": false,
+  "distribution": "Source backup; external authorized models and runtimes required.",
+  "source_only_snapshot_sha256": "6824df5341cec2521db38210bc9b1953ba8537e2d8b9b8f9006e7e805a1ea987"
+}

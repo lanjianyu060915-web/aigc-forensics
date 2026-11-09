@@ -1,0 +1,32 @@
+# 运行环境：由 系统/tools/setup_runtime.ps1 重建，不进仓库
+/系统/python_runtime/
+/系统/engine_runtime/
+/系统/ffmpeg/
+/系统/packaging_v0.4/resources/portable_python_v2/
+/系统/packaging_v0.3/resources/portable_python/
+/系统/packaging_v0.3/resources/deepfake_runtime/
+/系统/.runtime-cache/
+/系统/.runtime-setup.lock
+/系统/.bootstrap-*/
+/系统/.*.build-*/
+/系统/.*.old-*/
+/系统/packaging_v0.3/resources/.*.build-*/
+/系统/packaging_v0.4/resources/.*.build-*/
+
+# 运行产物和本地数据
+/用户数据/
+/评测集/
+/系统/runtime/
+*.log
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+/系统/tests/.backend_tmp/
+/系统/tests/.run_tmp/
+/系统/tests/.runtime_service_tmp/
+/系统/frontend/tests/.tmp/
+
+# 本机开发配置
+/.claude/
